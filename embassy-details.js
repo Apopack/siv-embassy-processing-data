@@ -1,4 +1,4 @@
-// Professional Embassy Details Application
+// Professional Embassy Details Application - Fixed Version
 
 class EmbassyDetailsApp {
     constructor() {
@@ -8,6 +8,7 @@ class EmbassyDetailsApp {
         this.comparisonEmbassies = [];
         this.isComparing = false;
         this.currentModal = null;
+        this.isDariMode = false;
         
         this.init();
     }
@@ -88,15 +89,12 @@ class EmbassyDetailsApp {
     }
 
     initializeSearch() {
-        // Show placeholder in search if no embassies loaded
         if (!this.embassyData) {
             const searchInput = document.getElementById('embassySearch');
             searchInput.disabled = true;
             searchInput.placeholder = 'Loading embassies...';
             return;
         }
-
-        // Initialize with all embassies
         this.searchResults = this.embassyData;
     }
 
@@ -134,7 +132,7 @@ class EmbassyDetailsApp {
         }
 
         searchResults.innerHTML = this.searchResults.slice(0, 8).map(embassy => {
-            const totalCases = Object.values(embassy.monthlyData).reduce((sum, val) => sum + val, 0);
+            const currentYearCases = this.getCurrentYearTotal(embassy);
             const flag = this.getCountryFlag(embassy.country);
             
             return `
@@ -142,7 +140,7 @@ class EmbassyDetailsApp {
                     <div class="embassy-flag">${flag}</div>
                     <div class="embassy-info">
                         <h3>${embassy.embassy}</h3>
-                        <p>${embassy.country} • ${totalCases.toLocaleString()} total cases</p>
+                        <p>${embassy.country} • ${currentYearCases} cases in ${new Date().getFullYear()}</p>
                     </div>
                 </div>
             `;
@@ -155,13 +153,9 @@ class EmbassyDetailsApp {
 
         this.selectedEmbassy = embassy;
         
-        // Hide search results
         document.getElementById('searchResults').classList.remove('active');
-        
-        // Update search input
         document.getElementById('embassySearch').value = `${embassy.embassy}, ${embassy.country}`;
         
-        // Show embassy details
         this.showEmbassyDetails();
     }
 
@@ -169,15 +163,12 @@ class EmbassyDetailsApp {
         const embassyDetails = document.getElementById('embassyDetails');
         const embassyLoading = document.getElementById('embassyLoading');
         
-        // Update header
         document.getElementById('embassyName').textContent = this.selectedEmbassy.embassy;
         document.getElementById('embassyLocation').textContent = `${this.selectedEmbassy.embassy}, ${this.selectedEmbassy.country}`;
         
-        // Show details section with loading
         embassyDetails.classList.add('active');
         embassyLoading.style.display = 'flex';
         
-        // Load embassy information
         try {
             this.embassyInfo = await this.getEmbassyInfoFromAPI(this.selectedEmbassy);
             embassyLoading.style.display = 'none';
@@ -199,7 +190,6 @@ class EmbassyDetailsApp {
         
         this.currentModal = infoType;
         
-        // Set title based on type
         const titles = {
             data: 'SIV Processing Data',
             links: 'Official Embassy Resources',
@@ -213,7 +203,6 @@ class EmbassyDetailsApp {
         
         modalTitle.textContent = titles[infoType] || 'Information';
         
-        // Show loading
         modalBody.innerHTML = `
             <div class="loading">
                 <div class="spinner"></div>
@@ -223,10 +212,14 @@ class EmbassyDetailsApp {
         
         modal.classList.add('active');
         
-        // Generate content based on type
         try {
             const content = await this.generateModalContent(infoType);
             modalBody.innerHTML = content;
+            
+            // Render chart for data modal
+            if (infoType === 'data') {
+                setTimeout(() => this.renderCurrentYearChart(), 100);
+            }
         } catch (error) {
             modalBody.innerHTML = `
                 <div style="color: var(--danger); text-align: center; padding: 40px;">
@@ -265,36 +258,132 @@ class EmbassyDetailsApp {
     }
 
     generateDataContent() {
-        const embassy = this.selectedEmbassy;
-        const totalCases = Object.values(embassy.monthlyData).reduce((sum, val) => sum + val, 0);
         const currentYear = new Date().getFullYear();
-        const currentYearCases = this.getCurrentYearTotal(embassy);
+        const currentYearCases = this.getCurrentYearTotal(this.selectedEmbassy);
         
         return `
             <div style="text-align: center; margin-bottom: 32px;">
-                <h3 style="color: var(--primary); font-size: 24px; margin-bottom: 8px;">${totalCases.toLocaleString()}</h3>
-                <p style="color: var(--gray-600); margin: 0;">Total SIV cases processed</p>
+                <p style="color: var(--gray-600); margin: 0 0 8px; font-size: 14px;">${currentYear} SIV Issuances by Month</p>
+                <h3 style="color: var(--primary); font-size: 28px; margin: 0; font-weight: 700;">${currentYearCases} Total Cases</h3>
             </div>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 32px;">
-                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">${currentYearCases}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">${currentYear} Cases</div>
-                </div>
-                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">${Math.round(totalCases / 32)}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Avg/Month</div>
-                </div>
-                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">32</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Months Data</div>
-                </div>
+            <div id="modalChart" style="height: 350px; background: var(--gray-50); border-radius: var(--radius); padding: 16px; margin-bottom: 24px;">
+                <canvas id="currentYearChart"></canvas>
             </div>
             
-            <div id="modalChart" style="height: 300px; background: var(--gray-50); border-radius: var(--radius); padding: 16px;">
-                <!-- Chart will be rendered here -->
+            <div style="text-align: center;">
+                <button onclick="embassyApp.showAllTimeData()" style="background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: var(--transition);">View All-Time Historical Data (32 Months)</button>
             </div>
         `;
+    }
+
+    renderCurrentYearChart() {
+        const ctx = document.getElementById('currentYearChart')?.getContext('2d');
+        if (!ctx) return;
+        
+        const currentYear = new Date().getFullYear();
+        const monthlyData = this.selectedEmbassy.monthlyData;
+        const currentYearData = {};
+        
+        for (const [dateKey, value] of Object.entries(monthlyData)) {
+            const [year, month] = dateKey.split('-');
+            if (parseInt(year) === currentYear) {
+                currentYearData[month] = value;
+            }
+        }
+        
+        const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const data = months.map(month => currentYearData[month] || 0);
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthNames,
+                datasets: [{
+                    label: `${currentYear} SIV Issuances`,
+                    data: data,
+                    backgroundColor: '#1a3a52',
+                    borderColor: '#1a3a52',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `${this.selectedEmbassy.embassy} - ${currentYear} Monthly SIV Issuances`
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    }
+                }
+            }
+        });
+    }
+
+    showAllTimeData() {
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `
+            <div style="text-align: center; margin-bottom: 24px;">
+                <h3 style="color: var(--primary); margin: 0;">Complete SIV Processing History</h3>
+                <p style="color: var(--gray-600); margin: 8px 0 0;">32 months of data (October 2022 - May 2025)</p>
+            </div>
+            <div style="height: 500px; background: var(--gray-50); border-radius: var(--radius); padding: 16px;">
+                <canvas id="allTimeChart"></canvas>
+            </div>
+        `;
+        
+        setTimeout(() => this.renderAllTimeChart(), 100);
+    }
+
+    renderAllTimeChart() {
+        const ctx = document.getElementById('allTimeChart')?.getContext('2d');
+        if (!ctx) return;
+        
+        const monthlyData = this.selectedEmbassy.monthlyData;
+        const sortedEntries = Object.entries(monthlyData).sort(([a], [b]) => a.localeCompare(b));
+        
+        const labels = sortedEntries.map(([date]) => {
+            const [year, month] = date.split('-');
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${monthNames[parseInt(month) - 1]} ${year}`;
+        });
+        
+        const data = sortedEntries.map(([, value]) => value);
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'SIV Issuances',
+                    data: data,
+                    borderColor: '#1a3a52',
+                    backgroundColor: 'rgba(26, 58, 82, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `${this.selectedEmbassy.embassy} - Complete History`
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
     }
 
     generateLinksContent() {
@@ -319,23 +408,25 @@ class EmbassyDetailsApp {
         const visa = this.embassyInfo.visaInfo || {};
         
         return `
-            <div style="display: grid; gap: 20px;">
-                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Visa Requirement</h4>
-                    <p style="margin: 0; color: var(--gray-700);"><strong>Required:</strong> ${visa.visaRequired || 'Contact embassy'}</p>
-                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Type:</strong> ${visa.visaType || 'Various types available'}</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Visa Required</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${visa.visaRequired || 'Contact embassy'}</h4>
                 </div>
                 
-                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Duration & Extension</h4>
-                    <p style="margin: 0; color: var(--gray-700);"><strong>Length:</strong> ${visa.visaLength || 'Varies by visa type'}</p>
-                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Extension:</strong> ${visa.extensionPossible || 'Contact local authorities'}</p>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Visa Type</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${visa.visaType || 'Various types'}</h4>
                 </div>
                 
-                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Fees</h4>
-                    <p style="margin: 0; color: var(--gray-700);"><strong>Visa Fee:</strong> ${visa.visaFee || 'Contact embassy for current rates'}</p>
-                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Extension Fee:</strong> ${visa.extensionFee || 'Varies'}</p>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Duration</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${visa.visaLength || 'Varies'}</h4>
+                </div>
+                
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Fee</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${visa.visaFee || 'Contact embassy'}</h4>
                 </div>
             </div>
         `;
@@ -346,24 +437,19 @@ class EmbassyDetailsApp {
         
         return `
             <div style="display: grid; gap: 20px;">
-                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--primary);">📍 Examination Location</h4>
-                    <p style="margin: 0; color: var(--gray-700);">${medical.location || 'Contact US Embassy for approved medical facilities'}</p>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">📍 Examination Location</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${medical.location || 'Contact US Embassy'}</h4>
                 </div>
                 
-                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--primary);">💰 Examination Fee</h4>
-                    <p style="margin: 0; color: var(--gray-700);">${medical.fee || 'Contact medical facility for current fees'}</p>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">💰 Examination Fee</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${medical.fee || 'Contact facility'}</h4>
                 </div>
                 
-                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--primary);">📅 Booking Information</h4>
-                    <p style="margin: 0; color: var(--gray-700);">${medical.bookingInfo || 'Embassy will provide list of approved doctors'}</p>
-                </div>
-                
-                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
-                    <h4 style="margin: 0 0 12px; color: var(--primary);">ℹ️ Additional Information</h4>
-                    <p style="margin: 0; color: var(--gray-700);">${medical.additionalInfo || 'Medical exam must be completed at embassy-approved facility'}</p>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">📅 Booking Info</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 16px; font-weight: 700;">${medical.bookingInfo || 'Embassy approved doctors'}</h4>
                 </div>
             </div>
         `;
@@ -373,19 +459,19 @@ class EmbassyDetailsApp {
         const travel = this.embassyInfo.travelCosts || {};
         
         return `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
-                <div style="background: linear-gradient(135deg, #FFF8E1, rgba(245, 158, 11, 0.1)); border-radius: var(--radius); padding: 24px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">${travel.flightCost || 'Varies'}</div>
-                    <div style="font-size: 13px; color: var(--gray-600); text-transform: uppercase;">Flight from Kabul</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">✈️ Flight from Kabul</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${travel.flightCost || 'Varies'}</h4>
                 </div>
                 
-                <div style="background: linear-gradient(135deg, #FFF8E1, rgba(245, 158, 11, 0.1)); border-radius: var(--radius); padding: 24px; text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">${travel.overlandCost || 'N/A'}</div>
-                    <div style="font-size: 13px; color: var(--gray-600); text-transform: uppercase;">Overland Travel</div>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">🚗 Overland Travel</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${travel.overlandCost || 'N/A'}</h4>
                 </div>
             </div>
             
-            <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
+            <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px; margin-top: 20px;">
                 <h4 style="margin: 0 0 12px; color: var(--gray-900);">Transit Information</h4>
                 <p style="margin: 0; color: var(--gray-700); line-height: 1.6;">${travel.transitInfo || 'Check visa requirements for transit countries'}</p>
             </div>
@@ -397,24 +483,24 @@ class EmbassyDetailsApp {
         
         return `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
-                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.dailyRoom || 'Varies'}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Daily Room</div>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Daily Room</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${living.dailyRoom || 'Varies'}</h4>
                 </div>
                 
-                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.monthlyRoom || 'Varies'}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Monthly Room</div>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Monthly Room</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${living.monthlyRoom || 'Varies'}</h4>
                 </div>
                 
-                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.dailyMeals || 'Varies'}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Daily Meals</div>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Daily Meals</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${living.dailyMeals || 'Varies'}</h4>
                 </div>
                 
-                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
-                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.localTransport || 'Varies'}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Local Transport</div>
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <p style="margin: 0 0 8px; color: var(--gray-600); font-size: 14px;">Local Transport</p>
+                    <h4 style="margin: 0; color: var(--primary); font-size: 18px; font-weight: 700;">${living.localTransport || 'Varies'}</h4>
                 </div>
             </div>
         `;
@@ -478,8 +564,89 @@ class EmbassyDetailsApp {
         const panel = document.getElementById('comparisonPanel');
         const btn = document.getElementById('compareBtn');
         
-        panel.classList.toggle('active');
-        btn.classList.toggle('active');
+        if (panel.classList.contains('active')) {
+            panel.classList.remove('active');
+            btn.classList.remove('active');
+        } else {
+            // Load comparison content
+            this.loadComparisonContent();
+            panel.classList.add('active');
+            btn.classList.add('active');
+        }
+    }
+
+    loadComparisonContent() {
+        const content = document.getElementById('comparisonContent');
+        
+        if (!this.selectedEmbassy) {
+            content.innerHTML = `
+                <div style="padding: 24px; text-align: center; color: var(--gray-500);">
+                    <p>Select an embassy first to start comparing</p>
+                </div>
+            `;
+            return;
+        }
+
+        const availableEmbassies = this.embassyData.filter(e => e.embassy !== this.selectedEmbassy.embassy);
+        
+        content.innerHTML = `
+            <div style="padding: 24px;">
+                <h3 style="margin: 0 0 16px; color: var(--gray-900);">Compare with ${this.selectedEmbassy.embassy}</h3>
+                <p style="margin: 0 0 20px; color: var(--gray-600); font-size: 14px;">Select up to 3 other embassies to compare</p>
+                
+                <div style="max-height: 400px; overflow-y: auto;">
+                    ${availableEmbassies.slice(0, 20).map(embassy => {
+                        const cases = this.getCurrentYearTotal(embassy);
+                        const flag = this.getCountryFlag(embassy.country);
+                        return `
+                            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: var(--transition);" 
+                                 onmouseover="this.style.background='var(--gray-50)'" 
+                                 onmouseout="this.style.background='transparent'"
+                                 onclick="embassyApp.compareWith('${embassy.embassy}')">
+                                <span style="font-size: 20px;">${flag}</span>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: var(--gray-900);">${embassy.embassy}</div>
+                                    <div style="font-size: 12px; color: var(--gray-600);">${embassy.country} • ${cases} cases</div>
+                                </div>
+                                <span style="color: var(--primary); font-size: 12px;">Compare →</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    compareWith(embassyName) {
+        const embassy = this.embassyData.find(e => e.embassy === embassyName);
+        if (!embassy) return;
+
+        // Simple comparison - you can expand this
+        const currentCases = this.getCurrentYearTotal(this.selectedEmbassy);
+        const compareCases = this.getCurrentYearTotal(embassy);
+        
+        const content = document.getElementById('comparisonContent');
+        content.innerHTML = `
+            <div style="padding: 24px;">
+                <h3 style="margin: 0 0 20px; color: var(--gray-900);">Embassy Comparison</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${this.selectedEmbassy.embassy}</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--gray-900);">${currentCases}</div>
+                        <div style="font-size: 12px; color: var(--gray-600);">2025 Cases</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${embassy.embassy}</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--gray-900);">${compareCases}</div>
+                        <div style="font-size: 12px; color: var(--gray-600);">2025 Cases</div>
+                    </div>
+                </div>
+                
+                <button onclick="embassyApp.loadComparisonContent()" style="background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: var(--radius); font-size: 14px; cursor: pointer; width: 100%;">Compare Different Embassy</button>
+            </div>
+        `;
     }
 
     closeComparisonPanel() {
@@ -492,17 +659,61 @@ class EmbassyDetailsApp {
 
     toggleTranslation() {
         const btn = document.getElementById('translateBtn');
-        btn.classList.toggle('active');
         
-        // Placeholder for translation functionality
-        if (btn.classList.contains('active')) {
-            console.log('Translation activated');
+        if (this.isDariMode) {
+            // Switch back to English
+            this.isDariMode = false;
+            btn.classList.remove('active');
+            document.body.classList.remove('rtl');
+            
+            // Reload the page to restore English content
+            if (this.selectedEmbassy) {
+                this.showEmbassyDetails();
+            }
         } else {
-            console.log('Translation deactivated');
+            // Switch to Dari
+            this.isDariMode = true;
+            btn.classList.add('active');
+            document.body.classList.add('rtl');
+            
+            // Apply Dari translations
+            this.applyDariTranslations();
         }
     }
 
-    // API Integration
+    applyDariTranslations() {
+        // Basic Dari translations for key UI elements
+        const translations = {
+            'Embassy Information & Resources': 'اطلاعات و منابع سفارت',
+            'Find detailed information for SIV applicants by embassy location': 'اطلاعات تفصیلی برای متقاضیان SIV بر اساس موقعیت سفارت پیدا کنید',
+            'Search embassy by name or country...': 'سفارت را با نام یا کشور جستجو کنید...',
+            'Compare': 'مقایسه',
+            'SIV Processing Data': 'داده‌های پردازش SIV',
+            'Official Resources': 'منابع رسمی',
+            'Visa Requirements': 'نیازمندی‌های ویزا',
+            'Medical Examinations': 'معاینات پزشکی',
+            'Travel Costs': 'هزینه‌های سفر',
+            'Living Expenses': 'هزینه‌های زندگی',
+            'Support Organizations': 'سازمان‌های حمایتی',
+            'Document Checklists': 'فهرست‌های اسناد'
+        };
+
+        // Apply translations to visible text elements
+        document.querySelectorAll('h1, h2, h3, p, button, .page-subtitle').forEach(element => {
+            const text = element.textContent.trim();
+            if (translations[text]) {
+                element.textContent = translations[text];
+            }
+        });
+
+        // Update placeholder
+        const searchInput = document.getElementById('embassySearch');
+        if (searchInput && translations[searchInput.placeholder]) {
+            searchInput.placeholder = translations[searchInput.placeholder];
+        }
+    }
+
+    // API Integration (unchanged)
     async getEmbassyInfoFromAPI(embassy) {
         if (!window.API_CONFIG || !window.API_CONFIG.SECURE_MODE) {
             return this.getFallbackEmbassyInfo(embassy);
@@ -520,9 +731,7 @@ class EmbassyDetailsApp {
     async callNetlifyFunction(embassy) {
         const response = await fetch(window.API_CONFIG.EMBASSY_INFO_ENDPOINT, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 embassy: embassy.embassy,
                 country: embassy.country
@@ -534,7 +743,6 @@ class EmbassyDetailsApp {
         }
 
         const data = await response.json();
-        
         if (data.error) {
             throw new Error(data.message || 'API call failed');
         }
@@ -544,13 +752,11 @@ class EmbassyDetailsApp {
 
     getFallbackEmbassyInfo(embassy) {
         return {
-            links: [
-                {
-                    title: "US Embassy Website",
-                    url: `https://embassy-finder.com/${embassy.country.toLowerCase()}`,
-                    description: "Official US Embassy website with visa information"
-                }
-            ],
+            links: [{
+                title: "US Embassy Website",
+                url: `https://embassy-finder.com/${embassy.country.toLowerCase()}`,
+                description: "Official US Embassy website with visa information"
+            }],
             visaInfo: {
                 visaRequired: "Please check current requirements",
                 visaType: "Varies by country",
@@ -565,13 +771,11 @@ class EmbassyDetailsApp {
                 bookingInfo: "Embassy will provide list of approved doctors",
                 additionalInfo: "Medical exam must be completed at embassy-approved facility"
             },
-            ngos: [
-                {
-                    name: "Local Refugee Assistance Organizations",
-                    contact: "Contact US Embassy for referrals",
-                    services: "SIV process guidance and support"
-                }
-            ],
+            ngos: [{
+                name: "Local Refugee Assistance Organizations",
+                contact: "Contact US Embassy for referrals",
+                services: "SIV process guidance and support"
+            }],
             travelCosts: {
                 flightCost: "Varies by route and season",
                 overlandCost: "Contact travel agencies",
@@ -584,19 +788,8 @@ class EmbassyDetailsApp {
                 localTransport: "Contact local transport services"
             },
             checklists: {
-                hostCountry: [
-                    "Valid passport",
-                    "Entry visa (if required)",
-                    "Proof of accommodation",
-                    "Financial support documentation"
-                ],
-                sivInterview: [
-                    "Form DS-260",
-                    "Supporting SIV documents",
-                    "Medical examination results",
-                    "Passport photos",
-                    "Birth certificates"
-                ]
+                hostCountry: ["Valid passport", "Entry visa (if required)", "Proof of accommodation", "Financial support documentation"],
+                sivInterview: ["Form DS-260", "Supporting SIV documents", "Medical examination results", "Passport photos", "Birth certificates"]
             }
         };
     }
