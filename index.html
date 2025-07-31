@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.S. Special Immigrant Visa (SIV) Embassy Processing Data</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>U.S. Special Immigrant Visa (SIV) Processing Data by Embassy</h1>
+            <p class="subtitle">Ranked by total SIV cases processed in <span id="currentDateRangeDisplay">selected date range</span></p>
+            <p class="last-updated">Last Updated: <span id="lastUpdated"></span></p>
+        </header>
+
+        <div class="controls">
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search by embassy or country..." 
+                    aria-label="Search embassies"
+                >
+                <button id="clearSearch" class="clear-btn" aria-label="Clear search">×</button>
+            </div>
+            
+            <div class="filter-container">
+                <select id="monthFilter" aria-label="Highlight month">
+                    <option value="">Highlight Month</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                
+                <button id="downloadCSV" class="download-btn">Download CSV</button>
+            </div>
+        </div>
+        
+        <div class="date-range-controls">
+            <div class="date-range-header">
+                <h3>Sort by Date Range</h3>
+                <p>Select a date range to rank embassies by their performance in that period</p>
+            </div>
+            <div class="date-range-selectors">
+                <div class="date-selector">
+                    <label>From:</label>
+                    <select id="startMonth">
+                        <option value="1" selected>January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="startYear">
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+                <div class="date-selector">
+                    <label>To:</label>
+                    <select id="endMonth">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5" selected>May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="endYear">
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                    </select>
+                </div>
+                <button id="applyDateRange" class="apply-btn">Apply Range</button>
+                <button id="resetDateRange" class="reset-btn">Reset to All Data</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingIndicator" class="loading">Loading data...</div>
+            <table id="dataTable" class="data-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Embassy/City</th>
+                        <th>Country</th>
+                        <th class="month-col" data-month="Oct">Oct</th>
+                        <th class="month-col" data-month="Nov">Nov</th>
+                        <th class="month-col" data-month="Dec">Dec</th>
+                        <th class="month-col" data-month="Jan">Jan</th>
+                        <th class="month-col" data-month="Feb">Feb</th>
+                        <th class="month-col" data-month="Mar">Mar</th>
+                        <th class="month-col" data-month="Apr">Apr</th>
+                        <th class="month-col" data-month="May">May</th>
+                        <th class="month-col" data-month="Jun">Jun</th>
+                        <th class="month-col" data-month="Jul">Jul</th>
+                        <th class="month-col" data-month="Aug">Aug</th>
+                        <th class="month-col" data-month="Sep">Sep</th>
+                        <th class="total-col">FY Total</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                No embassies found matching your search criteria.
+            </div>
+        </div>
+
+        <footer>
+            <p class="data-source">
+                Data Source: U.S. Department of State - Bureau of Consular Affairs<br>
+                <small>This data represents Special Immigrant Visa cases processed at U.S. embassies and consulates worldwide.</small>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
