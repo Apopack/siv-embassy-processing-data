@@ -30,6 +30,11 @@ class EmbassyDetailsApp {
     }
 
     setupEventListeners() {
+        // Mobile menu toggle (matching main site functionality)
+        document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
+            document.getElementById('sideNav').classList.toggle('active');
+        });
+
         // Search functionality
         const searchInput = document.getElementById('embassySearch');
         const searchResults = document.getElementById('searchResults');

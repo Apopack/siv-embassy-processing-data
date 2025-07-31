@@ -1,9 +1,9 @@
 /* Embassy Details - Professional SaaS Design */
 
 :root {
-    --primary: #2563EB;
-    --primary-light: #3B82F6;
-    --primary-dark: #1D4ED8;
+    --primary: #1a3a52;
+    --primary-light: #3498db;
+    --primary-dark: #2c3e50;
     --secondary: #64748B;
     --accent: #F59E0B;
     --success: #10B981;
@@ -51,13 +51,124 @@ body {
     min-height: 100vh;
 }
 
+/* Side Navigation */
+.side-nav {
+    width: 280px;
+    background: var(--primary);
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+}
+
+.nav-header {
+    padding: 32px 24px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 16px 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-item.active .nav-link {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border-left-color: var(--primary-light);
+}
+
+.nav-icon {
+    margin-right: 12px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Mobile menu toggle */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.mobile-menu-toggle span {
+    width: 20px;
+    height: 2px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+    
+    .side-nav {
+        transform: translateX(-100%);
+    }
+    
+    .side-nav.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+    
+    .ai-disclaimer {
+        left: 0;
+    }
+}
+
 /* Minimal Sticky Caveat */
 .ai-disclaimer {
     position: fixed;
     top: 0;
-    left: 0;
+    left: 280px;
     right: 0;
-    z-index: 1000;
+    z-index: 999;
     background: var(--warning);
     color: var(--white);
     padding: 8px 0;
@@ -75,8 +186,10 @@ body {
 
 /* Main Container */
 .main-content {
-    margin-left: 0;
+    flex: 1;
+    margin-left: 280px;
     padding-top: 48px; /* Account for sticky disclaimer */
+    transition: margin-left 0.3s ease;
 }
 
 .container {
@@ -113,7 +226,7 @@ body {
     position: fixed;
     top: 48px; /* Below disclaimer */
     right: 24px;
-    z-index: 999;
+    z-index: 998;
     display: flex;
     gap: 12px;
 }
@@ -540,6 +653,10 @@ body {
     
     .comparison-panel.active {
         transform: translateX(-100%);
+    }
+    
+    .ai-disclaimer {
+        left: 0 !important;
     }
 }
 
