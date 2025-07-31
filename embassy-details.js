@@ -1,14 +1,13 @@
-// Embassy Details Page JavaScript
+// Professional Embassy Details Application
 
 class EmbassyDetailsApp {
     constructor() {
         this.embassyData = null;
         this.selectedEmbassy = null;
+        this.searchResults = [];
         this.comparisonEmbassies = [];
         this.isComparing = false;
-        this.isDariMode = false;
-        this.sivChart = null;
-        this.fullHistoryChart = null;
+        this.currentModal = null;
         
         this.init();
     }
@@ -16,8 +15,7 @@ class EmbassyDetailsApp {
     async init() {
         await this.loadEmbassyData();
         this.setupEventListeners();
-        this.checkURLParams();
-        this.renderEmbassyGrid();
+        this.initializeSearch();
     }
 
     async loadEmbassyData() {
@@ -31,168 +29,482 @@ class EmbassyDetailsApp {
     }
 
     setupEventListeners() {
-        // Mobile menu toggle
-        document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
-            document.getElementById('sideNav').classList.toggle('active');
+        // Search functionality
+        const searchInput = document.getElementById('embassySearch');
+        const searchResults = document.getElementById('searchResults');
+        
+        searchInput.addEventListener('input', (e) => {
+            this.handleSearch(e.target.value);
         });
 
-        // Dari translation toggle
-        document.getElementById('translateToDari').addEventListener('click', () => {
-            this.toggleDariTranslation();
+        searchInput.addEventListener('focus', () => {
+            if (this.searchResults.length > 0) {
+                searchResults.classList.add('active');
+            }
         });
 
-        // Compare destinations button
-        document.getElementById('compareDestinationsBtn').addEventListener('click', () => {
-            this.showComparisonInterface();
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.remove('active');
+            }
         });
 
-        // Comparison interface buttons
-        document.getElementById('startComparingBtn').addEventListener('click', () => {
-            this.startComparison();
+        // Sticky action buttons
+        document.getElementById('compareBtn').addEventListener('click', () => {
+            this.toggleComparisonPanel();
         });
 
-        document.getElementById('cancelComparisonBtn').addEventListener('click', () => {
-            this.hideComparisonInterface();
+        document.getElementById('translateBtn').addEventListener('click', () => {
+            this.toggleTranslation();
         });
 
-        document.getElementById('exitComparisonBtn').addEventListener('click', () => {
-            this.exitComparison();
+        // Info card clicks
+        document.addEventListener('click', (e) => {
+            const infoCard = e.target.closest('.info-card');
+            if (infoCard && this.selectedEmbassy) {
+                this.openInfoModal(infoCard.dataset.type);
+            }
         });
 
         // Modal controls
-        document.getElementById('expandDataBtn').addEventListener('click', () => {
-            this.showFullHistoryModal();
+        document.getElementById('closeModal').addEventListener('click', () => {
+            this.closeModal();
         });
 
-        document.getElementById('closeDataModal').addEventListener('click', () => {
-            this.hideFullHistoryModal();
+        document.getElementById('detailModal').addEventListener('click', (e) => {
+            if (e.target.id === 'detailModal') {
+                this.closeModal();
+            }
         });
 
-        // Modal backdrop click
-        document.getElementById('dataModal').addEventListener('click', (e) => {
-            if (e.target.id === 'dataModal') {
-                this.hideFullHistoryModal();
+        // Escape key to close modal/panels
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeModal();
+                this.closeComparisonPanel();
             }
         });
     }
 
-    checkURLParams() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const embassyName = urlParams.get('embassy');
-        
-        if (embassyName && this.embassyData) {
-            const embassy = this.embassyData.find(e => 
-                e.embassy.toLowerCase() === embassyName.toLowerCase()
-            );
-            
-            if (embassy) {
-                this.selectEmbassy(embassy);
-            }
+    initializeSearch() {
+        // Show placeholder in search if no embassies loaded
+        if (!this.embassyData) {
+            const searchInput = document.getElementById('embassySearch');
+            searchInput.disabled = true;
+            searchInput.placeholder = 'Loading embassies...';
+            return;
         }
+
+        // Initialize with all embassies
+        this.searchResults = this.embassyData;
     }
 
-    renderEmbassyGrid() {
-        const embassyGrid = document.getElementById('embassyGrid');
-        if (!this.embassyData) return;
+    handleSearch(query) {
+        const searchResults = document.getElementById('searchResults');
+        
+        if (!query.trim()) {
+            searchResults.classList.remove('active');
+            return;
+        }
 
-        embassyGrid.innerHTML = this.embassyData.map(embassy => {
+        const filtered = this.embassyData.filter(embassy => 
+            embassy.embassy.toLowerCase().includes(query.toLowerCase()) ||
+            embassy.country.toLowerCase().includes(query.toLowerCase())
+        );
+
+        this.searchResults = filtered;
+        this.renderSearchResults();
+        searchResults.classList.add('active');
+    }
+
+    renderSearchResults() {
+        const searchResults = document.getElementById('searchResults');
+        
+        if (this.searchResults.length === 0) {
+            searchResults.innerHTML = `
+                <div class="embassy-result">
+                    <div class="embassy-info">
+                        <h3>No embassies found</h3>
+                        <p>Try searching by embassy name or country</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        searchResults.innerHTML = this.searchResults.slice(0, 8).map(embassy => {
             const totalCases = Object.values(embassy.monthlyData).reduce((sum, val) => sum + val, 0);
             const flag = this.getCountryFlag(embassy.country);
             
             return `
-                <div class="embassy-card" data-embassy="${embassy.embassy}" onclick="embassyApp.selectEmbassy(${JSON.stringify(embassy).replace(/"/g, '&quot;')})">
-                    <div class="flag">${flag}</div>
-                    <div class="name">${embassy.embassy}</div>
-                    <div class="country">${embassy.country}</div>
-                    <div class="total-cases">${totalCases.toLocaleString()} total cases</div>
+                <div class="embassy-result" onclick="embassyApp.selectEmbassy('${embassy.embassy}')">
+                    <div class="embassy-flag">${flag}</div>
+                    <div class="embassy-info">
+                        <h3>${embassy.embassy}</h3>
+                        <p>${embassy.country} • ${totalCases.toLocaleString()} total cases</p>
+                    </div>
                 </div>
             `;
         }).join('');
     }
 
-    getCountryFlag(country) {
-        const flags = {
-            'Qatar': '🇶🇦', 'Pakistan': '🇵🇰', 'Germany': '🇩🇪', 'Albania': '🇦🇱',
-            'Turkey': '🇹🇷', 'Canada': '🇨🇦', 'UAE': '🇦🇪', 'Rwanda': '🇷🇼',
-            'Iraq': '🇮🇶', 'Tajikistan': '🇹🇯', 'United Kingdom': '🇬🇧',
-            'Philippines': '🇵🇭', 'France': '🇫🇷', 'Oman': '🇴🇲',
-            'Uzbekistan': '🇺🇿', 'Italy': '🇮🇹', 'Sweden': '🇸🇪',
-            'Kenya': '🇰🇪', 'India': '🇮🇳', 'Brazil': '🇧🇷',
-            'Japan': '🇯🇵', 'Saudi Arabia': '🇸🇦', 'Spain': '🇪🇸',
-            'Australia': '🇦🇺', 'Belgium': '🇧🇪', 'Kosovo': '🇽🇰',
-            'Austria': '🇦🇹', 'New Zealand': '🇳🇿', 'Kazakhstan': '🇰🇿',
-            'Ireland': '🇮🇪', 'Jordan': '🇯🇴', 'Greece': '🇬🇷',
-            'Finland': '🇫🇮', 'Lithuania': '🇱🇹', 'Poland': '🇵🇱',
-            'China': '🇨🇳', 'Malaysia': '🇲🇾', 'Switzerland': '🇨🇭',
-            'Czech Republic': '🇨🇿', 'Vietnam': '🇻🇳', 'Kyrgyzstan': '🇰🇬',
-            'Indonesia': '🇮🇩', 'Romania': '🇷🇴', 'Slovakia': '🇸🇰',
-            'Bangladesh': '🇧🇩', 'Turkmenistan': '🇹🇲', 'South Africa': '🇿🇦',
-            'Bulgaria': '🇧🇬', 'Egypt': '🇪🇬', 'Iceland': '🇮🇸',
-            'Hungary': '🇭🇺', 'Tanzania': '🇹🇿', 'Nepal': '🇳🇵',
-            'Netherlands': '🇳🇱'
-        };
-        return flags[country] || '🏛️';
-    }
+    selectEmbassy(embassyName) {
+        const embassy = this.embassyData.find(e => e.embassy === embassyName);
+        if (!embassy) return;
 
-    async selectEmbassy(embassy) {
         this.selectedEmbassy = embassy;
         
-        // Hide embassy selection and show loading
-        document.getElementById('embassySelection').style.display = 'none';
-        document.getElementById('embassyDetailsContent').style.display = 'block';
-        document.getElementById('loadingSection').style.display = 'block';
-        document.getElementById('embassyInfoSections').style.display = 'none';
+        // Hide search results
+        document.getElementById('searchResults').classList.remove('active');
+        
+        // Update search input
+        document.getElementById('embassySearch').value = `${embassy.embassy}, ${embassy.country}`;
+        
+        // Show embassy details
+        this.showEmbassyDetails();
+    }
 
+    async showEmbassyDetails() {
+        const embassyDetails = document.getElementById('embassyDetails');
+        const embassyLoading = document.getElementById('embassyLoading');
+        
         // Update header
-        document.getElementById('embassyName').textContent = embassy.embassy;
-        document.getElementById('embassyLocation').textContent = `${embassy.embassy}, ${embassy.country}`;
-
-        // Update URL
-        const url = new URL(window.location);
-        url.searchParams.set('embassy', embassy.embassy);
-        window.history.pushState({}, '', url);
-
+        document.getElementById('embassyName').textContent = this.selectedEmbassy.embassy;
+        document.getElementById('embassyLocation').textContent = `${this.selectedEmbassy.embassy}, ${this.selectedEmbassy.country}`;
+        
+        // Show details section with loading
+        embassyDetails.classList.add('active');
+        embassyLoading.style.display = 'flex';
+        
+        // Load embassy information
         try {
-            // Load embassy information
-            await this.loadEmbassyInformation(embassy);
-            
-            // Hide loading and show content
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('embassyInfoSections').style.display = 'block';
-            
-            // Render charts and data
-            this.renderSIVChart();
-            
+            this.embassyInfo = await this.getEmbassyInfoFromAPI(this.selectedEmbassy);
+            embassyLoading.style.display = 'none';
         } catch (error) {
-            console.error('Error loading embassy information:', error);
-            document.getElementById('loadingSection').innerHTML = `
-                <div style="color: #dc3545;">
-                    <h3>Error Loading Information</h3>
-                    <p>We encountered an error while loading embassy information. Please try again later.</p>
-                    <button onclick="location.reload()" class="retry-btn">Retry</button>
+            console.error('Error loading embassy info:', error);
+            embassyLoading.innerHTML = `
+                <div style="color: var(--danger); text-align: center;">
+                    <p>Unable to load embassy information</p>
+                    <p style="font-size: 12px; color: var(--gray-500);">Using fallback data</p>
                 </div>
             `;
         }
     }
 
-    async loadEmbassyInformation(embassy) {
-        // This function will make API calls to get detailed embassy information
-        const embassyInfo = await this.getEmbassyInfoFromAPI(embassy);
+    async openInfoModal(infoType) {
+        const modal = document.getElementById('detailModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
         
-        // Render all sections
-        this.renderEmbassyLinks(embassyInfo.links);
-        this.renderVisaInfo(embassyInfo.visaInfo);
-        this.renderMedicalInfo(embassyInfo.medicalInfo);
-        this.renderNGOList(embassyInfo.ngos);
-        this.renderTravelCosts(embassyInfo.travelCosts);
-        this.renderLivingExpenses(embassyInfo.livingExpenses);
-        this.renderChecklists(embassyInfo.checklists);
+        this.currentModal = infoType;
+        
+        // Set title based on type
+        const titles = {
+            data: 'SIV Processing Data',
+            links: 'Official Embassy Resources',
+            visa: 'Visa Requirements',
+            medical: 'Medical Examinations',
+            travel: 'Travel Costs',
+            living: 'Living Expenses',
+            support: 'Support Organizations',
+            documents: 'Document Checklists'
+        };
+        
+        modalTitle.textContent = titles[infoType] || 'Information';
+        
+        // Show loading
+        modalBody.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                Loading detailed information...
+            </div>
+        `;
+        
+        modal.classList.add('active');
+        
+        // Generate content based on type
+        try {
+            const content = await this.generateModalContent(infoType);
+            modalBody.innerHTML = content;
+        } catch (error) {
+            modalBody.innerHTML = `
+                <div style="color: var(--danger); text-align: center; padding: 40px;">
+                    <p>Unable to load information</p>
+                    <p style="font-size: 12px; color: var(--gray-500);">Please try again later</p>
+                </div>
+            `;
+        }
     }
 
+    async generateModalContent(infoType) {
+        if (!this.embassyInfo) {
+            throw new Error('Embassy information not loaded');
+        }
+
+        switch (infoType) {
+            case 'data':
+                return this.generateDataContent();
+            case 'links':
+                return this.generateLinksContent();
+            case 'visa':
+                return this.generateVisaContent();
+            case 'medical':
+                return this.generateMedicalContent();
+            case 'travel':
+                return this.generateTravelContent();
+            case 'living':
+                return this.generateLivingContent();
+            case 'support':
+                return this.generateSupportContent();
+            case 'documents':
+                return this.generateDocumentsContent();
+            default:
+                return '<p>Information not available</p>';
+        }
+    }
+
+    generateDataContent() {
+        const embassy = this.selectedEmbassy;
+        const totalCases = Object.values(embassy.monthlyData).reduce((sum, val) => sum + val, 0);
+        const currentYear = new Date().getFullYear();
+        const currentYearCases = this.getCurrentYearTotal(embassy);
+        
+        return `
+            <div style="text-align: center; margin-bottom: 32px;">
+                <h3 style="color: var(--primary); font-size: 24px; margin-bottom: 8px;">${totalCases.toLocaleString()}</h3>
+                <p style="color: var(--gray-600); margin: 0;">Total SIV cases processed</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin-bottom: 32px;">
+                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">${currentYearCases}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">${currentYear} Cases</div>
+                </div>
+                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">${Math.round(totalCases / 32)}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Avg/Month</div>
+                </div>
+                <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--gray-900);">32</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Months Data</div>
+                </div>
+            </div>
+            
+            <div id="modalChart" style="height: 300px; background: var(--gray-50); border-radius: var(--radius); padding: 16px;">
+                <!-- Chart will be rendered here -->
+            </div>
+        `;
+    }
+
+    generateLinksContent() {
+        const links = this.embassyInfo.links || [];
+        
+        if (links.length === 0) {
+            return '<p style="text-align: center; color: var(--gray-500); padding: 40px;">No official links available</p>';
+        }
+        
+        return links.map(link => `
+            <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 8px; color: var(--gray-900);">${link.title}</h4>
+                <p style="margin: 0 0 12px; color: var(--gray-600); font-size: 14px;">${link.description}</p>
+                <a href="${link.url}" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">
+                    Visit Website →
+                </a>
+            </div>
+        `).join('');
+    }
+
+    generateVisaContent() {
+        const visa = this.embassyInfo.visaInfo || {};
+        
+        return `
+            <div style="display: grid; gap: 20px;">
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Visa Requirement</h4>
+                    <p style="margin: 0; color: var(--gray-700);"><strong>Required:</strong> ${visa.visaRequired || 'Contact embassy'}</p>
+                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Type:</strong> ${visa.visaType || 'Various types available'}</p>
+                </div>
+                
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Duration & Extension</h4>
+                    <p style="margin: 0; color: var(--gray-700);"><strong>Length:</strong> ${visa.visaLength || 'Varies by visa type'}</p>
+                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Extension:</strong> ${visa.extensionPossible || 'Contact local authorities'}</p>
+                </div>
+                
+                <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--gray-900);">Fees</h4>
+                    <p style="margin: 0; color: var(--gray-700);"><strong>Visa Fee:</strong> ${visa.visaFee || 'Contact embassy for current rates'}</p>
+                    <p style="margin: 8px 0 0; color: var(--gray-700);"><strong>Extension Fee:</strong> ${visa.extensionFee || 'Varies'}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    generateMedicalContent() {
+        const medical = this.embassyInfo.medicalInfo || {};
+        
+        return `
+            <div style="display: grid; gap: 20px;">
+                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--primary);">📍 Examination Location</h4>
+                    <p style="margin: 0; color: var(--gray-700);">${medical.location || 'Contact US Embassy for approved medical facilities'}</p>
+                </div>
+                
+                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--primary);">💰 Examination Fee</h4>
+                    <p style="margin: 0; color: var(--gray-700);">${medical.fee || 'Contact medical facility for current fees'}</p>
+                </div>
+                
+                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--primary);">📅 Booking Information</h4>
+                    <p style="margin: 0; color: var(--gray-700);">${medical.bookingInfo || 'Embassy will provide list of approved doctors'}</p>
+                </div>
+                
+                <div style="background: var(--secondary-light, var(--gray-50)); border-radius: var(--radius); padding: 20px;">
+                    <h4 style="margin: 0 0 12px; color: var(--primary);">ℹ️ Additional Information</h4>
+                    <p style="margin: 0; color: var(--gray-700);">${medical.additionalInfo || 'Medical exam must be completed at embassy-approved facility'}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    generateTravelContent() {
+        const travel = this.embassyInfo.travelCosts || {};
+        
+        return `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <div style="background: linear-gradient(135deg, #FFF8E1, rgba(245, 158, 11, 0.1)); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">${travel.flightCost || 'Varies'}</div>
+                    <div style="font-size: 13px; color: var(--gray-600); text-transform: uppercase;">Flight from Kabul</div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #FFF8E1, rgba(245, 158, 11, 0.1)); border-radius: var(--radius); padding: 24px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--accent); margin-bottom: 8px;">${travel.overlandCost || 'N/A'}</div>
+                    <div style="font-size: 13px; color: var(--gray-600); text-transform: uppercase;">Overland Travel</div>
+                </div>
+            </div>
+            
+            <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px;">
+                <h4 style="margin: 0 0 12px; color: var(--gray-900);">Transit Information</h4>
+                <p style="margin: 0; color: var(--gray-700); line-height: 1.6;">${travel.transitInfo || 'Check visa requirements for transit countries'}</p>
+            </div>
+        `;
+    }
+
+    generateLivingContent() {
+        const living = this.embassyInfo.livingExpenses || {};
+        
+        return `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.dailyRoom || 'Varies'}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Daily Room</div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.monthlyRoom || 'Varies'}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Monthly Room</div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.dailyMeals || 'Varies'}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Daily Meals</div>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #F0F9FF, rgba(59, 130, 246, 0.1)); border-radius: var(--radius); padding: 20px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: 700; color: var(--primary); margin-bottom: 6px;">${living.localTransport || 'Varies'}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); text-transform: uppercase;">Local Transport</div>
+                </div>
+            </div>
+        `;
+    }
+
+    generateSupportContent() {
+        const ngos = this.embassyInfo.ngos || [];
+        
+        if (ngos.length === 0) {
+            return '<p style="text-align: center; color: var(--gray-500); padding: 40px;">No support organizations listed.<br>Contact US Embassy for referrals.</p>';
+        }
+        
+        return ngos.map(ngo => `
+            <div style="background: var(--gray-50); border-radius: var(--radius); padding: 20px; margin-bottom: 16px;">
+                <h4 style="margin: 0 0 8px; color: var(--gray-900);">${ngo.name}</h4>
+                <p style="margin: 0 0 8px; color: var(--gray-700); font-size: 14px;"><strong>Contact:</strong> ${ngo.contact}</p>
+                <p style="margin: 0; color: var(--gray-600); font-size: 14px;">${ngo.services}</p>
+            </div>
+        `).join('');
+    }
+
+    generateDocumentsContent() {
+        const checklists = this.embassyInfo.checklists || {};
+        
+        return `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <div>
+                    <h4 style="margin: 0 0 16px; color: var(--gray-900);">Host Country Entry</h4>
+                    <div style="background: var(--gray-50); border-radius: var(--radius); padding: 16px;">
+                        ${(checklists.hostCountry || ['Valid passport', 'Entry visa (if required)', 'Proof of accommodation']).map(item => `
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="color: var(--success);">✓</span>
+                                <span style="font-size: 14px; color: var(--gray-700);">${item}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 style="margin: 0 0 16px; color: var(--gray-900);">SIV Interview</h4>
+                    <div style="background: var(--gray-50); border-radius: var(--radius); padding: 16px;">
+                        ${(checklists.sivInterview || ['Form DS-260', 'Supporting SIV documents', 'Medical examination results', 'Passport photos']).map(item => `
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <span style="color: var(--success);">✓</span>
+                                <span style="font-size: 14px; color: var(--gray-700);">${item}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    closeModal() {
+        const modal = document.getElementById('detailModal');
+        modal.classList.remove('active');
+        this.currentModal = null;
+    }
+
+    toggleComparisonPanel() {
+        const panel = document.getElementById('comparisonPanel');
+        const btn = document.getElementById('compareBtn');
+        
+        panel.classList.toggle('active');
+        btn.classList.toggle('active');
+    }
+
+    closeComparisonPanel() {
+        const panel = document.getElementById('comparisonPanel');
+        const btn = document.getElementById('compareBtn');
+        
+        panel.classList.remove('active');
+        btn.classList.remove('active');
+    }
+
+    toggleTranslation() {
+        const btn = document.getElementById('translateBtn');
+        btn.classList.toggle('active');
+        
+        // Placeholder for translation functionality
+        if (btn.classList.contains('active')) {
+            console.log('Translation activated');
+        } else {
+            console.log('Translation deactivated');
+        }
+    }
+
+    // API Integration
     async getEmbassyInfoFromAPI(embassy) {
-        // Check if secure API configuration exists
         if (!window.API_CONFIG || !window.API_CONFIG.SECURE_MODE) {
-            console.warn('Secure API not configured');
             return this.getFallbackEmbassyInfo(embassy);
         }
 
@@ -203,57 +515,6 @@ class EmbassyDetailsApp {
             console.error('Error calling embassy info API:', error);
             return this.getFallbackEmbassyInfo(embassy);
         }
-    }
-
-    createEmbassyInfoPrompt(embassy) {
-        return `Please provide comprehensive information for Afghan SIV applicants about ${embassy.embassy}, ${embassy.country}. Return the information as a JSON object with the following structure:
-
-{
-  "links": [
-    {"title": "US Embassy Website", "url": "...", "description": "..."},
-    {"title": "Visa Office", "url": "...", "description": "..."}
-  ],
-  "visaInfo": {
-    "visaRequired": "Yes/No",
-    "visaType": "e-visa/VOA/Embassy application",
-    "visaLength": "Duration of stay allowed",
-    "extensionPossible": "Yes/No",
-    "visaFee": "Cost in USD",
-    "extensionFee": "Cost in USD if applicable"
-  },
-  "medicalInfo": {
-    "location": "Where to book medical exam",
-    "fee": "Cost in USD",
-    "bookingInfo": "How to book",
-    "additionalInfo": "Other relevant details"
-  },
-  "ngos": [
-    {"name": "NGO Name", "contact": "email/phone", "services": "What they help with"}
-  ],
-  "travelCosts": {
-    "flightCost": "Average cost from Kabul in USD",
-    "overlandCost": "If applicable, overland travel cost",
-    "transitInfo": "Transit requirements"
-  },
-  "livingExpenses": {
-    "dailyRoom": "Cost per day for basic accommodation in USD",
-    "monthlyRoom": "Cost per month for basic accommodation in USD",
-    "dailyMeals": "Average daily food cost in USD",
-    "localTransport": "Daily transport cost in USD"
-  },
-  "checklists": {
-    "hostCountry": [
-      "Document requirement 1",
-      "Document requirement 2"
-    ],
-    "sivInterview": [
-      "SIV document requirement 1",
-      "SIV document requirement 2"
-    ]
-  }
-}
-
-Please ensure all information is current, accurate, and specifically relevant for Afghan nationals applying for SIV. Include actual websites, contact information, and realistic cost estimates.`;
     }
 
     async callNetlifyFunction(embassy) {
@@ -274,11 +535,7 @@ Please ensure all information is current, accurate, and specifically relevant fo
 
         const data = await response.json();
         
-        // Check if the function returned an error (API key not configured, etc.)
         if (data.error) {
-            if (data.error === 'API_KEY_NOT_CONFIGURED') {
-                console.warn('OpenAI API key not configured on server');
-            }
             throw new Error(data.message || 'API call failed');
         }
 
@@ -286,7 +543,6 @@ Please ensure all information is current, accurate, and specifically relevant fo
     }
 
     getFallbackEmbassyInfo(embassy) {
-        // Provide fallback information when API is not available
         return {
             links: [
                 {
@@ -318,12 +574,12 @@ Please ensure all information is current, accurate, and specifically relevant fo
             ],
             travelCosts: {
                 flightCost: "Varies by route and season",
-                overlandCost: "Contact travel agencies for current rates",
+                overlandCost: "Contact travel agencies",
                 transitInfo: "Check visa requirements for transit countries"
             },
             livingExpenses: {
                 dailyRoom: "Contact local accommodations",
-                monthlyRoom: "Varies by location and quality",
+                monthlyRoom: "Varies by location",
                 dailyMeals: "Varies",
                 localTransport: "Contact local transport services"
             },
@@ -339,395 +595,35 @@ Please ensure all information is current, accurate, and specifically relevant fo
                     "Supporting SIV documents",
                     "Medical examination results",
                     "Passport photos",
-                    "Birth certificates",
-                    "Marriage certificate (if applicable)"
+                    "Birth certificates"
                 ]
             }
         };
     }
 
-    renderSIVChart() {
-        const ctx = document.getElementById('sivChart').getContext('2d');
-        const currentYear = new Date().getFullYear();
-        
-        // Get current year data
-        const monthlyData = this.selectedEmbassy.monthlyData;
-        const currentYearData = {};
-        
-        for (const [dateKey, value] of Object.entries(monthlyData)) {
-            const [year, month] = dateKey.split('-');
-            if (parseInt(year) === currentYear) {
-                currentYearData[month] = value;
-            }
-        }
-
-        // Create chart data
-        const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const data = months.map(month => currentYearData[month] || 0);
-
-        if (this.sivChart) {
-            this.sivChart.destroy();
-        }
-
-        this.sivChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: monthNames,
-                datasets: [{
-                    label: `${currentYear} SIV Issuances`,
-                    data: data,
-                    backgroundColor: 'rgba(26, 58, 82, 0.8)',
-                    borderColor: 'rgba(26, 58, 82, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `${this.selectedEmbassy.embassy} - ${currentYear} SIV Issuances`
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    showFullHistoryModal() {
-        document.getElementById('dataModal').style.display = 'block';
-        this.renderFullHistoryChart();
-    }
-
-    hideFullHistoryModal() {
-        document.getElementById('dataModal').style.display = 'none';
-        if (this.fullHistoryChart) {
-            this.fullHistoryChart.destroy();
-            this.fullHistoryChart = null;
-        }
-    }
-
-    renderFullHistoryChart() {
-        const ctx = document.getElementById('fullHistoryChart').getContext('2d');
-        const monthlyData = this.selectedEmbassy.monthlyData;
-        
-        // Sort dates and create labels and data
-        const sortedEntries = Object.entries(monthlyData).sort(([a], [b]) => a.localeCompare(b));
-        const labels = sortedEntries.map(([date]) => {
-            const [year, month] = date.split('-');
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            return `${monthNames[parseInt(month) - 1]} ${year}`;
-        });
-        const data = sortedEntries.map(([, value]) => value);
-
-        if (this.fullHistoryChart) {
-            this.fullHistoryChart.destroy();
-        }
-
-        this.fullHistoryChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'SIV Issuances',
-                    data: data,
-                    borderColor: 'rgba(26, 58, 82, 1)',
-                    backgroundColor: 'rgba(26, 58, 82, 0.1)',
-                    tension: 0.1,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `${this.selectedEmbassy.embassy} - Complete SIV Issuance History`
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    renderEmbassyLinks(links) {
-        const container = document.getElementById('embassyLinks');
-        container.innerHTML = links.map(link => `
-            <div class="info-card">
-                <h3>${link.title}</h3>
-                <p>${link.description}</p>
-                <a href="${link.url}" target="_blank" rel="noopener noreferrer">Visit Website →</a>
-            </div>
-        `).join('');
-    }
-
-    renderVisaInfo(visaInfo) {
-        const container = document.getElementById('visaInfo');
-        container.innerHTML = `
-            <div class="info-card">
-                <h3>Visa Requirement</h3>
-                <p><strong>Required:</strong> ${visaInfo.visaRequired}</p>
-                <p><strong>Type:</strong> ${visaInfo.visaType}</p>
-            </div>
-            <div class="info-card">
-                <h3>Visa Duration & Extension</h3>
-                <p><strong>Length:</strong> ${visaInfo.visaLength}</p>
-                <p><strong>Extension Possible:</strong> ${visaInfo.extensionPossible}</p>
-            </div>
-            <div class="info-card">
-                <h3>Fees</h3>
-                <p><strong>Visa Fee:</strong> ${visaInfo.visaFee}</p>
-                <p><strong>Extension Fee:</strong> ${visaInfo.extensionFee}</p>
-            </div>
-        `;
-    }
-
-    renderMedicalInfo(medicalInfo) {
-        const container = document.getElementById('medicalInfo');
-        container.innerHTML = `
-            <div class="medical-card">
-                <h4>📍 Examination Location</h4>
-                <p>${medicalInfo.location}</p>
-            </div>
-            <div class="medical-card">
-                <h4>💰 Examination Fee</h4>
-                <p>${medicalInfo.fee}</p>
-            </div>
-            <div class="medical-card">
-                <h4>📅 Booking Information</h4>
-                <p>${medicalInfo.bookingInfo}</p>
-            </div>
-            <div class="medical-card">
-                <h4>ℹ️ Additional Information</h4>
-                <p>${medicalInfo.additionalInfo}</p>
-            </div>
-        `;
-    }
-
-    renderNGOList(ngos) {
-        const container = document.getElementById('ngoList');
-        container.innerHTML = ngos.map(ngo => `
-            <div class="ngo-card">
-                <h4>${ngo.name}</h4>
-                <div class="ngo-contact"><strong>Contact:</strong> ${ngo.contact}</div>
-                <div class="ngo-contact"><strong>Services:</strong> ${ngo.services}</div>
-            </div>
-        `).join('');
-    }
-
-    renderTravelCosts(travelCosts) {
-        const container = document.getElementById('travelCosts');
-        container.innerHTML = `
-            <div class="cost-card">
-                <div class="cost-amount">${travelCosts.flightCost}</div>
-                <div class="cost-label">Flight from Kabul</div>
-            </div>
-            <div class="cost-card">
-                <div class="cost-amount">${travelCosts.overlandCost}</div>
-                <div class="cost-label">Overland Travel</div>
-            </div>
-            <div class="info-card" style="grid-column: 1 / -1;">
-                <h3>Transit Information</h3>
-                <p>${travelCosts.transitInfo}</p>
-            </div>
-        `;
-    }
-
-    renderLivingExpenses(livingExpenses) {
-        const container = document.getElementById('livingExpenses');
-        container.innerHTML = `
-            <div class="cost-card">
-                <div class="cost-amount">${livingExpenses.dailyRoom}</div>
-                <div class="cost-label">Daily Room</div>
-            </div>
-            <div class="cost-card">
-                <div class="cost-amount">${livingExpenses.monthlyRoom}</div>
-                <div class="cost-label">Monthly Room</div>
-            </div>
-            <div class="cost-card">
-                <div class="cost-amount">${livingExpenses.dailyMeals}</div>
-                <div class="cost-label">Daily Meals</div>
-            </div>
-            <div class="cost-card">
-                <div class="cost-amount">${livingExpenses.localTransport}</div>
-                <div class="cost-label">Local Transport</div>
-            </div>
-        `;
-    }
-
-    renderChecklists(checklists) {
-        document.getElementById('hostCountryChecklist').innerHTML = 
-            checklists.hostCountry.map(item => `
-                <div class="checklist-item">
-                    <div class="checklist-icon">✓</div>
-                    <div class="checklist-text">${item}</div>
-                </div>
-            `).join('');
-
-        document.getElementById('sivInterviewChecklist').innerHTML = 
-            checklists.sivInterview.map(item => `
-                <div class="checklist-item">
-                    <div class="checklist-icon">✓</div>
-                    <div class="checklist-text">${item}</div>
-                </div>
-            `).join('');
-    }
-
-    showComparisonInterface() {
-        document.getElementById('comparisonInterface').style.display = 'block';
-        this.renderEmbassySelector();
-    }
-
-    hideComparisonInterface() {
-        document.getElementById('comparisonInterface').style.display = 'none';
-        this.comparisonEmbassies = [];
-        this.updateSelectedEmbassies();
-    }
-
-    renderEmbassySelector() {
-        const container = document.getElementById('embassySelector');
-        const availableEmbassies = this.embassyData.filter(e => e.embassy !== this.selectedEmbassy.embassy);
-        
-        container.innerHTML = availableEmbassies.map(embassy => `
-            <label class="embassy-checkbox">
-                <input type="checkbox" value="${embassy.embassy}" onchange="embassyApp.toggleEmbassyForComparison('${embassy.embassy}')">
-                <span>${embassy.embassy}, ${embassy.country}</span>
-            </label>
-        `).join('');
-    }
-
-    toggleEmbassyForComparison(embassyName) {
-        const embassy = this.embassyData.find(e => e.embassy === embassyName);
-        if (!embassy) return;
-
-        const index = this.comparisonEmbassies.findIndex(e => e.embassy === embassyName);
-        if (index > -1) {
-            this.comparisonEmbassies.splice(index, 1);
-        } else if (this.comparisonEmbassies.length < 4) {
-            this.comparisonEmbassies.push(embassy);
-        } else {
-            alert('You can only compare up to 4 additional locations.');
-            event.target.checked = false;
-            return;
-        }
-
-        this.updateSelectedEmbassies();
-    }
-
-    updateSelectedEmbassies() {
-        const container = document.getElementById('selectedEmbassies');
-        container.innerHTML = this.comparisonEmbassies.map(embassy => `
-            <div class="selected-embassy-tag">
-                ${embassy.embassy}, ${embassy.country}
-                <button class="remove-embassy" onclick="embassyApp.removeEmbassyFromComparison('${embassy.embassy}')">&times;</button>
-            </div>
-        `).join('');
-
-        document.getElementById('startComparingBtn').disabled = this.comparisonEmbassies.length === 0;
-    }
-
-    removeEmbassyFromComparison(embassyName) {
-        this.comparisonEmbassies = this.comparisonEmbassies.filter(e => e.embassy !== embassyName);
-        this.updateSelectedEmbassies();
-        
-        // Update checkbox
-        const checkbox = document.querySelector(`input[value="${embassyName}"]`);
-        if (checkbox) checkbox.checked = false;
-    }
-
-    async startComparison() {
-        this.isComparing = true;
-        document.getElementById('comparisonInterface').style.display = 'none';
-        document.getElementById('embassyInfoSections').style.display = 'none';
-        document.getElementById('loadingSection').style.display = 'block';
-        document.getElementById('loadingSection').innerHTML = `
-            <div class="loading-spinner"></div>
-            <p>Loading comparison data for ${this.comparisonEmbassies.length + 1} embassies...</p>
-        `;
-
-        try {
-            // Load information for all comparison embassies
-            const allEmbassies = [this.selectedEmbassy, ...this.comparisonEmbassies];
-            const comparisonData = [];
-
-            for (const embassy of allEmbassies) {
-                const info = await this.getEmbassyInfoFromAPI(embassy);
-                comparisonData.push({
-                    embassy: embassy,
-                    info: info
-                });
-            }
-
-            this.renderComparisonTable(comparisonData);
-            
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('comparisonResults').style.display = 'block';
-            
-        } catch (error) {
-            console.error('Error loading comparison data:', error);
-            document.getElementById('loadingSection').innerHTML = `
-                <div style="color: #dc3545;">
-                    <h3>Error Loading Comparison</h3>
-                    <p>We encountered an error while loading comparison data. Please try again.</p>
-                    <button onclick="embassyApp.exitComparison()" class="retry-btn">Go Back</button>
-                </div>
-            `;
-        }
-    }
-
-    renderComparisonTable(comparisonData) {
-        const container = document.getElementById('comparisonTable');
-        
-        const headers = ['Category', ...comparisonData.map(d => `${d.embassy.embassy}, ${d.embassy.country}`)];
-        
-        const rows = [
-            ['SIV Cases (Current Year)', ...comparisonData.map(d => this.getCurrentYearTotal(d.embassy))],
-            ['SIV Cases (All Time)', ...comparisonData.map(d => Object.values(d.embassy.monthlyData).reduce((sum, val) => sum + val, 0).toLocaleString())],
-            ['Visa Required', ...comparisonData.map(d => d.info.visaInfo.visaRequired)],
-            ['Visa Type', ...comparisonData.map(d => d.info.visaInfo.visaType)],
-            ['Visa Fee', ...comparisonData.map(d => d.info.visaInfo.visaFee)],
-            ['Flight Cost from Kabul', ...comparisonData.map(d => d.info.travelCosts.flightCost)],
-            ['Daily Room Cost', ...comparisonData.map(d => d.info.livingExpenses.dailyRoom)],
-            ['Monthly Room Cost', ...comparisonData.map(d => d.info.livingExpenses.monthlyRoom)],
-            ['Medical Exam Fee', ...comparisonData.map(d => d.info.medicalInfo.fee)]
-        ];
-
-        let tableHTML = `
-            <table class="comparison-table">
-                <thead>
-                    <tr>
-                        ${headers.map(header => `<th>${header}</th>`).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows.map(row => `
-                        <tr>
-                            <td class="category-header">${row[0]}</td>
-                            ${row.slice(1).map(cell => `<td>${cell}</td>`).join('')}
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-
-        container.innerHTML = tableHTML;
+    // Utility functions
+    getCountryFlag(country) {
+        const flags = {
+            'Qatar': '🇶🇦', 'Pakistan': '🇵🇰', 'Germany': '🇩🇪', 'Albania': '🇦🇱',
+            'Turkey': '🇹🇷', 'Canada': '🇨🇦', 'UAE': '🇦🇪', 'Rwanda': '🇷🇼',
+            'Iraq': '🇮🇶', 'Tajikistan': '🇹🇯', 'United Kingdom': '🇬🇧',
+            'Philippines': '🇵🇭', 'France': '🇫🇷', 'Oman': '🇴🇲',
+            'Uzbekistan': '🇺🇿', 'Italy': '🇮🇹', 'Sweden': '🇸🇪',
+            'Kenya': '🇰🇪', 'India': '🇮🇳', 'Brazil': '🇧🇷',
+            'Japan': '🇯🇵', 'Saudi Arabia': '🇸🇦', 'Spain': '🇪🇸',
+            'Australia': '🇦🇺', 'Belgium': '🇧🇪', 'Kosovo': '🇽🇰',
+            'Austria': '🇦🇹', 'New Zealand': '🇳🇿', 'Kazakhstan': '🇰🇿',
+            'Ireland': '🇮🇪', 'Jordan': '🇯🇴', 'Greece': '🇬🇷',
+            'Finland': '🇫🇮', 'Lithuania': '🇱🇹', 'Poland': '🇵🇱',
+            'China': '🇨🇳', 'Malaysia': '🇲🇾', 'Switzerland': '🇨🇭',
+            'Czech Republic': '🇨🇿', 'Vietnam': '🇻🇳', 'Kyrgyzstan': '🇰🇬',
+            'Indonesia': '🇮🇩', 'Romania': '🇷🇴', 'Slovakia': '🇸🇰',
+            'Bangladesh': '🇧🇩', 'Turkmenistan': '🇹🇲', 'South Africa': '🇿🇦',
+            'Bulgaria': '🇧🇬', 'Egypt': '🇪🇬', 'Iceland': '🇮🇸',
+            'Hungary': '🇭🇺', 'Tanzania': '🇹🇿', 'Nepal': '🇳🇵',
+            'Netherlands': '🇳🇱'
+        };
+        return flags[country] || '🏛️';
     }
 
     getCurrentYearTotal(embassy) {
@@ -743,36 +639,6 @@ Please ensure all information is current, accurate, and specifically relevant fo
         }
         
         return total.toLocaleString();
-    }
-
-    exitComparison() {
-        this.isComparing = false;
-        document.getElementById('comparisonResults').style.display = 'none';
-        document.getElementById('embassyInfoSections').style.display = 'block';
-        this.comparisonEmbassies = [];
-    }
-
-    async toggleDariTranslation() {
-        this.isDariMode = !this.isDariMode;
-        
-        if (this.isDariMode) {
-            await this.translateToDari();
-            document.body.classList.add('rtl');
-        } else {
-            this.restoreEnglish();
-            document.body.classList.remove('rtl');
-        }
-    }
-
-    async translateToDari() {
-        // This would integrate with translation API
-        // For now, we'll show a placeholder
-        alert('Dari translation feature will be implemented with the API integration.');
-    }
-
-    restoreEnglish() {
-        // Restore original English content
-        location.reload();
     }
 }
 
