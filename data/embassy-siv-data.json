@@ -1,13 +1,33 @@
 ﻿{
+    "processingInfo":  {
+                           "processedFiles":  [
+                                                  "APRIL 2025 - IV Issuances by Post and Visa Class.xlsx",
+                                                  "MAY 2025 - IV Issuances by Post and Visa Class (1).xlsx",
+                                                  "JANUARY 2025 - IV Issuances by Post and Visa Class (1).xlsx",
+                                                  "FEBRUARY 2025 - IV Issuances by Post and Visa Class.xlsx",
+                                                  "DECEMBER 2024 - IV Issuances by Post and Visa Class.xlsx",
+                                                  "OCTOBER 2024 - IV Issuances by Post and Visa Class (1).xlsx",
+                                                  "NOVEMBER 2024 - IV Issuances by Post and Visa Class.xlsx",
+                                                  "MARCH 2025 - IV Issuances by Post and Visa Class.xlsx"
+                                              ],
+                           "totalFilesAttempted":  8,
+                           "failedFiles":  [
+
+                                           ],
+                           "filesProcessed":  8,
+                           "filesFailed":  0
+                       },
     "embassies":  [
                       {
                           "embassy":  "Doha",
                           "monthlyData":  {
                                               "2025-01":  667,
                                               "2024-12":  781,
+                                              "2025-05":  29,
                                               "2024-10":  676,
                                               "2025-03":  261,
                                               "2025-04":  9,
+                                              "2025-02":  130,
                                               "2024-11":  1465
                                           },
                           "country":  "Qatar"
@@ -17,12 +37,28 @@
                           "monthlyData":  {
                                               "2025-01":  99,
                                               "2024-12":  588,
+                                              "2025-05":  52,
                                               "2024-10":  1030,
                                               "2025-03":  77,
                                               "2025-04":  95,
+                                              "2025-02":  85,
                                               "2024-11":  883
                                           },
                           "country":  "Germany"
+                      },
+                      {
+                          "embassy":  "Islamabad",
+                          "monthlyData":  {
+                                              "2025-01":  102,
+                                              "2024-12":  255,
+                                              "2025-05":  521,
+                                              "2024-10":  117,
+                                              "2025-03":  385,
+                                              "2025-04":  390,
+                                              "2025-02":  270,
+                                              "2024-11":  236
+                                          },
+                          "country":  "Pakistan"
                       },
                       {
                           "embassy":  "Tirana",
@@ -30,30 +66,21 @@
                                               "2024-11":  447,
                                               "2024-12":  182,
                                               "2024-10":  592,
+                                              "2025-02":  67,
                                               "2025-01":  530
                                           },
                           "country":  "Albania"
-                      },
-                      {
-                          "embassy":  "Islamabad",
-                          "monthlyData":  {
-                                              "2025-01":  102,
-                                              "2024-12":  255,
-                                              "2024-10":  117,
-                                              "2025-03":  385,
-                                              "2025-04":  390,
-                                              "2024-11":  236
-                                          },
-                          "country":  "Pakistan"
                       },
                       {
                           "embassy":  "Ankara",
                           "monthlyData":  {
                                               "2025-01":  84,
                                               "2024-12":  131,
+                                              "2025-05":  109,
                                               "2024-10":  105,
                                               "2025-03":  87,
                                               "2025-04":  74,
+                                              "2025-02":  120,
                                               "2024-11":  89
                                           },
                           "country":  "Turkey"
@@ -63,40 +90,67 @@
                           "monthlyData":  {
                                               "2025-01":  39,
                                               "2024-12":  30,
+                                              "2025-05":  42,
                                               "2024-10":  18,
                                               "2025-03":  51,
                                               "2025-04":  38,
+                                              "2025-02":  66,
                                               "2024-11":  21
                                           },
                           "country":  "Canada"
-                      },
-                      {
-                          "embassy":  "Manila",
-                          "monthlyData":  {
-                                              "2025-01":  167
-                                          },
-                          "country":  "Philippines"
                       },
                       {
                           "embassy":  "Abu Dhabi",
                           "monthlyData":  {
                                               "2025-01":  27,
                                               "2024-12":  13,
+                                              "2025-05":  34,
                                               "2024-10":  12,
                                               "2025-03":  41,
                                               "2025-04":  34,
+                                              "2025-02":  27,
                                               "2024-11":  12
                                           },
                           "country":  "UAE"
+                      },
+                      {
+                          "embassy":  "Kigali",
+                          "monthlyData":  {
+                                              "2025-01":  20,
+                                              "2024-12":  21,
+                                              "2025-05":  52,
+                                              "2024-10":  29,
+                                              "2025-03":  20,
+                                              "2025-04":  4,
+                                              "2025-02":  32,
+                                              "2024-11":  13
+                                          },
+                          "country":  "Rwanda"
+                      },
+                      {
+                          "embassy":  "Baghdad",
+                          "monthlyData":  {
+                                              "2025-01":  2,
+                                              "2024-12":  15,
+                                              "2025-05":  51,
+                                              "2024-10":  4,
+                                              "2025-03":  38,
+                                              "2025-04":  24,
+                                              "2025-02":  19,
+                                              "2024-11":  29
+                                          },
+                          "country":  "Iraq"
                       },
                       {
                           "embassy":  "Dushanbe",
                           "monthlyData":  {
                                               "2025-01":  14,
                                               "2024-12":  16,
+                                              "2025-05":  33,
                                               "2024-10":  19,
                                               "2025-03":  11,
                                               "2025-04":  41,
+                                              "2025-02":  8,
                                               "2024-11":  37
                                           },
                           "country":  "Tajikistan"
@@ -106,45 +160,32 @@
                           "monthlyData":  {
                                               "2025-01":  20,
                                               "2024-12":  9,
+                                              "2025-05":  23,
                                               "2024-10":  19,
                                               "2025-03":  35,
                                               "2025-04":  15,
+                                              "2025-02":  29,
                                               "2024-11":  18
                                           },
                           "country":  "United Kingdom"
                       },
                       {
-                          "embassy":  "Baghdad",
+                          "embassy":  "Manila",
                           "monthlyData":  {
-                                              "2025-01":  2,
-                                              "2024-12":  15,
-                                              "2024-10":  4,
-                                              "2025-03":  38,
-                                              "2025-04":  24,
-                                              "2024-11":  29
+                                              "2025-01":  167
                                           },
-                          "country":  "Iraq"
-                      },
-                      {
-                          "embassy":  "Kigali",
-                          "monthlyData":  {
-                                              "2025-01":  20,
-                                              "2024-12":  21,
-                                              "2024-10":  29,
-                                              "2025-03":  20,
-                                              "2025-04":  4,
-                                              "2024-11":  13
-                                          },
-                          "country":  "Rwanda"
+                          "country":  "Philippines"
                       },
                       {
                           "embassy":  "Paris",
                           "monthlyData":  {
                                               "2025-01":  12,
                                               "2024-12":  16,
+                                              "2025-05":  10,
                                               "2024-10":  8,
                                               "2025-03":  33,
                                               "2025-04":  15,
+                                              "2025-02":  23,
                                               "2024-11":  4
                                           },
                           "country":  "France"
@@ -154,34 +195,39 @@
                           "monthlyData":  {
                                               "2025-01":  6,
                                               "2024-12":  14,
+                                              "2025-05":  5,
                                               "2024-10":  3,
                                               "2025-03":  22,
                                               "2025-04":  20,
+                                              "2025-02":  10,
                                               "2024-11":  12
                                           },
                           "country":  "Oman"
                       },
                       {
-                          "embassy":  "Naples",
-                          "monthlyData":  {
-                                              "2024-11":  23,
-                                              "2024-12":  18,
-                                              "2024-10":  3,
-                                              "2025-03":  4,
-                                              "2025-01":  12
-                                          },
-                          "country":  "Italy"
-                      },
-                      {
                           "embassy":  "Tashkent",
                           "monthlyData":  {
-                                              "2024-11":  6,
+                                              "2025-01":  26,
                                               "2024-12":  1,
+                                              "2025-05":  5,
                                               "2025-03":  14,
                                               "2025-04":  11,
-                                              "2025-01":  26
+                                              "2025-02":  1,
+                                              "2024-11":  6
                                           },
                           "country":  "Uzbekistan"
+                      },
+                      {
+                          "embassy":  "Naples",
+                          "monthlyData":  {
+                                              "2025-01":  12,
+                                              "2024-12":  18,
+                                              "2025-05":  3,
+                                              "2024-10":  3,
+                                              "2025-03":  4,
+                                              "2024-11":  23
+                                          },
+                          "country":  "Italy"
                       },
                       {
                           "embassy":  "Stockholm",
@@ -191,19 +237,47 @@
                                               "2024-10":  3,
                                               "2025-03":  9,
                                               "2025-04":  11,
+                                              "2025-02":  14,
                                               "2024-11":  10
                                           },
                           "country":  "Sweden"
                       },
                       {
+                          "embassy":  "Nairobi",
+                          "monthlyData":  {
+                                              "2025-01":  1,
+                                              "2024-12":  5,
+                                              "2025-05":  7,
+                                              "2024-10":  9,
+                                              "2025-03":  4,
+                                              "2025-02":  9,
+                                              "2024-11":  20
+                                          },
+                          "country":  "Kenya"
+                      },
+                      {
                           "embassy":  "New Delhi",
                           "monthlyData":  {
-                                              "2024-11":  10,
+                                              "2025-01":  1,
                                               "2024-12":  18,
+                                              "2025-05":  6,
                                               "2025-03":  13,
-                                              "2025-01":  1
+                                              "2025-02":  5,
+                                              "2024-11":  10
                                           },
                           "country":  "India"
+                      },
+                      {
+                          "embassy":  "Riyadh",
+                          "monthlyData":  {
+                                              "2025-04":  11,
+                                              "2024-12":  3,
+                                              "2025-05":  11,
+                                              "2025-03":  19,
+                                              "2025-02":  2,
+                                              "2024-11":  1
+                                          },
+                          "country":  "Saudi Arabia"
                       },
                       {
                           "embassy":  "Rio de Janeiro",
@@ -214,17 +288,6 @@
                                               "2025-01":  17
                                           },
                           "country":  "Brazil"
-                      },
-                      {
-                          "embassy":  "Nairobi",
-                          "monthlyData":  {
-                                              "2024-11":  20,
-                                              "2024-12":  5,
-                                              "2024-10":  9,
-                                              "2025-03":  4,
-                                              "2025-01":  1
-                                          },
-                          "country":  "Kenya"
                       },
                       {
                           "embassy":  "Tokyo",
@@ -239,20 +302,11 @@
                           "country":  "Japan"
                       },
                       {
-                          "embassy":  "Riyadh",
-                          "monthlyData":  {
-                                              "2024-11":  1,
-                                              "2024-12":  3,
-                                              "2025-03":  19,
-                                              "2025-04":  11
-                                          },
-                          "country":  "Saudi Arabia"
-                      },
-                      {
                           "embassy":  "Dublin",
                           "monthlyData":  {
                                               "2025-01":  1,
                                               "2024-12":  7,
+                                              "2025-05":  2,
                                               "2024-10":  5,
                                               "2025-03":  12,
                                               "2025-04":  1,
@@ -263,11 +317,12 @@
                       {
                           "embassy":  "Madrid",
                           "monthlyData":  {
-                                              "2024-11":  5,
+                                              "2025-01":  5,
                                               "2024-12":  1,
+                                              "2025-05":  4,
                                               "2024-10":  5,
                                               "2025-03":  5,
-                                              "2025-01":  5
+                                              "2024-11":  5
                                           },
                           "country":  "Spain"
                       },
@@ -276,31 +331,70 @@
                           "monthlyData":  {
                                               "2025-01":  1,
                                               "2024-12":  3,
-                                              "2025-04":  15
+                                              "2025-04":  15,
+                                              "2025-02":  3
                                           },
                           "country":  "Belgium"
                       },
                       {
+                          "embassy":  "Amsterdam",
+                          "monthlyData":  {
+                                              "2025-02":  10,
+                                              "2024-11":  8
+                                          },
+                          "country":  "Netherlands"
+                      },
+                      {
                           "embassy":  "Amman",
                           "monthlyData":  {
+                                              "2025-01":  5,
                                               "2024-12":  4,
-                                              "2025-01":  5
+                                              "2025-02":  7
                                           },
                           "country":  "Jordan"
                       },
                       {
+                          "embassy":  "Sydney",
+                          "monthlyData":  {
+                                              "2025-01":  4,
+                                              "2025-03":  1,
+                                              "2025-02":  10
+                                          },
+                          "country":  "Australia"
+                      },
+                      {
                           "embassy":  "Ho Chi Minh City",
                           "monthlyData":  {
-                                              "2025-03":  9
+                                              "2025-05":  1,
+                                              "2025-03":  9,
+                                              "2025-02":  5
                                           },
                           "country":  "Vietnam"
                       },
                       {
-                          "embassy":  "Amsterdam",
+                          "embassy":  "Bern",
                           "monthlyData":  {
-                                              "2024-11":  8
+                                              "2025-05":  3,
+                                              "2025-04":  4,
+                                              "2025-02":  1
                                           },
-                          "country":  "Netherlands"
+                          "country":  "Switzerland"
+                      },
+                      {
+                          "embassy":  "Guangzhou",
+                          "monthlyData":  {
+                                              "2024-10":  3,
+                                              "2025-02":  5
+                                          },
+                          "country":  "China"
+                      },
+                      {
+                          "embassy":  "Auckland",
+                          "monthlyData":  {
+                                              "2025-05":  2,
+                                              "2025-04":  5
+                                          },
+                          "country":  "New Zealand"
                       },
                       {
                           "embassy":  "Pristina",
@@ -308,6 +402,21 @@
                                               "2024-12":  7
                                           },
                           "country":  "Kosovo"
+                      },
+                      {
+                          "embassy":  "Vilnius",
+                          "monthlyData":  {
+                                              "2024-10":  5,
+                                              "2025-02":  1
+                                          },
+                          "country":  "Lithuania"
+                      },
+                      {
+                          "embassy":  "Warsaw",
+                          "monthlyData":  {
+                                              "2024-11":  6
+                                          },
+                          "country":  "Poland"
                       },
                       {
                           "embassy":  "Helsinki",
@@ -325,13 +434,6 @@
                           "country":  "Kyrgyzstan"
                       },
                       {
-                          "embassy":  "Warsaw",
-                          "monthlyData":  {
-                                              "2024-11":  6
-                                          },
-                          "country":  "Poland"
-                      },
-                      {
                           "embassy":  "Kuala Lumpur",
                           "monthlyData":  {
                                               "2025-01":  1,
@@ -339,13 +441,6 @@
                                               "2025-04":  4
                                           },
                           "country":  "Malaysia"
-                      },
-                      {
-                          "embassy":  "Vilnius",
-                          "monthlyData":  {
-                                              "2024-10":  5
-                                          },
-                          "country":  "Lithuania"
                       },
                       {
                           "embassy":  "Vienna",
@@ -357,26 +452,11 @@
                           "country":  "Austria"
                       },
                       {
-                          "embassy":  "Auckland",
+                          "embassy":  "Sofia",
                           "monthlyData":  {
-                                              "2025-04":  5
+                                              "2025-03":  4
                                           },
-                          "country":  "New Zealand"
-                      },
-                      {
-                          "embassy":  "Sydney",
-                          "monthlyData":  {
-                                              "2025-03":  1,
-                                              "2025-01":  4
-                                          },
-                          "country":  "Australia"
-                      },
-                      {
-                          "embassy":  "Bern",
-                          "monthlyData":  {
-                                              "2025-04":  4
-                                          },
-                          "country":  "Switzerland"
+                          "country":  "Bulgaria"
                       },
                       {
                           "embassy":  "Cairo",
@@ -386,25 +466,19 @@
                           "country":  "Egypt"
                       },
                       {
-                          "embassy":  "Sofia",
-                          "monthlyData":  {
-                                              "2025-03":  4
-                                          },
-                          "country":  "Bulgaria"
-                      },
-                      {
-                          "embassy":  "Guangzhou",
-                          "monthlyData":  {
-                                              "2024-10":  3
-                                          },
-                          "country":  "China"
-                      },
-                      {
                           "embassy":  "Almaty",
                           "monthlyData":  {
                                               "2025-03":  3
                                           },
                           "country":  "Kazakhstan"
+                      },
+                      {
+                          "embassy":  "Jakarta",
+                          "monthlyData":  {
+                                              "2025-05":  2,
+                                              "2025-01":  1
+                                          },
+                          "country":  "Indonesia"
                       },
                       {
                           "embassy":  "Ashgabat",
@@ -414,11 +488,19 @@
                           "country":  "Turkmenistan"
                       },
                       {
-                          "embassy":  "Johannesburg",
+                          "embassy":  "Kathmandu",
                           "monthlyData":  {
-                                              "2024-10":  1
+                                              "2025-02":  1,
+                                              "2025-01":  1
                                           },
-                          "country":  "South Africa"
+                          "country":  "Nepal"
+                      },
+                      {
+                          "embassy":  "Dar es Salaam",
+                          "monthlyData":  {
+                                              "2025-05":  2
+                                          },
+                          "country":  "Tanzania"
                       },
                       {
                           "embassy":  "Dhaka",
@@ -428,18 +510,11 @@
                           "country":  "Bangladesh"
                       },
                       {
-                          "embassy":  "Kathmandu",
+                          "embassy":  "Johannesburg",
                           "monthlyData":  {
-                                              "2025-01":  1
+                                              "2024-10":  1
                                           },
-                          "country":  "Nepal"
-                      },
-                      {
-                          "embassy":  "Jakarta",
-                          "monthlyData":  {
-                                              "2025-01":  1
-                                          },
-                          "country":  "Indonesia"
+                          "country":  "South Africa"
                       },
                       {
                           "embassy":  "Bratislava",
@@ -447,6 +522,13 @@
                                               "2025-03":  1
                                           },
                           "country":  "Slovakia"
+                      },
+                      {
+                          "embassy":  "Budapest",
+                          "monthlyData":  {
+                                              "2025-05":  1
+                                          },
+                          "country":  "Hungary"
                       }
                   ],
     "lastUpdated":  "2025-07-30"
