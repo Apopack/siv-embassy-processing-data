@@ -266,29 +266,9 @@ function handleSearch() {
     renderTable();
 }
 
-function handleMonthFilter() {
-    const selectedMonth = document.getElementById('monthFilter').value;
-    
-    // Clear all month highlights
-    document.querySelectorAll('.month-col').forEach(cell => {
-        cell.classList.remove('highlighted-column');
-    });
-    
-    // Highlight selected month if visible
-    if (selectedMonth) {
-        const currentYear = new Date().getFullYear();
-        const monthKey = `${currentYear}-${selectedMonth.padStart(2, '0')}`;
-        
-        // Try current year and nearby years
-        for (let year = currentYear - 2; year <= currentYear + 2; year++) {
-            const testKey = `${year}-${selectedMonth.padStart(2, '0')}`;
-            if (visibleMonths.includes(testKey)) {
-                document.querySelectorAll(`[data-month="${testKey}"]`).forEach(cell => {
-                    cell.classList.add('highlighted-column');
-                });
-            }
-        }
-    }
+function toggleMobileMenu() {
+    const sideNav = document.getElementById('sideNav');
+    sideNav.classList.toggle('active');
 }
 
 function handleDateRangeChange() {
@@ -322,8 +302,21 @@ function handleDateRangeChange() {
 }
 
 function resetDateRange() {
-    // Reset to January 2025 through latest available data
-    setDefaultDateRange();
+    // Reset to current year (January through December of current year)
+    const currentYear = new Date().getFullYear();
+    currentDateRange = {
+        startMonth: 1,
+        startYear: currentYear,
+        endMonth: 12,
+        endYear: currentYear
+    };
+    
+    // Update UI selectors
+    document.getElementById('startMonth').value = '1';
+    document.getElementById('startYear').value = currentYear.toString();
+    document.getElementById('endMonth').value = '12';
+    document.getElementById('endYear').value = currentYear.toString();
+    
     handleDateRangeChange();
 }
 
@@ -401,8 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('searchInput').addEventListener('input', handleSearch);
     document.getElementById('clearSearch').addEventListener('click', clearSearch);
-    document.getElementById('monthFilter').addEventListener('change', handleMonthFilter);
     document.getElementById('applyDateRange').addEventListener('click', handleDateRangeChange);
     document.getElementById('resetDateRange').addEventListener('click', resetDateRange);
     document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
+    document.getElementById('mobileMenuToggle').addEventListener('click', toggleMobileMenu);
 });

@@ -9,6 +9,100 @@ body {
     background-color: #f5f5f5;
     color: #333;
     line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: #1a3a52;
+    border: none;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.mobile-menu-toggle span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: white;
+    transition: 0.3s;
+}
+
+/* Side Navigation */
+.side-nav {
+    width: 280px;
+    background: #2c3e50;
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.nav-header {
+    padding: 30px 25px 20px;
+    border-bottom: 1px solid #34495e;
+}
+
+.nav-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ecf0f1;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 20px 0;
+}
+
+.nav-item {
+    margin: 0;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+    background: #34495e;
+    color: #ecf0f1;
+    border-left-color: #3498db;
+}
+
+.nav-item.active .nav-link {
+    background: #34495e;
+    color: #ecf0f1;
+    border-left-color: #3498db;
+}
+
+.nav-icon {
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
 }
 
 .container {
@@ -100,21 +194,6 @@ header h1 {
     display: flex;
     gap: 15px;
     align-items: center;
-}
-
-#monthFilter {
-    padding: 10px 15px;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: white;
-    cursor: pointer;
-    transition: border-color 0.3s;
-}
-
-#monthFilter:focus {
-    outline: none;
-    border-color: #1a3a52;
 }
 
 .download-btn {
@@ -232,6 +311,8 @@ header h1 {
     border-radius: 0 0 8px 8px;
     overflow-x: auto;
     position: relative;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .loading {
@@ -247,11 +328,13 @@ header h1 {
     min-width: 900px;
 }
 
-.data-table thead {
+/* Sticky Header - Best Practice Implementation */
+.data-table thead.sticky-header {
     position: sticky;
     top: 0;
     background-color: #f8f9fa;
-    z-index: 10;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .data-table th {
@@ -261,6 +344,7 @@ header h1 {
     color: #2c5282;
     border-bottom: 2px solid #ddd;
     white-space: nowrap;
+    background-color: #f8f9fa;
 }
 
 .data-table th.month-col,
@@ -323,11 +407,39 @@ footer {
     font-size: 14px;
 }
 
+.data-source a {
+    color: #2c5282;
+    text-decoration: none;
+}
+
+.data-source a:hover {
+    text-decoration: underline;
+}
+
 .data-source small {
     display: block;
     margin-top: 5px;
     font-size: 12px;
     opacity: 0.8;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
+    .side-nav {
+        transform: translateX(-100%);
+    }
+    
+    .side-nav.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .mobile-menu-toggle {
+        display: flex;
+    }
 }
 
 @media (max-width: 768px) {
@@ -337,6 +449,7 @@ footer {
     
     header {
         padding: 20px;
+        margin-top: 60px; /* Account for mobile menu button */
     }
     
     header h1 {
@@ -354,27 +467,7 @@ footer {
     
     .filter-container {
         width: 100%;
-        justify-content: space-between;
-    }
-    
-    #monthFilter {
-        flex: 1;
-        max-width: 200px;
-    }
-    
-    .table-container {
-        border-radius: 0;
-        margin: 0 -10px;
-        width: calc(100% + 20px);
-    }
-    
-    .data-table {
-        font-size: 14px;
-    }
-    
-    .data-table th,
-    .data-table td {
-        padding: 8px 6px;
+        justify-content: center;
     }
     
     .date-range-controls {
@@ -401,5 +494,33 @@ footer {
     .apply-btn, .reset-btn {
         width: 100%;
         padding: 12px;
+    }
+    
+    .table-container {
+        border-radius: 0;
+        margin: 0 -10px;
+        width: calc(100% + 20px);
+        max-height: 60vh;
+    }
+    
+    .data-table {
+        font-size: 14px;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+    }
+}
+
+/* Dark mode support for better accessibility */
+@media (prefers-color-scheme: dark) {
+    .data-table thead.sticky-header {
+        background-color: #2d3748;
+    }
+    
+    .data-table th {
+        background-color: #2d3748;
+        color: #e2e8f0;
     }
 }
