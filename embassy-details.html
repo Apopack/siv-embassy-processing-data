@@ -70,6 +70,20 @@
                     <p>Choose an embassy to view detailed information and resources for SIV applicants</p>
                 </div>
                 
+                <!-- Search and Filter Controls -->
+                <div class="embassy-controls">
+                    <div class="search-box">
+                        <div class="search-icon">🔍</div>
+                        <input type="text" class="search-input" placeholder="Search embassies by name or country..." id="embassySearch">
+                    </div>
+                    <div class="filter-controls">
+                        <div class="view-toggle">
+                            <button class="view-btn active" data-view="grid">Grid</button>
+                            <button class="view-btn" data-view="list">List</button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="embassy-grid" id="embassyGrid">
                     <!-- Embassy options will be populated dynamically -->
                 </div>
@@ -129,8 +143,11 @@
                     <!-- 1. SIV Issuance Data -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>SIV Issuance Data</h2>
-                            <button class="expand-btn" id="expandDataBtn">View All Time Data</button>
+                            <div class="section-title-group">
+                                <h2>SIV Issuance Data</h2>
+                                <p class="section-subtitle">Current year processing volume with historical trends</p>
+                            </div>
+                            <button class="expand-btn" id="expandDataBtn">View Full History</button>
                         </div>
                         <div class="chart-container">
                             <canvas id="sivChart"></canvas>
@@ -153,7 +170,10 @@
                     <!-- 2. Embassy Links -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Official Embassy Resources</h2>
+                            <div class="section-title-group">
+                                <h2>Official Embassy Resources</h2>
+                                <p class="section-subtitle">Direct links to embassy websites and visa services</p>
+                            </div>
                         </div>
                         <div class="links-grid" id="embassyLinks">
                             <!-- Links will be populated dynamically -->
@@ -163,8 +183,10 @@
                     <!-- 3. Host Country Visa Information -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Host Country Visa Requirements</h2>
-                            <p class="section-subtitle">Visa requirements for Afghan nationals</p>
+                            <div class="section-title-group">
+                                <h2>Host Country Visa Requirements</h2>
+                                <p class="section-subtitle">Entry requirements and visa information for Afghan nationals</p>
+                            </div>
                         </div>
                         <div class="visa-info-grid" id="visaInfo">
                             <!-- Visa information will be populated dynamically -->
@@ -174,8 +196,10 @@
                     <!-- 4. Medical Exam Information -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Medical Examination Requirements</h2>
-                            <p class="section-subtitle">Required medical exams for SIV process</p>
+                            <div class="section-title-group">
+                                <h2>Medical Examination Requirements</h2>
+                                <p class="section-subtitle">Approved medical facilities and examination requirements</p>
+                            </div>
                         </div>
                         <div class="medical-info" id="medicalInfo">
                             <!-- Medical exam info will be populated dynamically -->
@@ -185,8 +209,10 @@
                     <!-- 5. NGO Resources -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Support Organizations</h2>
-                            <p class="section-subtitle">NGOs and organizations that can help with the SIV process</p>
+                            <div class="section-title-group">
+                                <h2>Support Organizations</h2>
+                                <p class="section-subtitle">NGOs and organizations providing SIV assistance</p>
+                            </div>
                         </div>
                         <div class="ngo-list" id="ngoList">
                             <!-- NGO information will be populated dynamically -->
@@ -196,8 +222,10 @@
                     <!-- 6. Travel Costs -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Travel Costs from Afghanistan</h2>
-                            <p class="section-subtitle">Estimated costs for travel from Afghanistan to embassy location</p>
+                            <div class="section-title-group">
+                                <h2>Travel Costs from Afghanistan</h2>
+                                <p class="section-subtitle">Estimated transportation costs and travel requirements</p>
+                            </div>
                         </div>
                         <div class="cost-info" id="travelCosts">
                             <!-- Travel cost info will be populated dynamically -->
@@ -207,8 +235,10 @@
                     <!-- 7. Living Expenses -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Living Expenses</h2>
-                            <p class="section-subtitle">Accommodation and daily living costs in embassy city</p>
+                            <div class="section-title-group">
+                                <h2>Living Expenses</h2>
+                                <p class="section-subtitle">Daily and monthly accommodation costs in embassy city</p>
+                            </div>
                         </div>
                         <div class="expense-grid" id="livingExpenses">
                             <!-- Living expense info will be populated dynamically -->
@@ -218,7 +248,10 @@
                     <!-- 8. Document Checklists -->
                     <section class="info-section">
                         <div class="section-header">
-                            <h2>Document Checklists</h2>
+                            <div class="section-title-group">
+                                <h2>Document Checklists</h2>
+                                <p class="section-subtitle">Required documents for entry and SIV interview</p>
+                            </div>
                         </div>
                         <div class="checklist-container">
                             <div class="checklist-section">
