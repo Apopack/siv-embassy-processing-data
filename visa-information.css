@@ -174,13 +174,11 @@ body {
     font-size: 16px;
 }
 
-.search-input-container .search-results {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    margin-top: 4px !important;
+.search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
     background: var(--white);
     border: 1px solid var(--gray-200);
     border-radius: 12px;
