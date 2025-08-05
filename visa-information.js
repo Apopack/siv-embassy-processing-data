@@ -378,17 +378,13 @@ class VisaInformationApp {
 
 
 
-        // Comparison search
-        document.getElementById('comparisonSearch')?.addEventListener('input', (e) => {
-            this.filterCountrySelection(e.target.value);
-        });
 
         // Close modals with escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeComparisonPanel();
-                this.closeCountrySelection();
                 this.closeAllDropdowns();
+                this.closeCountrySelectionPopout();
             }
         });
 
@@ -428,17 +424,19 @@ class VisaInformationApp {
             });
         });
         
-        // Add SIV countries
-        this.sivCountries.forEach(country => {
-            if (!allCountries.has(country.name)) {
-                allCountries.set(country.name, {
-                    name: country.name,
-                    flag: country.flag,
-                    embassy: country.embassy || 'Embassy information available',
-                    hasVisaInfo: false
-                });
-            }
-        });
+        // Add SIV countries if they exist
+        if (this.sivCountries && Array.isArray(this.sivCountries)) {
+            this.sivCountries.forEach(country => {
+                if (!allCountries.has(country.name)) {
+                    allCountries.set(country.name, {
+                        name: country.name,
+                        flag: country.flag,
+                        embassy: country.embassy || 'Embassy information available',
+                        hasVisaInfo: false
+                    });
+                }
+            });
+        }
         
         // Filter countries based on search query
         const filteredCountries = Array.from(allCountries.values()).filter(country => 
@@ -535,17 +533,19 @@ class VisaInformationApp {
             });
         });
         
-        // Add SIV countries
-        this.sivCountries.forEach(country => {
-            if (!allCountries.has(country.name)) {
-                allCountries.set(country.name, {
-                    name: country.name,
-                    flag: country.flag,
-                    embassy: country.embassy || 'Embassy information available',
-                    hasVisaInfo: false
-                });
-            }
-        });
+        // Add SIV countries if they exist
+        if (this.sivCountries && Array.isArray(this.sivCountries)) {
+            this.sivCountries.forEach(country => {
+                if (!allCountries.has(country.name)) {
+                    allCountries.set(country.name, {
+                        name: country.name,
+                        flag: country.flag,
+                        embassy: country.embassy || 'Embassy information available',
+                        hasVisaInfo: false
+                    });
+                }
+            });
+        }
         
         // Filter countries based on search query
         let filteredCountries = Array.from(allCountries.values());
@@ -995,50 +995,6 @@ class VisaInformationApp {
         btn.classList.remove('active');
     }
 
-    openCountrySelection() {
-        if (this.comparisonCountries.length >= this.maxComparisons) {
-            alert(`You can only compare up to ${this.maxComparisons} countries at once.`);
-            return;
-        }
-        
-        const modal = document.getElementById('countrySelectionModal');
-        modal.classList.add('active');
-        this.renderCountrySelectionList();
-    }
-
-    closeCountrySelection() {
-        const modal = document.getElementById('countrySelectionModal');
-        modal.classList.remove('active');
-    }
-
-    renderCountrySelectionList(filter = '') {
-        const list = document.getElementById('countrySelectionList');
-        const countries = filter 
-            ? this.visaData.filter(v => 
-                v.country.toLowerCase().includes(filter.toLowerCase()) ||
-                v.embassy.toLowerCase().includes(filter.toLowerCase())
-              )
-            : this.visaData;
-        
-        list.innerHTML = countries.map(visa => {
-            const isSelected = this.comparisonCountries.some(c => c.country === visa.country);
-            
-            return `
-                <div class="country-selection-item ${isSelected ? 'selected' : ''}" 
-                     ${!isSelected ? `onclick="visaApp.addToComparison('${visa.country}')"` : ''}>
-                    <span class="flag" style="font-size: 24px;">${visa.flag}</span>
-                    <div>
-                        <h4 style="margin: 0 0 4px; font-size: 15px;">${visa.country}</h4>
-                        <p style="margin: 0; font-size: 13px; color: var(--gray-600);">${visa.embassy} • ${visa.visaType}</p>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    filterCountrySelection(query) {
-        this.renderCountrySelectionList(query);
-    }
 
 
 
@@ -1057,12 +1013,6 @@ class VisaInformationApp {
                 <button class="remove-chip" onclick="visaApp.removeFromComparison('${visa.country}')">&times;</button>
             </div>
         `).join('');
-        
-        // Show/hide add button
-        const addBtn = document.getElementById('addCountryBtn');
-        if (addBtn) {
-            addBtn.style.display = this.comparisonCountries.length >= this.maxComparisons ? 'none' : 'flex';
-        }
     }
 
     renderComparisonTable() {
