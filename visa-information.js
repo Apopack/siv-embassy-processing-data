@@ -376,15 +376,6 @@ class VisaInformationApp {
             this.openCountrySelection();
         });
 
-        // Comparison button
-        document.getElementById('compareBtn')?.addEventListener('click', () => {
-            this.openComparisonPanel();
-        });
-
-        // Download button
-        document.getElementById('downloadBtn')?.addEventListener('click', () => {
-            this.downloadVisaData();
-        });
 
         // Comparison search
         document.getElementById('comparisonSearch')?.addEventListener('input', (e) => {
@@ -617,16 +608,10 @@ class VisaInformationApp {
                         </div>
                     ` : ''}
                 </td>
-                <td class="details-col">
-                    <button class="show-details-btn" onclick="visaApp.toggleDetails('${country.country}')" id="btn-${detailsId}">
-                        <span id="icon-${detailsId}">▼</span>
-                        <span>Show Details</span>
-                    </button>
-                </td>
             </tr>
-            <tr class="details-row" id="${detailsId}" style="display: none;">
-                <td colspan="6">
-                    <div class="details-content" id="content-${detailsId}">
+            <tr class="details-row" id="${detailsId}">
+                <td colspan="5">
+                    <div class="details-content expanded">
                         ${this.renderDetailsContent(country)}
                     </div>
                 </td>
@@ -644,7 +629,7 @@ class VisaInformationApp {
                     </h4>
                     <div class="processing-steps">
                         <ol>
-                            ${country.processingSteps.map(step => `<li>${step}</li>`).join('')}
+                            ${country.processingSteps.map(step => `<li>${this.makeLinksClickable(step)}</li>`).join('')}
                         </ol>
                     </div>
                 </div>
@@ -673,77 +658,28 @@ class VisaInformationApp {
                 </div>
             </div>
             
-            <div class="details-grid">
-                <div class="details-section">
-                    <h4>
-                        <span class="details-section-icon">🔗</span>
-                        Official Resources
-                    </h4>
-                    <div class="official-links">
-                        ${country.links.map(link => `
-                            <a href="${link.url}" target="_blank" rel="noopener">
-                                ${link.text} →
-                            </a>
-                        `).join('<br>')}
-                    </div>
-                </div>
-                
-                <div class="details-section">
-                    <h4>
-                        <span class="details-section-icon">ℹ️</span>
-                        Source & Actions
-                    </h4>
-                    <div style="margin-bottom: 16px;">
-                        <div class="source-badge">
-                            📊 ${country.sourceName} (${country.sourceType})
-                        </div>
-                    </div>
-                    <div style="font-size: 12px; color: var(--gray-600); margin-bottom: 16px;">
-                        Update Frequency: ${country.updateFrequency}
-                    </div>
-                    <button class="remove-country-btn" onclick="visaApp.removeFromComparison('${country.country}')">
-                        Remove from Comparison
-                    </button>
+            <div class="details-section" style="grid-column: 1 / -1;">
+                <h4>
+                    <span class="details-section-icon">🔗</span>
+                    Official Resources
+                </h4>
+                <div class="official-links">
+                    ${country.links.map(link => `
+                        <a href="${link.url}" target="_blank" rel="noopener">
+                            ${link.text} →
+                        </a>
+                    `).join(' ')}
                 </div>
             </div>
         `;
     }
     
-    toggleDetails(countryName) {
-        const detailsId = `details-${countryName.replace(/\s+/g, '-').toLowerCase()}`;
-        const contentId = `content-${detailsId}`;
-        const btnId = `btn-${detailsId}`;
-        const iconId = `icon-${detailsId}`;
-        
-        const detailsRow = document.getElementById(detailsId);
-        const detailsContent = document.getElementById(contentId);
-        const btn = document.getElementById(btnId);
-        const icon = document.getElementById(iconId);
-        
-        if (detailsRow && detailsContent && btn && icon) {
-            const isExpanded = detailsContent.classList.contains('expanded');
-            
-            if (isExpanded) {
-                // Collapse
-                detailsContent.classList.remove('expanded');
-                btn.classList.remove('expanded');
-                icon.textContent = '▼';
-                btn.querySelector('span:last-child').textContent = 'Show Details';
-                setTimeout(() => {
-                    detailsRow.style.display = 'none';
-                }, 300);
-            } else {
-                // Expand
-                detailsRow.style.display = 'table-row';
-                setTimeout(() => {
-                    detailsContent.classList.add('expanded');
-                    btn.classList.add('expanded');
-                    icon.textContent = '▲';
-                    btn.querySelector('span:last-child').textContent = 'Hide Details';
-                }, 10);
-            }
-        }
+    makeLinksClickable(text) {
+        // Convert URLs in text to clickable links
+        const urlRegex = /(https?:\/\/[^\s]+)/gi;
+        return text.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline;">$1</a>');
     }
+    
     
     renderCountryCard(country) {
         const hasDetailedInfo = country.hasDetailedInfo !== false;

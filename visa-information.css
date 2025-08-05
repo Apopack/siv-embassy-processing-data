@@ -385,11 +385,6 @@ body {
     min-width: 120px;
 }
 
-.details-col {
-    width: 10%;
-    min-width: 100px;
-    text-align: center;
-}
 
 /* Country cell styling */
 .country-cell {
@@ -431,32 +426,6 @@ body {
     font-weight: 500;
 }
 
-/* Show Details Button */
-.show-details-btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid var(--primary);
-    background: var(--white);
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin: 0 auto;
-}
-
-.show-details-btn:hover {
-    background: var(--primary);
-    color: var(--white);
-}
-
-.show-details-btn.expanded {
-    background: var(--primary);
-    color: var(--white);
-}
 
 /* Expandable Details Section */
 .details-row {
@@ -466,8 +435,7 @@ body {
 
 .details-content {
     padding: 32px;
-    display: none;
-    animation: slideDown 0.3s ease-out;
+    display: block;
 }
 
 .details-content.expanded {
@@ -592,23 +560,6 @@ body {
     font-weight: 500;
 }
 
-.remove-country-btn {
-    background: var(--white);
-    border: 1px solid var(--danger);
-    color: var(--danger);
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 16px;
-}
-
-.remove-country-btn:hover {
-    background: var(--danger);
-    color: var(--white);
-}
 
 .visa-card-header {
     display: flex;
@@ -921,45 +872,6 @@ body {
     border-color: var(--primary-dark);
 }
 
-/* Sticky Actions */
-.sticky-actions {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 998;
-    display: flex;
-    gap: 16px;
-}
-
-.sticky-btn {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    color: var(--gray-700);
-    padding: 14px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 102, 204, 0.1);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.sticky-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: rgba(77, 148, 255, 0.3);
-    box-shadow: 0 8px 30px rgba(0, 102, 204, 0.15);
-    transform: translateY(-2px);
-}
-
-.sticky-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: var(--white);
-}
 
 /* Comparison Panel - Reuse from embassy-details.css */
 .comparison-panel {
@@ -1237,13 +1149,6 @@ body {
         grid-template-columns: 1fr;
     }
     
-    .sticky-actions {
-        position: relative;
-        top: auto;
-        right: auto;
-        justify-content: center;
-        margin: 24px 0;
-    }
     
     .comparison-modal {
         width: 95%;
