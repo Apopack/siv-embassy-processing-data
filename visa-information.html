@@ -63,30 +63,34 @@
                 <p class="page-subtitle">Comprehensive visa information for SIV applicants traveling to interview locations</p>
             </header>
 
-            <!-- Info Notice -->
-            <div class="info-notice">
-                <div class="notice-icon">ℹ️</div>
-                <div class="notice-content">
-                    <strong>Important:</strong> This information is for Afghan nationals holding Afghan passports. Requirements may change - always verify with the embassy before applying.
+            <!-- Country Selection Section -->
+            <div class="country-selection-section">
+                <div class="selection-container">
+                    <h3>Select a Country</h3>
+                    <p>Choose a country to view detailed visa requirements and processing information</p>
+                    
+                    <div class="country-dropdown-container">
+                        <select id="countrySelect" class="country-dropdown">
+                            <option value="">Choose a country...</option>
+                        </select>
+                        <div class="dropdown-icon">▼</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Filter and Search -->
-            <div class="filter-section">
-                <div class="search-box">
-                    <input type="text" id="searchInput" placeholder="Search by country or embassy..." class="search-input">
-                    <span class="search-icon">🔍</span>
+            <!-- Selected Countries Display -->
+            <div class="selected-countries-bar" id="selectedCountriesBar" style="display: none;">
+                <div class="selected-countries-list" id="selectedCountriesList">
+                    <!-- Selected country chips will appear here -->
                 </div>
-                <div class="filter-options">
-                    <button class="filter-btn active" data-filter="all">All Countries</button>
-                    <button class="filter-btn" data-filter="evisa">E-Visa Available</button>
-                    <button class="filter-btn" data-filter="schengen">Schengen Zone</button>
-                </div>
+                <button class="add-country-btn" id="addCountryBtn">
+                    <span>+</span> Add Country to Compare
+                </button>
             </div>
 
-            <!-- Visa Cards Grid -->
-            <div class="visa-grid" id="visaGrid">
-                <!-- Cards will be populated by JavaScript -->
+            <!-- Visa Information Display -->
+            <div class="visa-info-container" id="visaInfoContainer" style="display: none;">
+                <!-- Visa information will be populated here -->
             </div>
         </div>
     </main>

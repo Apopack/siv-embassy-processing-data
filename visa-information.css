@@ -109,82 +109,343 @@ body {
     line-height: 1.5;
 }
 
-/* Filter Section */
-.filter-section {
+/* Country Selection Section */
+.country-selection-section {
     background: var(--white);
     border-radius: var(--radius-lg);
-    padding: 24px;
+    padding: 48px 24px;
     margin-bottom: 24px;
     box-shadow: var(--shadow);
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    flex-wrap: wrap;
+    text-align: center;
 }
 
-.search-box {
+.selection-container h3 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 8px;
+}
+
+.selection-container p {
+    font-size: 16px;
+    color: var(--gray-600);
+    margin: 0 0 32px;
+}
+
+.country-dropdown-container {
     position: relative;
-    flex: 1;
-    min-width: 250px;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
-.search-input {
+.country-dropdown {
     width: 100%;
-    padding: 10px 40px 10px 16px;
+    padding: 16px 48px 16px 20px;
     border: 2px solid var(--gray-200);
-    border-radius: var(--radius);
-    font-size: 14px;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    background: var(--white);
+    cursor: pointer;
     transition: var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
-.search-input:focus {
+.country-dropdown:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(26, 58, 82, 0.1);
+    box-shadow: 0 0 0 4px rgba(26, 58, 82, 0.1);
 }
 
-.search-icon {
+.dropdown-icon {
     position: absolute;
-    right: 16px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--gray-400);
+    pointer-events: none;
+    font-size: 12px;
 }
 
-.filter-options {
+/* Selected Countries Bar */
+.selected-countries-bar {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.selected-countries-list {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
 }
 
-.filter-btn {
-    background: var(--gray-100);
-    border: 1px solid var(--gray-300);
-    color: var(--gray-700);
+.country-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.country-chip .remove-chip {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.country-chip .remove-chip:hover {
+    opacity: 1;
+}
+
+.add-country-btn {
+    background: var(--white);
+    border: 2px dashed var(--gray-300);
+    color: var(--gray-600);
     padding: 8px 16px;
-    border-radius: var(--radius);
+    border-radius: 20px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.filter-btn:hover {
-    background: var(--gray-200);
+.add-country-btn:hover {
+    background: var(--gray-50);
     border-color: var(--gray-400);
+    color: var(--gray-700);
 }
 
-.filter-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-}
-
-/* Visa Cards Grid */
-.visa-grid {
+/* Visa Information Container */
+.visa-info-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 24px;
     margin-bottom: 48px;
+}
+
+/* Individual Visa Info Card */
+.visa-info-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.visa-info-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.visa-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.country-info {
+    flex: 1;
+}
+
+.country-flag {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.country-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 4px;
+}
+
+.embassy-location {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.visa-type-badge {
+    background: var(--primary-light);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 24px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Visa Details Section */
+.visa-details-section {
+    margin-bottom: 24px;
+}
+
+.visa-details-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-icon {
+    font-size: 18px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.detail-item {
+    background: var(--gray-50);
+    padding: 16px;
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.detail-label {
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.detail-value.cost {
+    color: var(--primary);
+}
+
+.detail-value.extension-yes {
+    color: var(--success);
+}
+
+.detail-value.extension-no {
+    color: var(--danger);
+}
+
+/* Processing Steps */
+.processing-steps {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.processing-steps ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.processing-steps li {
+    margin-bottom: 8px;
+    color: var(--gray-700);
+    line-height: 1.5;
+}
+
+/* Extension Info */
+.extension-info {
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.extension-available {
+    border-left: 4px solid var(--success);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.extension-not-available {
+    border-left: 4px solid var(--danger);
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.extension-info p {
+    margin: 0 0 8px;
+    color: var(--gray-700);
+}
+
+.extension-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* Official Links */
+.official-links {
+    margin-top: 20px;
+}
+
+.links-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.links-list li {
+    margin-bottom: 8px;
+}
+
+.links-list a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.links-list a:hover {
+    text-decoration: underline;
+}
+
+/* Source Information */
+.source-info {
+    background: var(--primary);
+    color: white;
+    padding: 16px;
+    border-radius: var(--radius);
+    margin-top: 20px;
+    font-size: 13px;
+}
+
+.source-info strong {
+    display: block;
+    margin-bottom: 4px;
 }
 
 .visa-card {

@@ -416,6 +416,17 @@ footer {
     text-decoration: underline;
 }
 
+/* Country link hover effects in the data table */
+.data-table td a {
+    transition: all 0.2s ease;
+}
+
+.data-table td a:hover {
+    color: #2c5282 !important;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
 .data-source small {
     display: block;
     margin-top: 5px;

@@ -13,8 +13,10 @@ class VisaInformationApp {
 
     async init() {
         await this.loadVisaData();
+        await this.loadSIVCountries(); // Load countries from SIV data
         this.setupEventListeners();
-        this.renderVisaCards();
+        this.populateCountryDropdown();
+        this.handleURLParameters();
     }
 
     async loadVisaData() {
@@ -315,25 +317,53 @@ class VisaInformationApp {
         this.filteredData = [...this.visaData];
     }
 
+    async loadSIVCountries() {
+        // Load SIV embassy data to get all countries
+        try {
+            const response = await fetch('data/embassy-siv-data.json');
+            const data = await response.json();
+            this.sivCountries = data.embassies.map(embassy => ({
+                name: embassy.country,
+                embassy: embassy.embassy,
+                flag: this.getCountryFlag(embassy.country)
+            }));
+        } catch (error) {
+            console.error('Error loading SIV countries:', error);
+            // Fallback to visa countries if SIV data unavailable
+            this.sivCountries = this.visaData.map(visa => ({
+                name: visa.country,
+                embassy: visa.embassy || visa.city,
+                flag: visa.flag
+            }));
+        }
+    }
+
+    getCountryFlag(country) {
+        const flagMap = {
+            'Pakistan': '🇵🇰', 'Qatar': '🇶🇦', 'Albania': '🇦🇱', 'Turkey': '🇹🇷',
+            'Germany': '🇩🇪', 'Canada': '🇨🇦', 'Philippines': '🇵🇭', 'UAE': '🇦🇪',
+            'Iraq': '🇮🇶', 'Rwanda': '🇷🇼', 'United Arab Emirates': '🇦🇪',
+            'United States': '🇺🇸', 'India': '🇮🇳', 'Iran': '🇮🇷'
+        };
+        return flagMap[country] || '🏛️';
+    }
+
     setupEventListeners() {
         // Mobile menu toggle
         document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-        // Search functionality
-        document.getElementById('searchInput')?.addEventListener('input', (e) => {
-            this.handleSearch(e.target.value);
+        // Country dropdown selection
+        document.getElementById('countrySelect')?.addEventListener('change', (e) => {
+            if (e.target.value) {
+                this.selectCountry(e.target.value);
+            }
         });
 
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.handleFilter(btn.dataset.filter);
-                // Update active state
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
+        // Add country to comparison
+        document.getElementById('addCountryBtn')?.addEventListener('click', () => {
+            this.openCountrySelection();
         });
 
         // Comparison button
@@ -346,11 +376,6 @@ class VisaInformationApp {
             this.downloadVisaData();
         });
 
-        // Add country button
-        document.getElementById('addCountryBtn')?.addEventListener('click', () => {
-            this.openCountrySelection();
-        });
-
         // Comparison search
         document.getElementById('comparisonSearch')?.addEventListener('input', (e) => {
             this.filterCountrySelection(e.target.value);
@@ -361,118 +386,256 @@ class VisaInformationApp {
             if (e.key === 'Escape') {
                 this.closeComparisonPanel();
                 this.closeCountrySelection();
-                this.closeDetailModal();
             }
         });
     }
 
-    handleSearch(query) {
-        const searchTerm = query.toLowerCase().trim();
+    populateCountryDropdown() {
+        const dropdown = document.getElementById('countrySelect');
+        if (!dropdown) return;
         
-        if (!searchTerm) {
-            this.filteredData = this.applyFilter(this.visaData);
+        // Combine visa countries with SIV countries (remove duplicates)
+        const allCountries = new Map();
+        
+        // Add visa countries first (they have detailed info)
+        this.visaData.forEach(visa => {
+            allCountries.set(visa.country, {
+                name: visa.country,
+                flag: visa.flag,
+                hasVisaInfo: true
+            });
+        });
+        
+        // Add SIV countries
+        this.sivCountries.forEach(country => {
+            if (!allCountries.has(country.name)) {
+                allCountries.set(country.name, {
+                    name: country.name,
+                    flag: country.flag,
+                    hasVisaInfo: false
+                });
+            }
+        });
+        
+        // Sort countries alphabetically
+        const sortedCountries = Array.from(allCountries.values()).sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Populate dropdown
+        dropdown.innerHTML = '<option value="">Choose a country...</option>';
+        sortedCountries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.name;
+            option.textContent = `${country.flag} ${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}`;
+            dropdown.appendChild(option);
+        });
+    }
+    
+    handleURLParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const country = urlParams.get('country');
+        if (country) {
+            // Set dropdown value and select country
+            const dropdown = document.getElementById('countrySelect');
+            if (dropdown) {
+                dropdown.value = country;
+                this.selectCountry(country);
+            }
+        }
+    }
+    
+    selectCountry(countryName) {
+        // Update URL without page reload
+        if (window.history) {
+            const url = new URL(window.location);
+            url.searchParams.set('country', countryName);
+            window.history.pushState({}, '', url);
+        }
+        
+        // Add to selected countries if not already there
+        if (!this.comparisonCountries.some(c => c.country === countryName)) {
+            const countryData = this.getCountryData(countryName);
+            if (countryData) {
+                this.comparisonCountries = [countryData]; // Replace with new selection
+                this.updateSelectedCountriesBar();
+                this.renderVisaInformation();
+            }
+        }
+    }
+    
+    getCountryData(countryName) {
+        // First try to find in visa data
+        let countryData = this.visaData.find(visa => visa.country === countryName);
+        
+        if (!countryData) {
+            // If not in visa data, create basic info from SIV data
+            const sivCountry = this.sivCountries.find(c => c.name === countryName);
+            if (sivCountry) {
+                countryData = {
+                    country: countryName,
+                    flag: sivCountry.flag,
+                    embassy: sivCountry.embassy,
+                    visaType: 'Information not available',
+                    visaCost: 'Contact embassy for details',
+                    validity: 'Varies',
+                    extensionPossible: false,
+                    processingSteps: ['Contact the embassy directly for visa requirements'],
+                    links: [{ text: 'Contact Embassy', url: '#' }],
+                    sourceName: 'Embassy Contact Required',
+                    hasDetailedInfo: false
+                };
+            }
         } else {
-            this.filteredData = this.applyFilter(this.visaData).filter(visa => 
-                visa.country.toLowerCase().includes(searchTerm) ||
-                visa.embassy.toLowerCase().includes(searchTerm) ||
-                visa.visaType.toLowerCase().includes(searchTerm)
-            );
+            countryData.hasDetailedInfo = true;
         }
         
-        this.renderVisaCards();
+        return countryData;
     }
 
-    handleFilter(filter) {
-        this.currentFilter = filter;
-        this.filteredData = this.applyFilter(this.visaData);
+    updateSelectedCountriesBar() {
+        const bar = document.getElementById('selectedCountriesBar');
+        const list = document.getElementById('selectedCountriesList');
         
-        // Apply search if exists
-        const searchTerm = document.getElementById('searchInput')?.value;
-        if (searchTerm) {
-            this.handleSearch(searchTerm);
-        } else {
-            this.renderVisaCards();
-        }
-    }
-
-    applyFilter(data) {
-        switch (this.currentFilter) {
-            case 'evisa':
-                return data.filter(visa => visa.tags.includes('evisa'));
-            case 'schengen':
-                return data.filter(visa => visa.tags.includes('schengen'));
-            default:
-                return data;
-        }
-    }
-
-    renderVisaCards() {
-        const grid = document.getElementById('visaGrid');
-        
-        if (this.filteredData.length === 0) {
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 48px; color: var(--gray-500);">
-                    <p style="font-size: 16px;">No visa information found matching your criteria.</p>
-                </div>
-            `;
+        if (this.comparisonCountries.length === 0) {
+            bar.style.display = 'none';
             return;
         }
         
-        grid.innerHTML = this.filteredData.map(visa => `
-            <div class="visa-card" onclick="visaApp.showVisaDetails(${visa.rank})">
-                <div class="visa-card-header">
-                    <div class="country-info">
-                        <div class="country-flag">${visa.flag}</div>
-                        <h3 class="country-name">${visa.country}</h3>
-                        <p class="embassy-location">${visa.embassy}</p>
-                    </div>
-                    <div class="visa-type-badge">${visa.tags.includes('evisa') ? 'E-Visa' : 'Embassy'}</div>
-                </div>
-                
-                <div class="visa-details">
-                    <div class="visa-detail-row">
-                        <span class="detail-label">Visa Type</span>
-                        <span class="detail-value">${visa.visaType}</span>
-                    </div>
-                    <div class="visa-detail-row">
-                        <span class="detail-label">Cost</span>
-                        <span class="detail-value visa-cost">${visa.visaCost}</span>
-                    </div>
-                    <div class="visa-detail-row">
-                        <span class="detail-label">Validity</span>
-                        <span class="detail-value">${visa.validity}</span>
-                    </div>
-                    <div class="visa-detail-row">
-                        <span class="detail-label">Extension</span>
-                        <span class="detail-value">${visa.extensionPossible ? 'Available' : 'Not Available'}</span>
-                    </div>
-                </div>
-                
-                <div class="visa-actions">
-                    <button class="visa-action-btn" onclick="event.stopPropagation(); visaApp.addToComparison('${visa.country}')">
-                        Compare
-                    </button>
-                    <button class="visa-action-btn primary" onclick="event.stopPropagation(); visaApp.showVisaDetails(${visa.rank})">
-                        View Details
-                    </button>
-                </div>
+        bar.style.display = 'flex';
+        list.innerHTML = this.comparisonCountries.map(country => `
+            <div class="country-chip">
+                <span>${country.flag}</span>
+                <span>${country.country}</span>
+                <button class="remove-chip" onclick="visaApp.removeFromComparison('${country.country}')">&times;</button>
             </div>
         `).join('');
     }
+    
+    renderVisaInformation() {
+        const container = document.getElementById('visaInfoContainer');
+        
+        if (this.comparisonCountries.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'grid';
+        container.innerHTML = this.comparisonCountries.map(country => this.renderCountryCard(country)).join('');
+    }
+    
+    renderCountryCard(country) {
+        const hasDetailedInfo = country.hasDetailedInfo !== false;
+        
+        return `
+            <div class="visa-info-card">
+                <div class="visa-card-header">
+                    <div class="country-info">
+                        <div class="country-flag">${country.flag}</div>
+                        <h3 class="country-name">${country.country}</h3>
+                        <p class="embassy-location">${country.embassy || country.city || 'Embassy information available'}</p>
+                    </div>
+                    <div class="visa-type-badge">${hasDetailedInfo && country.tags?.includes('evisa') ? 'E-Visa' : hasDetailedInfo ? 'Embassy' : 'Contact Required'}</div>
+                </div>
+                
+                <!-- Key Details -->
+                <div class="visa-details-section">
+                    <h4><span class="section-icon">💰</span> Cost & Validity</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Cost</div>
+                            <div class="detail-value cost">${country.visaCost}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Validity</div>
+                            <div class="detail-value">${country.validity || 'Varies'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Extension</div>
+                            <div class="detail-value ${country.extensionPossible ? 'extension-yes' : 'extension-no'}">
+                                ${country.extensionPossible ? 'Available' : 'Not Available'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${hasDetailedInfo ? `
+                    <!-- Processing Steps -->
+                    <div class="visa-details-section">
+                        <h4><span class="section-icon">📋</span> Application Process</h4>
+                        <div class="processing-steps">
+                            <ol>
+                                ${country.processingSteps.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- Extension Information -->
+                    <div class="visa-details-section">
+                        <h4><span class="section-icon">⏰</span> Extension Policy</h4>
+                        <div class="extension-info ${country.extensionPossible ? 'extension-available' : 'extension-not-available'}">
+                            ${country.extensionPossible ? `
+                                <p><strong>Duration:</strong> ${country.extensionDuration}</p>
+                                <p><strong>Cost:</strong> ${country.extensionCost}</p>
+                            ` : '<p>Visa extensions are not available for this destination.</p>'}
+                        </div>
+                    </div>
+                    
+                    <!-- Official Links -->
+                    <div class="official-links">
+                        <h4><span class="section-icon">🔗</span> Official Resources</h4>
+                        <ul class="links-list">
+                            ${country.links.map(link => `
+                                <li><a href="${link.url}" target="_blank" rel="noopener">${link.text} →</a></li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <!-- Source Information -->
+                    <div class="source-info">
+                        <strong>Source:</strong> ${country.sourceName} (${country.sourceType})<br>
+                        <strong>Update Frequency:</strong> ${country.updateFrequency}
+                    </div>
+                ` : `
+                    <!-- Limited Information Notice -->
+                    <div class="visa-details-section">
+                        <div class="extension-info extension-not-available">
+                            <p><strong>Limited Information Available</strong></p>
+                            <p>Detailed visa requirements are not available in our database for this country. Please contact the embassy directly for accurate and up-to-date visa information.</p>
+                        </div>
+                    </div>
+                `}
+            </div>
+        `;
+    }
 
-    getProcessingTime(visa) {
-        // Extract processing time from steps or provide default
-        if (visa.country === "Rwanda") return "Instant/Same day";
-        if (visa.country === "Qatar") return "3-5 days";
-        if (visa.country === "Pakistan") return "7-10 days";
-        if (visa.country === "Albania") return "5-10 days";
-        if (visa.country === "Turkey") return "Varies";
-        if (visa.country === "Germany") return "15-30 days";
-        if (visa.country === "Canada") return "4-8 weeks";
-        if (visa.country === "Philippines") return "5-10 days";
-        if (visa.country === "UAE") return "3-5 days";
-        if (visa.country === "Iraq") return "7-10 days";
-        return "5-15 days";
+    addToComparison(countryName) {
+        if (this.comparisonCountries.length >= this.maxComparisons) {
+            alert(`You can only compare up to ${this.maxComparisons} countries at once.`);
+            return;
+        }
+        
+        if (!this.comparisonCountries.some(c => c.country === countryName)) {
+            const countryData = this.getCountryData(countryName);
+            if (countryData) {
+                this.comparisonCountries.push(countryData);
+                this.updateSelectedCountriesBar();
+                this.renderVisaInformation();
+            }
+        }
+    }
+    
+    removeFromComparison(countryName) {
+        this.comparisonCountries = this.comparisonCountries.filter(c => c.country !== countryName);
+        this.updateSelectedCountriesBar();
+        this.renderVisaInformation();
+        
+        // Update URL if this was the main country
+        if (this.comparisonCountries.length === 0) {
+            if (window.history) {
+                const url = new URL(window.location);
+                url.searchParams.delete('country');
+                window.history.pushState({}, '', url);
+            }
+        }
     }
 
     showVisaDetails(rank) {

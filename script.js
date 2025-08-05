@@ -243,7 +243,9 @@ function createTableRow(embassy, rank) {
     row.innerHTML = `
         <td>${rank}</td>
         <td>${embassy.embassy}</td>
-        <td>${embassy.country}</td>
+        <td><a href="visa-information.html?country=${encodeURIComponent(embassy.country)}" 
+               style="color: var(--primary, #1a3a52); text-decoration: none; font-weight: 500;"
+               title="View visa information for ${embassy.country}">${embassy.country}</a></td>
         ${monthCells}
         <td class="total-col">${embassy.rangeTotal}</td>
     `;
