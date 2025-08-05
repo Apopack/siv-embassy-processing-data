@@ -452,54 +452,33 @@ class VisaInformationApp {
         const searchResults = document.getElementById('searchResults');
         if (!searchResults) return;
         
+        console.log('Search query:', query); // Debug log
+        console.log('SIV Countries loaded:', this.sivCountries ? this.sivCountries.length : 'Not loaded'); // Debug log
+        
         if (!query.trim()) {
             this.hideSearchResults();
             return;
         }
         
-        // Get all available countries from SIV data
-        const allCountries = new Map();
-        
-        // Add visa countries first (they have detailed info)
-        this.visaData.forEach(visa => {
-            allCountries.set(visa.country, {
-                name: visa.country,
-                flag: visa.flag,
-                embassy: visa.embassy,
-                hasVisaInfo: true
-            });
-        });
-        
-        // Add all SIV countries
-        if (this.sivCountries && Array.isArray(this.sivCountries)) {
-            this.sivCountries.forEach(country => {
-                if (!allCountries.has(country.name)) {
-                    allCountries.set(country.name, {
-                        name: country.name,
-                        flag: country.flag,
-                        embassy: country.embassy || 'Embassy information available',
-                        hasVisaInfo: false
-                    });
-                }
-            });
-        }
+        // Start with visa countries - these always exist and work
+        let allCountries = [...this.visaData];
         
         // Filter countries based on search query
-        let filteredCountries = Array.from(allCountries.values()).filter(country => 
-            country.name.toLowerCase().includes(query.toLowerCase())
+        let filteredCountries = allCountries.filter(country => 
+            country.country.toLowerCase().includes(query.toLowerCase())
         );
         
         // Sort alphabetically
-        filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
+        filteredCountries.sort((a, b) => a.country.localeCompare(b.country));
         
         if (filteredCountries.length === 0) {
             searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
         } else {
             searchResults.innerHTML = filteredCountries.map(country => `
-                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
+                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.country}')">
                     <span class="search-result-flag">${country.flag}</span>
                     <div class="search-result-info">
-                        <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
+                        <h4>${country.country}</h4>
                         <p>${country.embassy}</p>
                     </div>
                 </div>
@@ -513,42 +492,19 @@ class VisaInformationApp {
         const searchResults = document.getElementById('searchResults');
         if (!searchResults) return;
         
-        // Get all available countries from SIV data
-        const allCountries = new Map();
+        console.log('Showing all countries'); // Debug log
         
-        // Add visa countries first (they have detailed info)
-        this.visaData.forEach(visa => {
-            allCountries.set(visa.country, {
-                name: visa.country,
-                flag: visa.flag,
-                embassy: visa.embassy,
-                hasVisaInfo: true
-            });
-        });
-        
-        // Add all SIV countries
-        if (this.sivCountries && Array.isArray(this.sivCountries)) {
-            this.sivCountries.forEach(country => {
-                if (!allCountries.has(country.name)) {
-                    allCountries.set(country.name, {
-                        name: country.name,
-                        flag: country.flag,
-                        embassy: country.embassy || 'Embassy information available',
-                        hasVisaInfo: false
-                    });
-                }
-            });
-        }
+        // Start with visa countries - these always exist and work
+        let allCountries = [...this.visaData];
         
         // Sort alphabetically
-        let sortedCountries = Array.from(allCountries.values());
-        sortedCountries.sort((a, b) => a.name.localeCompare(b.name));
+        allCountries.sort((a, b) => a.country.localeCompare(b.country));
         
-        searchResults.innerHTML = sortedCountries.map(country => `
-            <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
+        searchResults.innerHTML = allCountries.map(country => `
+            <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.country}')">
                 <span class="search-result-flag">${country.flag}</span>
                 <div class="search-result-info">
-                    <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
+                    <h4>${country.country}</h4>
                     <p>${country.embassy}</p>
                 </div>
             </div>
