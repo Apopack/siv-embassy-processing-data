@@ -392,7 +392,18 @@ class VisaInformationApp {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-
+        // Country search functionality
+        const countrySearchInput = document.getElementById('countrySearch');
+        if (countrySearchInput) {
+            countrySearchInput.addEventListener('input', (e) => {
+                this.handleCountrySearch(e.target.value);
+            });
+            countrySearchInput.addEventListener('focus', () => {
+                if (!countrySearchInput.value.trim()) {
+                    this.showAllCountries();
+                }
+            });
+        }
 
         // Add country to comparison
         document.getElementById('addCountryBtn')?.addEventListener('click', (e) => {
@@ -431,9 +442,133 @@ class VisaInformationApp {
             if (!e.target.closest('.add-country-container')) {
                 this.closeCountrySelectionPopout();
             }
+            if (!e.target.closest('.search-input-container')) {
+                this.hideSearchResults();
+            }
         });
     }
 
+    handleCountrySearch(query) {
+        const searchResults = document.getElementById('searchResults');
+        if (!searchResults) return;
+        
+        if (!query.trim()) {
+            this.hideSearchResults();
+            return;
+        }
+        
+        // Get all available countries from SIV data
+        const allCountries = new Map();
+        
+        // Add visa countries first (they have detailed info)
+        this.visaData.forEach(visa => {
+            allCountries.set(visa.country, {
+                name: visa.country,
+                flag: visa.flag,
+                embassy: visa.embassy,
+                hasVisaInfo: true
+            });
+        });
+        
+        // Add all SIV countries
+        if (this.sivCountries && Array.isArray(this.sivCountries)) {
+            this.sivCountries.forEach(country => {
+                if (!allCountries.has(country.name)) {
+                    allCountries.set(country.name, {
+                        name: country.name,
+                        flag: country.flag,
+                        embassy: country.embassy || 'Embassy information available',
+                        hasVisaInfo: false
+                    });
+                }
+            });
+        }
+        
+        // Filter countries based on search query
+        let filteredCountries = Array.from(allCountries.values()).filter(country => 
+            country.name.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        // Sort alphabetically
+        filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
+        
+        if (filteredCountries.length === 0) {
+            searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
+        } else {
+            searchResults.innerHTML = filteredCountries.map(country => `
+                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
+                    <span class="search-result-flag">${country.flag}</span>
+                    <div class="search-result-info">
+                        <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
+                        <p>${country.embassy}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        searchResults.style.display = 'block';
+    }
+    
+    showAllCountries() {
+        const searchResults = document.getElementById('searchResults');
+        if (!searchResults) return;
+        
+        // Get all available countries from SIV data
+        const allCountries = new Map();
+        
+        // Add visa countries first (they have detailed info)
+        this.visaData.forEach(visa => {
+            allCountries.set(visa.country, {
+                name: visa.country,
+                flag: visa.flag,
+                embassy: visa.embassy,
+                hasVisaInfo: true
+            });
+        });
+        
+        // Add all SIV countries
+        if (this.sivCountries && Array.isArray(this.sivCountries)) {
+            this.sivCountries.forEach(country => {
+                if (!allCountries.has(country.name)) {
+                    allCountries.set(country.name, {
+                        name: country.name,
+                        flag: country.flag,
+                        embassy: country.embassy || 'Embassy information available',
+                        hasVisaInfo: false
+                    });
+                }
+            });
+        }
+        
+        // Sort alphabetically
+        let sortedCountries = Array.from(allCountries.values());
+        sortedCountries.sort((a, b) => a.name.localeCompare(b.name));
+        
+        searchResults.innerHTML = sortedCountries.map(country => `
+            <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
+                <span class="search-result-flag">${country.flag}</span>
+                <div class="search-result-info">
+                    <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
+                    <p>${country.embassy}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        searchResults.style.display = 'block';
+    }
+    
+    selectCountryFromSearch(countryName) {
+        document.getElementById('countrySearch').value = countryName;
+        this.hideSearchResults();
+        this.selectCountry(countryName);
+    }
+    
+    hideSearchResults() {
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+        }
+    }
     
     toggleCountrySelectionPopout() {
         const popout = document.getElementById('countrySelectionPopout');
