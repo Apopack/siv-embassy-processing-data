@@ -9,6 +9,7 @@ class EmbassyDetailsApp {
         this.isComparing = false;
         this.currentModal = null;
         this.isDariMode = false;
+        this.useAPI = localStorage.getItem('useAPI') !== 'false'; // Default to true
         
         this.init();
     }
@@ -17,6 +18,7 @@ class EmbassyDetailsApp {
         await this.loadEmbassyData();
         this.setupEventListeners();
         this.initializeSearch();
+        this.initializeAPIToggle();
     }
 
     async loadEmbassyData() {
@@ -718,9 +720,38 @@ class EmbassyDetailsApp {
         }
     }
 
+    // Initialize API Toggle
+    initializeAPIToggle() {
+        const apiToggle = document.getElementById('apiToggle');
+        if (apiToggle) {
+            // Set initial state
+            apiToggle.checked = this.useAPI;
+            
+            // Add event listener
+            apiToggle.addEventListener('change', (e) => {
+                this.useAPI = e.target.checked;
+                localStorage.setItem('useAPI', this.useAPI);
+                
+                // If embassy is already selected, reload the info
+                if (this.selectedEmbassy) {
+                    const loading = document.getElementById('embassyLoading');
+                    if (loading) loading.style.display = 'flex';
+                    
+                    // Clear existing modals
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.classList.remove('active');
+                    });
+                    
+                    // Reload info cards with new setting
+                    this.loadEmbassyInfo();
+                }
+            });
+        }
+    }
+
     // API Integration (unchanged)
     async getEmbassyInfoFromAPI(embassy) {
-        if (!window.API_CONFIG || !window.API_CONFIG.SECURE_MODE) {
+        if (!window.API_CONFIG || !window.API_CONFIG.SECURE_MODE || window.API_CONFIG.API_DISABLED || !this.useAPI) {
             return this.getFallbackEmbassyInfo(embassy);
         }
 
