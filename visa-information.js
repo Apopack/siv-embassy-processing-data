@@ -18,7 +18,7 @@ class VisaInformationApp {
     }
 
     async loadVisaData() {
-        // Visa data from the Excel file
+        // Visa data from the CSV file: Visa_Information_Sources_with_Extension_Details.csv
         this.visaData = [
             {
                 rank: 1,
@@ -26,61 +26,86 @@ class VisaInformationApp {
                 country: "Pakistan",
                 flag: "🇵🇰",
                 visaNeeded: "Yes, Pakistani visa required",
-                visaType: "Visitor visa (Pakistan Online Visa System)",
-                visaCost: "≈US$50–100",
+                visaType: "Visitor Visa (Tourist/Family Visit)",
+                visaCost: "US$50–100",
+                validity: "3 months (90 days)",
                 processingSteps: [
-                    "Apply online via https://visa.nadra.gov.pk",
-                    "Upload passport copy, photo, invitation letter (if applicable)",
-                    "Pay fee online",
-                    "Print e-visa after approval (usually 7-10 business days)"
+                    "Visit the Pakistan Online Visa portal at https://visa.nadra.gov.pk",
+                    "Create account and complete online application form",
+                    "Upload required documents: passport copy, photo, invitation letter (if applicable)",
+                    "Pay visa fee online (US$50-100)",
+                    "Wait for processing (typically 3-5 business days)",
+                    "Download and print approved e-visa"
                 ],
-                extension: "Possible - apply at local immigration office. Extension fees vary (≈PKR 3,000–5,000)",
+                extension: "Yes - Up to additional 90 days. Extension cost varies (portal fee approx US$20)",
+                extensionPossible: true,
+                extensionDuration: "Up to additional 90 days",
+                extensionCost: "Varies (portal fee; approx US$20)",
                 links: [
-                    { text: "Pakistan Online Visa System", url: "https://visa.nadra.gov.pk" },
-                    { text: "Embassy of Pakistan in Kabul", url: "https://www.pakembassykabul.org" }
+                    { text: "Pakistan Online Visa System", url: "https://visa.nadra.gov.pk" }
                 ],
-                tags: ["evisa"]
+                sourceName: "Pakistan Online Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal"]
             },
             {
                 rank: 2,
                 embassy: "Doha",
                 country: "Qatar",
                 flag: "🇶🇦",
-                visaNeeded: "Yes, Qatari visa required",
-                visaType: "Hayya e-visa (tourist/entry visa)",
-                visaCost: "≈QAR 100 (≈US$27)",
+                visaNeeded: "Yes, Qatari entry permit required",
+                visaType: "Hayya Entry Permit",
+                visaCost: "US$27",
+                validity: "30 days",
                 processingSteps: [
-                    "Apply via Hayya Portal: https://www.qatar2022.qa/hayya",
-                    "Upload documents: passport, photo, proof of accommodation",
-                    "Pay online",
-                    "Download Hayya card after approval"
+                    "Visit the official Hayya Portal at https://hayya.qa",
+                    "Create account and fill application form",
+                    "Upload required documents: passport copy, photo, proof of accommodation",
+                    "Pay entry permit fee online (US$27)",
+                    "Receive approval notification (usually same day)",
+                    "Download and print Hayya Entry Permit"
                 ],
-                extension: "Extensions handled through Ministry of Interior. Cost varies.",
+                extension: "No - Extensions not available",
+                extensionPossible: false,
+                extensionDuration: "",
+                extensionCost: "",
                 links: [
-                    { text: "Hayya Portal", url: "https://www.qatar2022.qa/hayya" },
-                    { text: "Qatar e-Visa Portal", url: "https://www.qatarvisaservice.com" }
+                    { text: "Hayya Portal", url: "https://hayya.qa" }
                 ],
-                tags: ["evisa"]
+                sourceName: "Hayya Portal",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal"]
             },
             {
                 rank: 3,
-                embassy: "Tirana",
+                embassy: "Tirana", 
                 country: "Albania",
                 flag: "🇦🇱",
                 visaNeeded: "Yes, Albanian visa required",
-                visaType: "Short-stay Albanian e-Visa",
-                visaCost: "≈€50",
+                visaType: "Short-Stay Type C Schengen Visa",
+                visaCost: "€50 (~US$55)",
+                validity: "90 days",
                 processingSteps: [
-                    "Apply at https://e-visa.al",
-                    "Upload passport scan, photo, travel insurance, accommodation proof",
-                    "Pay fee online",
-                    "Receive e-visa by email (5-10 business days)"
+                    "Visit the Albanian e-Visa portal at https://e-visa.al",
+                    "Create account and complete application form",
+                    "Upload required documents: passport scan, photo, travel insurance, accommodation proof",
+                    "Pay visa fee online (€50)",
+                    "Wait for processing (typically 5-10 business days)",
+                    "Receive e-visa approval by email"
                 ],
-                extension: "Possible through local immigration office for ≈€30",
+                extension: "No - Extensions not available",
+                extensionPossible: false,
+                extensionDuration: "",
+                extensionCost: "",
                 links: [
-                    { text: "Albania e-Visa Portal", url: "https://e-visa.al" }
+                    { text: "Albanian e-Visa Portal", url: "https://e-visa.al" }
                 ],
-                tags: ["evisa"]
+                sourceName: "Albanian e-Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal"]
             },
             {
                 rank: 4,
@@ -88,20 +113,28 @@ class VisaInformationApp {
                 country: "Turkey",
                 flag: "🇹🇷",
                 visaNeeded: "Yes, Turkish visa required",
-                visaType: "Turkish e-visa or sticker visa",
-                visaCost: "≈US$60",
+                visaType: "Single-Entry Turkish e-Visa",
+                visaCost: "US$60",
+                validity: "30 days",
                 processingSteps: [
-                    "Check e-visa eligibility at https://www.evisa.gov.tr",
-                    "If eligible: Apply online, pay, receive e-visa",
-                    "If not eligible: Apply at Turkish embassy/consulate with full documentation",
-                    "Processing time: e-visa (minutes), sticker visa (5-15 days)"
+                    "Visit the Turkish e-Visa portal at https://www.evisa.gov.tr",
+                    "Check eligibility for e-visa",
+                    "Complete online application form",
+                    "Upload required documents and photo",
+                    "Pay visa fee online (US$60)",
+                    "Receive e-visa approval (usually within minutes)"
                 ],
-                extension: "Possible at provincial immigration offices. Fees vary.",
+                extension: "No - Extensions not available",
+                extensionPossible: false,
+                extensionDuration: "",
+                extensionCost: "",
                 links: [
-                    { text: "Turkey e-Visa", url: "https://www.evisa.gov.tr" },
-                    { text: "Turkish Embassy Kabul", url: "https://kabul.emb.mfa.gov.tr" }
+                    { text: "Turkish e-Visa Portal", url: "https://www.evisa.gov.tr" }
                 ],
-                tags: ["evisa"]
+                sourceName: "Turkish e-Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal"]
             },
             {
                 rank: 5,
@@ -109,127 +142,173 @@ class VisaInformationApp {
                 country: "Germany",
                 flag: "🇩🇪",
                 visaNeeded: "Yes, Schengen visa required",
-                visaType: "Schengen short-stay visa",
-                visaCost: "€90 (increased June 2024)",
+                visaType: "Schengen Short-Stay Visa (Type C)",
+                visaCost: "€90 (~US$98)",
+                validity: "90 days",
                 processingSteps: [
-                    "Schedule appointment via embassy website",
-                    "Complete application form",
-                    "Gather documents: passport, photos, insurance, proof of funds, accommodation",
-                    "Attend appointment for biometrics",
-                    "Wait 15-30 days for decision"
+                    "Visit the Auswärtiges Amt website at https://www.auswaertiges-amt.de/en",
+                    "Schedule appointment at German embassy or consulate",
+                    "Complete Schengen visa application form",
+                    "Gather documents: passport, photos, travel insurance, proof of funds, accommodation",
+                    "Attend appointment for biometrics and document submission",
+                    "Wait for decision (typically 15-30 days)"
                 ],
-                extension: "Very limited - must show exceptional circumstances",
+                extension: "No - Only in exceptional cases",
+                extensionPossible: false,
+                extensionDuration: "",
+                extensionCost: "",
                 links: [
-                    { text: "Germany Visa Info", url: "https://www.germany.info/us-en/service/visa" },
-                    { text: "VFS Global (Visa Service)", url: "https://www.vfsglobal.com/germany/pakistan" }
+                    { text: "Auswärtiges Amt (German Foreign Office)", url: "https://www.auswaertiges-amt.de/en" }
                 ],
-                tags: ["schengen"]
+                sourceName: "Auswärtiges Amt",
+                sourceType: "Government Portal",
+                updateFrequency: "Monthly",
+                tags: ["schengen", "government-portal"]
             },
             {
                 rank: 6,
                 embassy: "Montreal",
                 country: "Canada",
                 flag: "🇨🇦",
-                visaNeeded: "Yes, Canadian visa required",
-                visaType: "Visitor visa (TRV)",
-                visaCost: "CA$100 + biometrics CA$85 = CA$185",
+                visaNeeded: "Yes, Canadian visitor visa required",
+                visaType: "Visitor Visa (Temporary Resident Visa)",
+                visaCost: "CA$100 + CA$85 biometrics (~US$137)",
+                validity: "6 months",
                 processingSteps: [
-                    "Apply online via IRCC website",
-                    "Upload documents: passport, photos, proof of funds, purpose of visit",
-                    "Pay fees online",
-                    "Give biometrics at VAC",
-                    "Processing time: 4-8 weeks"
+                    "Visit IRCC website at https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/visitor-visa.html",
+                    "Create online account and complete application",
+                    "Upload required documents: passport, photos, proof of funds, purpose of visit",
+                    "Pay application and biometric fees online",
+                    "Schedule and attend biometrics appointment at VAC",
+                    "Wait for processing (typically 4-8 weeks)"
                 ],
-                extension: "Can apply for visitor record before expiry",
+                extension: "Yes - Up to 6 months. Extension cost CA$100 (~US$74)",
+                extensionPossible: true,
+                extensionDuration: "Up to 6 months",
+                extensionCost: "CA$100 (~US$74)",
                 links: [
-                    { text: "IRCC Portal", url: "https://www.canada.ca/en/immigration-refugees-citizenship" },
-                    { text: "VAC Pakistan", url: "https://visa.vfsglobal.com/pak/en/can" }
+                    { text: "IRCC Visitor Visa Info", url: "https://www.canada.ca/en/immigration-refugees-citizenship/services/visit-canada/visitor-visa.html" }
                 ],
-                tags: []
+                sourceName: "IRCC Visitor Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Monthly",
+                tags: ["government-portal"]
             },
             {
                 rank: 7,
                 embassy: "Manila",
                 country: "Philippines",
                 flag: "🇵🇭",
-                visaNeeded: "Yes, Philippine visa required",
-                visaType: "Tourist/business visa",
-                visaCost: "≈US$30-60",
+                visaNeeded: "Yes, Philippine tourist visa required",
+                visaType: "Tourist Visa (9(a) category)",
+                visaCost: "US$30",
+                validity: "59 days",
                 processingSteps: [
-                    "Apply at Philippine embassy/consulate",
-                    "Submit: application form, passport, photos, bank statements, itinerary",
-                    "Interview may be required",
-                    "Processing: 5-10 business days"
+                    "Visit DFA website at https://dfa.gov.ph/visa-info",
+                    "Complete visa application form",
+                    "Prepare required documents: passport, photos, bank statements, itinerary",
+                    "Submit application at Philippine embassy/consulate",
+                    "Attend interview if required",
+                    "Wait for processing (typically 5-10 business days)"
                 ],
-                extension: "Can extend at Bureau of Immigration for ≈PHP 3,000",
+                extension: "Yes - 30 days per extension. Extension cost PHP 3,430 (~US$60)",
+                extensionPossible: true,
+                extensionDuration: "30 days per extension",
+                extensionCost: "PHP 3,430 (~US$60)",
                 links: [
-                    { text: "Philippine Embassy", url: "https://www.dfa.gov.ph" },
-                    { text: "Bureau of Immigration", url: "https://immigration.gov.ph" }
+                    { text: "DoF Passport & Visa Info", url: "https://dfa.gov.ph/visa-info" }
                 ],
-                tags: []
+                sourceName: "DoF Passport & Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Monthly",
+                tags: ["government-portal"]
             },
             {
                 rank: 8,
                 embassy: "Abu Dhabi",
                 country: "UAE",
                 flag: "🇦🇪",
-                visaNeeded: "Yes, UAE visa required",
-                visaType: "Tourist visa (sponsored)",
-                visaCost: "≈AED 300-500",
+                visaNeeded: "Yes, UAE tourist visa required",
+                visaType: "Tourist Visa via ICA Smart Services",
+                visaCost: "AED350–400 (~US$95–110)",
+                validity: "30 days",
                 processingSteps: [
-                    "Need UAE sponsor (hotel, airline, or resident)",
-                    "Apply through sponsor or approved agency",
-                    "Submit passport copy, photo, application",
-                    "Processing: 3-5 working days"
+                    "Visit ICA Smart Services at https://www.icp.gov.ae",
+                    "Create account on the portal",
+                    "Complete tourist visa application",
+                    "Upload required documents: passport copy, photo",
+                    "Pay visa fee online (AED350-400)",
+                    "Wait for approval (typically 3-5 working days)"
                 ],
-                extension: "Can extend for 30 days for ≈AED 1,000",
+                extension: "Yes - 30 days extension for AED 650 (~US$177)",
+                extensionPossible: true,
+                extensionDuration: "30 days",
+                extensionCost: "AED 650 (~US$177)",
                 links: [
-                    { text: "UAE Immigration", url: "https://smartservices.icp.gov.ae" },
-                    { text: "GDRFA Dubai", url: "https://www.gdrfad.gov.ae" }
+                    { text: "ICA Smart Services", url: "https://www.icp.gov.ae" }
                 ],
-                tags: []
+                sourceName: "ICA Smart Services",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["government-portal"]
             },
             {
                 rank: 9,
                 embassy: "Baghdad",
                 country: "Iraq",
                 flag: "🇮🇶",
-                visaNeeded: "Yes, Iraqi visa required",
-                visaType: "Iraqi e-Visa",
-                visaCost: "≈US$75-80",
+                visaNeeded: "Yes, Iraqi tourist visa required",
+                visaType: "Tourist e-Visa",
+                visaCost: "US$75",
+                validity: "30 days",
                 processingSteps: [
-                    "Apply at https://www.mofa.gov.iq/visa",
-                    "Fill application, upload documents",
-                    "Pay fee online",
-                    "Receive e-visa approval (7-10 days)",
-                    "Visa stamped on arrival"
+                    "Visit Iraqi e-Visa Portal at https://evisa.iraq.egov.iq",
+                    "Create account and complete application form",
+                    "Upload required documents: passport copy, photo",
+                    "Pay visa fee online (US$75)",
+                    "Wait for e-visa approval (typically 7-10 days)",
+                    "Present e-visa at port of entry"
                 ],
-                extension: "Possible at residency office - fees vary",
+                extension: "Yes - 30 days extension for approximately US$75",
+                extensionPossible: true,
+                extensionDuration: "30 days",
+                extensionCost: "Approx US$75",
                 links: [
-                    { text: "Iraq e-Visa", url: "https://www.mofa.gov.iq/visa" }
+                    { text: "Iraqi e-Visa Portal", url: "https://evisa.iraq.egov.iq" }
                 ],
-                tags: ["evisa"]
+                sourceName: "Iraqi e-Visa Portal",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal"]
             },
             {
                 rank: 10,
                 embassy: "Kigali",
                 country: "Rwanda",
                 flag: "🇷🇼",
-                visaNeeded: "Yes, but visa on arrival available",
-                visaType: "Tourist visa (e-Visa or on arrival)",
+                visaNeeded: "Yes, tourist visa required",
+                visaType: "Tourist Visa (V-1)",
                 visaCost: "US$50",
+                validity: "30 days",
                 processingSteps: [
-                    "Option 1: Apply online at https://irembo.gov.rw",
-                    "Option 2: Get visa on arrival at airport",
-                    "Need: passport, yellow fever certificate",
-                    "Valid for 30 days"
+                    "Visit Irembo e-Visa portal at https://irembo.gov.rw",
+                    "Create account and complete online application",
+                    "Upload required documents: passport copy, photo, yellow fever certificate",
+                    "Pay visa fee online (US$50)",
+                    "Receive e-visa approval (usually same day)",
+                    "Alternative: Visa available on arrival at airport"
                 ],
-                extension: "Can extend at immigration office",
+                extension: "Yes - 30 days extension for US$50",
+                extensionPossible: true,
+                extensionDuration: "30 days",
+                extensionCost: "US$50",
                 links: [
-                    { text: "Rwanda e-Visa", url: "https://irembo.gov.rw" },
-                    { text: "Rwanda Immigration", url: "https://www.migration.gov.rw" }
+                    { text: "Irembo e-Visa Portal", url: "https://irembo.gov.rw" }
                 ],
-                tags: ["evisa", "visa-on-arrival"]
+                sourceName: "Irembo e-Visa",
+                sourceType: "Government Portal",
+                updateFrequency: "Real-time",
+                tags: ["evisa", "government-portal", "visa-on-arrival"]
             }
         ];
         
@@ -360,8 +439,12 @@ class VisaInformationApp {
                         <span class="detail-value visa-cost">${visa.visaCost}</span>
                     </div>
                     <div class="visa-detail-row">
-                        <span class="detail-label">Processing</span>
-                        <span class="detail-value">${this.getProcessingTime(visa)}</span>
+                        <span class="detail-label">Validity</span>
+                        <span class="detail-value">${visa.validity}</span>
+                    </div>
+                    <div class="visa-detail-row">
+                        <span class="detail-label">Extension</span>
+                        <span class="detail-value">${visa.extensionPossible ? 'Available' : 'Not Available'}</span>
                     </div>
                 </div>
                 
@@ -416,8 +499,11 @@ class VisaInformationApp {
                 </div>
                 
                 <div class="detail-section">
-                    <h4>Cost</h4>
+                    <h4>Cost & Validity</h4>
                     <p class="visa-cost" style="font-size: 18px; font-weight: 600;">${visa.visaCost}</p>
+                    <p><strong>Validity:</strong> ${visa.validity}</p>
+                    <p><strong>Source:</strong> ${visa.sourceName} (${visa.sourceType})</p>
+                    <p><strong>Update Frequency:</strong> ${visa.updateFrequency}</p>
                 </div>
                 
                 <div class="detail-section">
@@ -429,7 +515,11 @@ class VisaInformationApp {
                 
                 <div class="detail-section">
                     <h4>Extension Policy</h4>
-                    <p>${visa.extension}</p>
+                    <p><strong>Extensions Available:</strong> ${visa.extensionPossible ? 'Yes' : 'No'}</p>
+                    ${visa.extensionPossible ? `
+                        <p><strong>Extension Duration:</strong> ${visa.extensionDuration}</p>
+                        <p><strong>Extension Cost:</strong> ${visa.extensionCost}</p>
+                    ` : '<p>Visa extensions are not available for this destination.</p>'}
                 </div>
                 
                 <div class="detail-section">
