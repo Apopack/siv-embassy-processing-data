@@ -220,12 +220,39 @@
 
     <!-- Comparison Panel -->
     <div class="comparison-panel" id="comparisonPanel">
-        <div class="comparison-header">
-            <h2>Compare Embassies</h2>
-            <p class="comparison-subtitle">Select embassies to compare side by side</p>
+        <div class="comparison-modal">
+            <div class="comparison-header">
+                <h2>Compare Embassies</h2>
+                <p class="comparison-subtitle">Select up to 5 embassies to compare side by side</p>
+                <button class="close-comparison-btn" onclick="embassyApp.closeComparisonPanel()">&times;</button>
+            </div>
+            <div class="comparison-controls">
+                <div class="selected-embassies" id="selectedEmbassies">
+                    <!-- Selected embassy chips will appear here -->
+                </div>
+                <button class="add-embassy-btn" id="addEmbassyBtn">
+                    <span>+</span> Add Embassy
+                </button>
+            </div>
+            <div class="comparison-content" id="comparisonContent">
+                <!-- Comparison table will load here -->
+            </div>
         </div>
-        <div class="comparison-content" id="comparisonContent">
-            <!-- Comparison content will load here -->
+    </div>
+
+    <!-- Embassy Selection Modal for Comparison -->
+    <div class="modal" id="embassySelectionModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Select Embassy to Compare</h2>
+                <button class="close-btn" onclick="embassyApp.closeEmbassySelection()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="comparisonSearch" class="comparison-search" placeholder="Search embassies...">
+                <div class="embassy-selection-list" id="embassySelectionList">
+                    <!-- Embassy list will populate here -->
+                </div>
+            </div>
         </div>
     </div>
 

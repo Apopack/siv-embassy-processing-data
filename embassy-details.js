@@ -10,6 +10,7 @@ class EmbassyDetailsApp {
         this.currentModal = null;
         this.isDariMode = false;
         this.useAPI = localStorage.getItem('useAPI') !== 'false'; // Default to true
+        this.maxComparisons = 5;
         
         this.init();
     }
@@ -60,7 +61,17 @@ class EmbassyDetailsApp {
 
         // Sticky action buttons
         document.getElementById('compareBtn').addEventListener('click', () => {
-            this.toggleComparisonPanel();
+            this.openComparisonPanel();
+        });
+        
+        // Add embassy button in comparison panel
+        document.getElementById('addEmbassyBtn')?.addEventListener('click', () => {
+            this.openEmbassySelection();
+        });
+        
+        // Comparison search
+        document.getElementById('comparisonSearch')?.addEventListener('input', (e) => {
+            this.filterEmbassySelection(e.target.value);
         });
 
         document.getElementById('translateBtn').addEventListener('click', () => {
@@ -567,94 +578,16 @@ class EmbassyDetailsApp {
         this.currentModal = null;
     }
 
-    toggleComparisonPanel() {
+    openComparisonPanel() {
         const panel = document.getElementById('comparisonPanel');
         const btn = document.getElementById('compareBtn');
         
-        if (panel.classList.contains('active')) {
-            panel.classList.remove('active');
-            btn.classList.remove('active');
-        } else {
-            // Load comparison content
-            this.loadComparisonContent();
-            panel.classList.add('active');
-            btn.classList.add('active');
-        }
+        panel.classList.add('active');
+        btn.classList.add('active');
+        
+        this.updateComparisonView();
     }
 
-    loadComparisonContent() {
-        const content = document.getElementById('comparisonContent');
-        
-        if (!this.selectedEmbassy) {
-            content.innerHTML = `
-                <div style="padding: 24px; text-align: center; color: var(--gray-500);">
-                    <p>Select an embassy first to start comparing</p>
-                </div>
-            `;
-            return;
-        }
-
-        const availableEmbassies = this.embassyData.filter(e => e.embassy !== this.selectedEmbassy.embassy);
-        
-        content.innerHTML = `
-            <div style="padding: 24px;">
-                <h3 style="margin: 0 0 16px; color: var(--gray-900);">Compare with ${this.selectedEmbassy.embassy}</h3>
-                <p style="margin: 0 0 20px; color: var(--gray-600); font-size: 14px;">Select up to 3 other embassies to compare</p>
-                
-                <div style="max-height: 400px; overflow-y: auto;">
-                    ${availableEmbassies.slice(0, 20).map(embassy => {
-                        const cases = this.getCurrentYearTotal(embassy);
-                        const flag = this.getCountryFlag(embassy.country);
-                        return `
-                            <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: var(--transition);" 
-                                 onmouseover="this.style.background='var(--gray-50)'" 
-                                 onmouseout="this.style.background='transparent'"
-                                 onclick="embassyApp.compareWith('${embassy.embassy}')">
-                                <span style="font-size: 20px;">${flag}</span>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 600; color: var(--gray-900);">${embassy.embassy}</div>
-                                    <div style="font-size: 12px; color: var(--gray-600);">${embassy.country} • ${cases} cases</div>
-                                </div>
-                                <span style="color: var(--primary); font-size: 12px;">Compare →</span>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    compareWith(embassyName) {
-        const embassy = this.embassyData.find(e => e.embassy === embassyName);
-        if (!embassy) return;
-
-        // Simple comparison - you can expand this
-        const currentCases = this.getCurrentYearTotal(this.selectedEmbassy);
-        const compareCases = this.getCurrentYearTotal(embassy);
-        
-        const content = document.getElementById('comparisonContent');
-        content.innerHTML = `
-            <div style="padding: 24px;">
-                <h3 style="margin: 0 0 20px; color: var(--gray-900);">Embassy Comparison</h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
-                        <div style="font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${this.selectedEmbassy.embassy}</div>
-                        <div style="font-size: 24px; font-weight: 700; color: var(--gray-900);">${currentCases}</div>
-                        <div style="font-size: 12px; color: var(--gray-600);">2025 Cases</div>
-                    </div>
-                    
-                    <div style="text-align: center; padding: 20px; background: var(--gray-50); border-radius: var(--radius);">
-                        <div style="font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${embassy.embassy}</div>
-                        <div style="font-size: 24px; font-weight: 700; color: var(--gray-900);">${compareCases}</div>
-                        <div style="font-size: 12px; color: var(--gray-600);">2025 Cases</div>
-                    </div>
-                </div>
-                
-                <button onclick="embassyApp.loadComparisonContent()" style="background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: var(--radius); font-size: 14px; cursor: pointer; width: 100%;">Compare Different Embassy</button>
-            </div>
-        `;
-    }
 
     closeComparisonPanel() {
         const panel = document.getElementById('comparisonPanel');
@@ -662,6 +595,204 @@ class EmbassyDetailsApp {
         
         panel.classList.remove('active');
         btn.classList.remove('active');
+    }
+    
+    // Embassy Selection Modal
+    openEmbassySelection() {
+        if (this.comparisonEmbassies.length >= this.maxComparisons) {
+            alert(`You can only compare up to ${this.maxComparisons} embassies at once.`);
+            return;
+        }
+        
+        const modal = document.getElementById('embassySelectionModal');
+        modal.classList.add('active');
+        this.renderEmbassySelectionList();
+    }
+    
+    closeEmbassySelection() {
+        const modal = document.getElementById('embassySelectionModal');
+        modal.classList.remove('active');
+    }
+    
+    renderEmbassySelectionList(filter = '') {
+        const list = document.getElementById('embassySelectionList');
+        const embassies = filter 
+            ? this.embassyData.filter(e => 
+                e.embassy.toLowerCase().includes(filter.toLowerCase()) ||
+                e.country.toLowerCase().includes(filter.toLowerCase())
+              )
+            : this.embassyData;
+        
+        list.innerHTML = embassies.map(embassy => {
+            const isSelected = this.comparisonEmbassies.some(e => e.embassy === embassy.embassy);
+            const flag = this.getCountryFlag(embassy.country);
+            
+            return `
+                <div class="embassy-selection-item ${isSelected ? 'selected' : ''}" 
+                     data-embassy="${embassy.embassy}"
+                     ${!isSelected ? `onclick="embassyApp.addToComparison('${embassy.embassy}')"` : ''}>
+                    <span class="flag">${flag}</span>
+                    <div class="embassy-selection-info">
+                        <h4>${embassy.embassy}</h4>
+                        <p>${embassy.country}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    filterEmbassySelection(query) {
+        this.renderEmbassySelectionList(query);
+    }
+    
+    addToComparison(embassyName) {
+        const embassy = this.embassyData.find(e => e.embassy === embassyName);
+        if (!embassy || this.comparisonEmbassies.length >= this.maxComparisons) return;
+        
+        this.comparisonEmbassies.push(embassy);
+        this.closeEmbassySelection();
+        this.updateComparisonView();
+    }
+    
+    removeFromComparison(embassyName) {
+        this.comparisonEmbassies = this.comparisonEmbassies.filter(e => e.embassy !== embassyName);
+        this.updateComparisonView();
+    }
+    
+    updateComparisonView() {
+        this.renderSelectedEmbassies();
+        this.renderComparisonTable();
+    }
+    
+    renderSelectedEmbassies() {
+        const container = document.getElementById('selectedEmbassies');
+        
+        container.innerHTML = this.comparisonEmbassies.map(embassy => {
+            const flag = this.getCountryFlag(embassy.country);
+            return `
+                <div class="embassy-chip">
+                    <span>${flag}</span>
+                    <span>${embassy.embassy}</span>
+                    <button class="remove-chip" onclick="embassyApp.removeFromComparison('${embassy.embassy}')">&times;</button>
+                </div>
+            `;
+        }).join('');
+        
+        // Show/hide add button based on count
+        const addBtn = document.getElementById('addEmbassyBtn');
+        if (addBtn) {
+            addBtn.style.display = this.comparisonEmbassies.length >= this.maxComparisons ? 'none' : 'flex';
+        }
+    }
+    
+    async renderComparisonTable() {
+        const content = document.getElementById('comparisonContent');
+        
+        if (this.comparisonEmbassies.length === 0) {
+            content.innerHTML = `
+                <div style="text-align: center; padding: 64px; color: var(--gray-500);">
+                    <p style="font-size: 16px; margin-bottom: 8px;">No embassies selected for comparison</p>
+                    <p style="font-size: 14px;">Click "Add Embassy" to get started</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Show loading state
+        content.innerHTML = '<div class="loading"><div class="spinner"></div>Loading comparison data...</div>';
+        
+        // Collect all embassy data
+        const embassyDataPromises = this.comparisonEmbassies.map(embassy => 
+            this.getEmbassyInfoFromAPI(embassy)
+        );
+        
+        const embassyInfos = await Promise.all(embassyDataPromises);
+        
+        // Build comparison table
+        const metrics = [
+            { key: 'sivData', label: 'Current Year SIV Cases', formatter: this.formatSIVData.bind(this) },
+            { key: 'links', label: 'Embassy Website', formatter: this.formatLinks.bind(this) },
+            { key: 'visa', label: 'Visa Requirements', formatter: this.formatVisa.bind(this) },
+            { key: 'medical', label: 'Medical Exam Info', formatter: this.formatMedical.bind(this) },
+            { key: 'travel', label: 'Travel Costs', formatter: this.formatTravel.bind(this) },
+            { key: 'living', label: 'Living Expenses', formatter: this.formatLiving.bind(this) },
+            { key: 'support', label: 'Support Organizations', formatter: this.formatSupport.bind(this) },
+            { key: 'documents', label: 'Required Documents', formatter: this.formatDocuments.bind(this) }
+        ];
+        
+        content.innerHTML = `
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        ${this.comparisonEmbassies.map((embassy, index) => `
+                            <th class="embassy-column-header">
+                                <h3>${embassy.embassy}</h3>
+                                <p>${embassy.country}</p>
+                            </th>
+                        `).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${metrics.map(metric => `
+                        <tr>
+                            <td class="metric-label">${metric.label}</td>
+                            ${embassyInfos.map((info, index) => `
+                                <td class="embassy-column">
+                                    ${metric.formatter(info[metric.key], this.comparisonEmbassies[index])}
+                                </td>
+                            `).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+    
+    // Formatters for comparison table
+    formatSIVData(data, embassy) {
+        const currentYear = new Date().getFullYear();
+        const total = this.getCurrentYearTotal(embassy);
+        return `<strong>${total}</strong> cases<br><small>${currentYear} YTD</small>`;
+    }
+    
+    formatLinks(data) {
+        if (!data?.website) return '<span style="color: var(--gray-400);">Not available</span>';
+        return `<a href="${data.website}" target="_blank" style="color: var(--primary);">Visit Website →</a>`;
+    }
+    
+    formatVisa(data) {
+        if (!data?.requirements) return '<span style="color: var(--gray-400);">Not available</span>';
+        return `<div style="font-size: 13px;">${data.requirements}</div>`;
+    }
+    
+    formatMedical(data) {
+        if (!data?.location) return '<span style="color: var(--gray-400);">Not available</span>';
+        return `<div style="font-size: 13px;">${data.location}</div>`;
+    }
+    
+    formatTravel(data) {
+        if (!data?.cost) return '<span style="color: var(--gray-400);">Not available</span>';
+        return `<div style="font-size: 13px;">${data.cost}</div>`;
+    }
+    
+    formatLiving(data) {
+        if (!data?.daily) return '<span style="color: var(--gray-400);">Not available</span>';
+        return `<div style="font-size: 13px;">Daily: ${data.daily}<br>Monthly: ${data.monthly || 'N/A'}</div>`;
+    }
+    
+    formatSupport(data) {
+        if (!data?.organizations || data.organizations.length === 0) {
+            return '<span style="color: var(--gray-400);">Not available</span>';
+        }
+        return `<div style="font-size: 13px;">${data.organizations.slice(0, 2).join('<br>')}<br><small>+${data.organizations.length - 2} more</small></div>`;
+    }
+    
+    formatDocuments(data) {
+        if (!data?.checklist || data.checklist.length === 0) {
+            return '<span style="color: var(--gray-400);">Not available</span>';
+        }
+        return `<div style="font-size: 13px;">${data.checklist.slice(0, 3).join('<br>')}<br><small>+${data.checklist.length - 3} more</small></div>`;
     }
 
     toggleTranslation() {
