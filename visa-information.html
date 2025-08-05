@@ -58,20 +58,16 @@
             <!-- Country Selection Section -->
             <div class="country-selection-section">
                 <div class="selection-container">
-                    <h3>Select a Country</h3>
-                    <p>Choose a country to view detailed visa requirements and processing information</p>
+                    <h3>Search for Countries</h3>
+                    <p>Type a country name to view detailed visa requirements and processing information</p>
                     
-                    <div class="country-dropdown-container">
-                        <select id="countrySelect" class="country-dropdown">
-                            <option value="">Choose a country...</option>
-                        </select>
-                        <div class="dropdown-icon">▼</div>
+                    <div class="search-input-container">
+                        <input type="text" id="countrySearch" class="country-search-input" placeholder="Type country name...">
+                        <div class="search-icon">🔍</div>
                     </div>
                     
-                    <div class="selection-actions" id="selectionActions" style="display: none;">
-                        <button class="clear-selection-btn" id="clearSelectionBtn">
-                            <span>↻</span> Start Over
-                        </button>
+                    <div class="search-results" id="searchResults" style="display: none;">
+                        <!-- Search results will appear here -->
                     </div>
                 </div>
             </div>
@@ -81,9 +77,25 @@
                 <div class="selected-countries-list" id="selectedCountriesList">
                     <!-- Selected country chips will appear here -->
                 </div>
-                <button class="add-country-btn" id="addCountryBtn">
-                    <span>+</span> Add Country to Compare
-                </button>
+                <div class="add-country-container">
+                    <button class="add-country-btn" id="addCountryBtn">
+                        <span>+</span> Add Country to Compare
+                    </button>
+                    
+                    <!-- Embedded Country Selection Popout -->
+                    <div class="country-selection-popout" id="countrySelectionPopout" style="display: none;">
+                        <div class="popout-header">
+                            <h4>Select Country to Compare</h4>
+                            <button class="close-popout-btn" id="closePopoutBtn">&times;</button>
+                        </div>
+                        <div class="popout-search">
+                            <input type="text" id="comparisonCountrySearch" class="popout-search-input" placeholder="Search for country...">
+                        </div>
+                        <div class="popout-results" id="comparisonSearchResults">
+                            <!-- Search results will appear here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Visa Information Display -->

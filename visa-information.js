@@ -15,7 +15,6 @@ class VisaInformationApp {
         await this.loadVisaData();
         await this.loadSIVCountries(); // Load countries from SIV data
         this.setupEventListeners();
-        this.populateCountryDropdown();
         this.handleURLParameters();
     }
 
@@ -354,21 +353,27 @@ class VisaInformationApp {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-        // Country dropdown selection
-        document.getElementById('countrySelect')?.addEventListener('change', (e) => {
-            if (e.target.value) {
-                this.selectCountry(e.target.value);
-            }
+        // Country search
+        document.getElementById('countrySearch')?.addEventListener('input', (e) => {
+            this.handleCountrySearch(e.target.value);
         });
 
-        // Clear selection button
-        document.getElementById('clearSelectionBtn')?.addEventListener('click', () => {
-            this.clearSelection();
-        });
 
         // Add country to comparison
-        document.getElementById('addCountryBtn')?.addEventListener('click', () => {
-            this.openCountrySelection();
+        document.getElementById('addCountryBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleCountrySelectionPopout();
+        });
+
+        // Close popout
+        document.getElementById('closePopoutBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeCountrySelectionPopout();
+        });
+
+        // Comparison country search
+        document.getElementById('comparisonCountrySearch')?.addEventListener('input', (e) => {
+            this.handleComparisonCountrySearch(e.target.value);
         });
 
 
@@ -392,12 +397,23 @@ class VisaInformationApp {
             if (!e.target.closest('.info-dropdown')) {
                 this.closeAllDropdowns();
             }
+            if (!e.target.closest('.search-input-container')) {
+                this.hideSearchResults();
+            }
+            if (!e.target.closest('.add-country-container')) {
+                this.closeCountrySelectionPopout();
+            }
         });
     }
 
-    populateCountryDropdown() {
-        const dropdown = document.getElementById('countrySelect');
-        if (!dropdown) return;
+    handleCountrySearch(query) {
+        const searchResults = document.getElementById('searchResults');
+        if (!searchResults) return;
+        
+        if (!query.trim()) {
+            this.hideSearchResults();
+            return;
+        }
         
         // Combine visa countries with SIV countries (remove duplicates)
         const allCountries = new Map();
@@ -407,6 +423,7 @@ class VisaInformationApp {
             allCountries.set(visa.country, {
                 name: visa.country,
                 flag: visa.flag,
+                embassy: visa.embassy,
                 hasVisaInfo: true
             });
         });
@@ -417,34 +434,189 @@ class VisaInformationApp {
                 allCountries.set(country.name, {
                     name: country.name,
                     flag: country.flag,
+                    embassy: country.embassy || 'Embassy information available',
                     hasVisaInfo: false
                 });
             }
         });
         
-        // Sort countries alphabetically
-        const sortedCountries = Array.from(allCountries.values()).sort((a, b) => a.name.localeCompare(b.name));
+        // Filter countries based on search query
+        const filteredCountries = Array.from(allCountries.values()).filter(country => 
+            country.name.toLowerCase().includes(query.toLowerCase())
+        );
         
-        // Populate dropdown
-        dropdown.innerHTML = '<option value="">Choose a country...</option>';
-        sortedCountries.forEach(country => {
-            const option = document.createElement('option');
-            option.value = country.name;
-            option.textContent = `${country.flag} ${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}`;
-            dropdown.appendChild(option);
+        if (filteredCountries.length === 0) {
+            searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
+        } else {
+            searchResults.innerHTML = filteredCountries.map(country => `
+                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
+                    <span class="search-result-flag">${country.flag}</span>
+                    <div class="search-result-info">
+                        <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
+                        <p>${country.embassy}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        searchResults.style.display = 'block';
+    }
+    
+    selectCountryFromSearch(countryName) {
+        document.getElementById('countrySearch').value = '';
+        this.hideSearchResults();
+        this.selectCountry(countryName);
+    }
+    
+    hideSearchResults() {
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+        }
+    }
+    
+    toggleCountrySelectionPopout() {
+        const popout = document.getElementById('countrySelectionPopout');
+        if (!popout) return;
+        
+        const isVisible = popout.style.display === 'block';
+        
+        if (isVisible) {
+            this.closeCountrySelectionPopout();
+        } else {
+            this.openCountrySelectionPopout();
+        }
+    }
+    
+    openCountrySelectionPopout() {
+        const popout = document.getElementById('countrySelectionPopout');
+        const searchInput = document.getElementById('comparisonCountrySearch');
+        
+        if (!popout || !searchInput) return;
+        
+        popout.style.display = 'block';
+        
+        // Focus on search input
+        setTimeout(() => {
+            searchInput.focus();
+        }, 100);
+        
+        // Load all countries initially
+        this.handleComparisonCountrySearch('');
+    }
+    
+    closeCountrySelectionPopout() {
+        const popout = document.getElementById('countrySelectionPopout');
+        const searchInput = document.getElementById('comparisonCountrySearch');
+        
+        if (popout) {
+            popout.style.display = 'none';
+        }
+        
+        if (searchInput) {
+            searchInput.value = '';
+        }
+    }
+    
+    handleComparisonCountrySearch(query) {
+        const resultsContainer = document.getElementById('comparisonSearchResults');
+        if (!resultsContainer) return;
+        
+        // Get all available countries
+        const allCountries = new Map();
+        
+        // Add visa countries first (they have detailed info)
+        this.visaData.forEach(visa => {
+            allCountries.set(visa.country, {
+                name: visa.country,
+                flag: visa.flag,
+                embassy: visa.embassy,
+                hasVisaInfo: true
+            });
         });
+        
+        // Add SIV countries
+        this.sivCountries.forEach(country => {
+            if (!allCountries.has(country.name)) {
+                allCountries.set(country.name, {
+                    name: country.name,
+                    flag: country.flag,
+                    embassy: country.embassy || 'Embassy information available',
+                    hasVisaInfo: false
+                });
+            }
+        });
+        
+        // Filter countries based on search query
+        let filteredCountries = Array.from(allCountries.values());
+        
+        if (query.trim()) {
+            filteredCountries = filteredCountries.filter(country => 
+                country.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        
+        // Sort countries - already selected ones last
+        const selectedCountryNames = this.comparisonCountries.map(c => c.country);
+        filteredCountries.sort((a, b) => {
+            const aSelected = selectedCountryNames.includes(a.name);
+            const bSelected = selectedCountryNames.includes(b.name);
+            
+            if (aSelected && !bSelected) return 1;
+            if (!aSelected && bSelected) return -1;
+            return a.name.localeCompare(b.name);
+        });
+        
+        if (filteredCountries.length === 0) {
+            resultsContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--gray-500);">No countries found</div>';
+        } else {
+            resultsContainer.innerHTML = filteredCountries.map(country => {
+                const isAlreadySelected = selectedCountryNames.includes(country.name);
+                const canAddMore = this.comparisonCountries.length < this.maxComparisons;
+                
+                return `
+                    <div class="popout-result-item ${isAlreadySelected ? 'disabled' : ''}" 
+                         ${!isAlreadySelected && canAddMore ? `onclick="visaApp.addCountryFromPopout('${country.name}')"` : ''}>
+                        <span class="popout-result-flag">${country.flag}</span>
+                        <div class="popout-result-info">
+                            <h5>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h5>
+                            <p>${country.embassy}</p>
+                        </div>
+                        ${isAlreadySelected ? 
+                            '<span class="popout-result-status already-selected">Already selected</span>' : 
+                            (!canAddMore ? '<span class="popout-result-status already-selected">Max reached</span>' : '')
+                        }
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+    
+    addCountryFromPopout(countryName) {
+        if (this.comparisonCountries.length >= this.maxComparisons) {
+            alert(`You can only compare up to ${this.maxComparisons} countries at once.`);
+            return;
+        }
+        
+        if (!this.comparisonCountries.some(c => c.country === countryName)) {
+            const countryData = this.getCountryData(countryName);
+            if (countryData) {
+                this.comparisonCountries.push(countryData);
+                this.updateSelectedCountriesBar();
+                this.renderVisaInformation();
+                
+                // Refresh the popout results to reflect the new selection
+                const searchInput = document.getElementById('comparisonCountrySearch');
+                this.handleComparisonCountrySearch(searchInput ? searchInput.value : '');
+            }
+        }
     }
     
     handleURLParameters() {
         const urlParams = new URLSearchParams(window.location.search);
         const country = urlParams.get('country');
         if (country) {
-            // Set dropdown value and select country
-            const dropdown = document.getElementById('countrySelect');
-            if (dropdown) {
-                dropdown.value = country;
-                this.selectCountry(country);
-            }
+            this.selectCountry(country);
         }
     }
     
@@ -463,47 +635,11 @@ class VisaInformationApp {
                 this.comparisonCountries = [countryData]; // Replace with new selection
                 this.updateSelectedCountriesBar();
                 this.renderVisaInformation();
-                this.showSelectionActions();
             }
         }
     }
     
-    clearSelection() {
-        // Clear all selections
-        this.comparisonCountries = [];
-        
-        // Reset dropdown
-        const dropdown = document.getElementById('countrySelect');
-        if (dropdown) {
-            dropdown.value = '';
-        }
-        
-        // Hide UI elements
-        this.updateSelectedCountriesBar();
-        this.renderVisaInformation();
-        this.hideSelectionActions();
-        
-        // Clear URL parameters
-        if (window.history) {
-            const url = new URL(window.location);
-            url.searchParams.delete('country');
-            window.history.pushState({}, '', url);
-        }
-    }
     
-    showSelectionActions() {
-        const actions = document.getElementById('selectionActions');
-        if (actions) {
-            actions.style.display = 'block';
-        }
-    }
-    
-    hideSelectionActions() {
-        const actions = document.getElementById('selectionActions');
-        if (actions) {
-            actions.style.display = 'none';
-        }
-    }
     
     getCountryData(countryName) {
         // First try to find in visa data
@@ -639,7 +775,7 @@ class VisaInformationApp {
                 <td class="official-link-col">
                     ${country.links.length > 0 ? `
                         <a href="${country.links[0].url}" target="_blank" rel="noopener" class="official-link">
-                            <span>Apply Online</span>
+                            <span>Official Link</span>
                             <span>→</span>
                         </a>
                     ` : `
@@ -650,19 +786,9 @@ class VisaInformationApp {
         `;
     }
     
-    toggleDropdown(dropdownId) {
+    toggleDropdown(dropdownId, triggerElement) {
         // Close all other dropdowns first
-        document.querySelectorAll('.dropdown-content.active').forEach(dropdown => {
-            if (dropdown.id !== dropdownId) {
-                dropdown.classList.remove('active');
-                const trigger = dropdown.previousElementSibling;
-                if (trigger) {
-                    trigger.classList.remove('active');
-                    const icon = trigger.querySelector('[id^="icon-"]');
-                    if (icon) icon.textContent = '▼';
-                }
-            }
-        });
+        this.closeAllDropdowns();
         
         // Toggle the clicked dropdown
         const dropdown = document.getElementById(dropdownId);
@@ -672,15 +798,38 @@ class VisaInformationApp {
         if (dropdown && trigger && icon) {
             const isActive = dropdown.classList.contains('active');
             
-            if (isActive) {
-                dropdown.classList.remove('active');
-                trigger.classList.remove('active');
-                icon.textContent = '▼';
-            } else {
+            if (!isActive) {
+                // Create and show overlay
+                this.showDropdownOverlay();
+                
+                // Position the dropdown in the center of the screen
+                dropdown.style.left = '50%';
+                dropdown.style.top = '50%';
+                dropdown.style.transform = 'translate(-50%, -50%)';
+                
                 dropdown.classList.add('active');
                 trigger.classList.add('active');
                 icon.textContent = '▲';
             }
+        }
+    }
+    
+    showDropdownOverlay() {
+        let overlay = document.getElementById('dropdownOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'dropdownOverlay';
+            overlay.className = 'dropdown-overlay';
+            overlay.onclick = () => this.closeAllDropdowns();
+            document.body.appendChild(overlay);
+        }
+        overlay.classList.add('active');
+    }
+    
+    hideDropdownOverlay() {
+        const overlay = document.getElementById('dropdownOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
         }
     }
     
@@ -694,6 +843,7 @@ class VisaInformationApp {
                 if (icon) icon.textContent = '▼';
             }
         });
+        this.hideDropdownOverlay();
     }
     
     makeLinksClickable(text) {
@@ -815,16 +965,10 @@ class VisaInformationApp {
         
         // Update URL if this was the main country
         if (this.comparisonCountries.length === 0) {
-            this.hideSelectionActions();
             if (window.history) {
                 const url = new URL(window.location);
                 url.searchParams.delete('country');
                 window.history.pushState({}, '', url);
-            }
-            // Reset dropdown
-            const dropdown = document.getElementById('countrySelect');
-            if (dropdown) {
-                dropdown.value = '';
             }
         }
     }
