@@ -317,8 +317,19 @@ class VisaInformationApp {
     }
 
     async loadSIVCountries() {
-        // Load SIV embassy data to get all countries
+        // Load the same SIV embassy data that's used in the main issuances page
         try {
+            // First try to get data from script.js global variable if available
+            if (typeof embassyData !== 'undefined' && embassyData.embassies) {
+                this.sivCountries = embassyData.embassies.map(embassy => ({
+                    name: embassy.country,
+                    embassy: embassy.embassy,
+                    flag: this.getCountryFlag(embassy.country)
+                }));
+                return;
+            }
+            
+            // Otherwise try to fetch the JSON file
             const response = await fetch('data/embassy-siv-data.json');
             const data = await response.json();
             this.sivCountries = data.embassies.map(embassy => ({
@@ -328,12 +339,24 @@ class VisaInformationApp {
             }));
         } catch (error) {
             console.error('Error loading SIV countries:', error);
-            // Fallback to visa countries if SIV data unavailable
-            this.sivCountries = this.visaData.map(visa => ({
-                name: visa.country,
-                embassy: visa.embassy || visa.city,
-                flag: visa.flag
-            }));
+            // Create a comprehensive list of SIV countries as fallback
+            this.sivCountries = [
+                // Add all the countries that would be in the SIV data
+                { name: 'Afghanistan', embassy: 'Kabul', flag: this.getCountryFlag('Afghanistan') },
+                { name: 'Pakistan', embassy: 'Islamabad', flag: this.getCountryFlag('Pakistan') },
+                { name: 'India', embassy: 'New Delhi', flag: this.getCountryFlag('India') },
+                { name: 'Qatar', embassy: 'Doha', flag: this.getCountryFlag('Qatar') },
+                { name: 'UAE', embassy: 'Abu Dhabi', flag: this.getCountryFlag('UAE') },
+                { name: 'Turkey', embassy: 'Ankara', flag: this.getCountryFlag('Turkey') },
+                { name: 'Germany', embassy: 'Frankfurt', flag: this.getCountryFlag('Germany') },
+                { name: 'Canada', embassy: 'Montreal', flag: this.getCountryFlag('Canada') },
+                { name: 'Albania', embassy: 'Tirana', flag: this.getCountryFlag('Albania') },
+                { name: 'Iraq', embassy: 'Baghdad', flag: this.getCountryFlag('Iraq') },
+                { name: 'Iran', embassy: 'Tehran', flag: this.getCountryFlag('Iran') },
+                { name: 'Philippines', embassy: 'Manila', flag: this.getCountryFlag('Philippines') },
+                { name: 'Rwanda', embassy: 'Kigali', flag: this.getCountryFlag('Rwanda') },
+                { name: 'United States', embassy: 'Washington DC', flag: this.getCountryFlag('United States') }
+            ];
         }
     }
 
@@ -428,7 +451,7 @@ class VisaInformationApp {
         const searchResults = document.getElementById('searchResults');
         if (!searchResults) return;
         
-        // Get all available countries (exactly like comparison search)
+        // Get all available countries - exactly like comparison search
         const allCountries = new Map();
         
         // Add visa countries first (they have detailed info)
@@ -441,7 +464,7 @@ class VisaInformationApp {
             });
         });
         
-        // Add SIV countries if they exist
+        // Add ALL SIV countries (this should include all countries from the issuances page)
         if (this.sivCountries && Array.isArray(this.sivCountries)) {
             this.sivCountries.forEach(country => {
                 if (!allCountries.has(country.name)) {
@@ -455,7 +478,7 @@ class VisaInformationApp {
             });
         }
         
-        // Filter countries based on search query (exactly like comparison search)
+        // Filter countries based on search query
         let filteredCountries = Array.from(allCountries.values());
         
         if (query.trim()) {
@@ -464,7 +487,7 @@ class VisaInformationApp {
             );
         }
         
-        // Sort alphabetically (exactly like comparison search)
+        // Sort alphabetically
         filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
         
         if (filteredCountries.length === 0) {
