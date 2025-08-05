@@ -342,7 +342,29 @@ body {
     opacity: 1;
 }
 
-.add-country-btn {
+.selection-container .add-country-btn {
+    background: var(--primary);
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.selection-container .add-country-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+}
+
+.selected-countries-bar .add-country-btn {
     background: var(--white);
     border: 2px dashed var(--gray-300);
     color: var(--gray-600);
@@ -357,7 +379,7 @@ body {
     gap: 4px;
 }
 
-.add-country-btn:hover {
+.selected-countries-bar .add-country-btn:hover {
     background: var(--gray-50);
     border-color: var(--gray-400);
     color: var(--gray-700);
@@ -366,15 +388,19 @@ body {
 /* Add Country Container */
 .add-country-container {
     position: relative;
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
 }
 
 /* Country Selection Popout */
 .country-selection-popout {
     position: absolute;
     top: 100%;
-    right: 0;
-    margin-top: 12px;
-    width: 350px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    width: 400px;
     background: var(--white);
     border: 1px solid var(--gray-200);
     border-radius: 12px;
@@ -387,11 +413,11 @@ body {
 @keyframes popoutSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px) scale(0.95);
+        transform: translateX(-50%) translateY(-10px) scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateX(-50%) translateY(0) scale(1);
     }
 }
 
