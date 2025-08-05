@@ -392,18 +392,6 @@ class VisaInformationApp {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-        // Country search functionality
-        const countrySearchInput = document.getElementById('countrySearch');
-        if (countrySearchInput) {
-            countrySearchInput.addEventListener('input', (e) => {
-                this.handleCountrySearch(e.target.value);
-            });
-            countrySearchInput.addEventListener('focus', () => {
-                if (!countrySearchInput.value.trim()) {
-                    this.showAllCountries();
-                }
-            });
-        }
 
         // Add country to comparison
         document.getElementById('addCountryBtn')?.addEventListener('click', (e) => {
@@ -442,89 +430,9 @@ class VisaInformationApp {
             if (!e.target.closest('.add-country-container')) {
                 this.closeCountrySelectionPopout();
             }
-            if (!e.target.closest('.search-input-container')) {
-                this.hideSearchResults();
-            }
         });
     }
 
-    handleCountrySearch(query) {
-        const searchResults = document.getElementById('searchResults');
-        if (!searchResults) return;
-        
-        console.log('Search query:', query); // Debug log
-        console.log('SIV Countries loaded:', this.sivCountries ? this.sivCountries.length : 'Not loaded'); // Debug log
-        
-        if (!query.trim()) {
-            this.hideSearchResults();
-            return;
-        }
-        
-        // Start with visa countries - these always exist and work
-        let allCountries = [...this.visaData];
-        
-        // Filter countries based on search query
-        let filteredCountries = allCountries.filter(country => 
-            country.country.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        // Sort alphabetically
-        filteredCountries.sort((a, b) => a.country.localeCompare(b.country));
-        
-        if (filteredCountries.length === 0) {
-            searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
-        } else {
-            searchResults.innerHTML = filteredCountries.map(country => `
-                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.country}')">
-                    <span class="search-result-flag">${country.flag}</span>
-                    <div class="search-result-info">
-                        <h4>${country.country}</h4>
-                        <p>${country.embassy}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        searchResults.style.display = 'block';
-    }
-    
-    showAllCountries() {
-        const searchResults = document.getElementById('searchResults');
-        if (!searchResults) return;
-        
-        console.log('Showing all countries'); // Debug log
-        
-        // Start with visa countries - these always exist and work
-        let allCountries = [...this.visaData];
-        
-        // Sort alphabetically
-        allCountries.sort((a, b) => a.country.localeCompare(b.country));
-        
-        searchResults.innerHTML = allCountries.map(country => `
-            <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.country}')">
-                <span class="search-result-flag">${country.flag}</span>
-                <div class="search-result-info">
-                    <h4>${country.country}</h4>
-                    <p>${country.embassy}</p>
-                </div>
-            </div>
-        `).join('');
-        
-        searchResults.style.display = 'block';
-    }
-    
-    selectCountryFromSearch(countryName) {
-        document.getElementById('countrySearch').value = countryName;
-        this.hideSearchResults();
-        this.selectCountry(countryName);
-    }
-    
-    hideSearchResults() {
-        const searchResults = document.getElementById('searchResults');
-        if (searchResults) {
-            searchResults.style.display = 'none';
-        }
-    }
     
     toggleCountrySelectionPopout() {
         const popout = document.getElementById('countrySelectionPopout');
