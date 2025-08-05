@@ -371,6 +371,11 @@ class VisaInformationApp {
             this.openCountrySelection();
         });
 
+        // Add more button in table
+        document.getElementById('addMoreBtn')?.addEventListener('click', () => {
+            this.openCountrySelection();
+        });
+
         // Comparison button
         document.getElementById('compareBtn')?.addEventListener('click', () => {
             this.openComparisonPanel();
@@ -561,8 +566,64 @@ class VisaInformationApp {
             return;
         }
         
-        container.style.display = 'grid';
-        container.innerHTML = this.comparisonCountries.map(country => this.renderCountryCard(country)).join('');
+        container.style.display = 'block';
+        
+        // Update table title
+        const tableTitle = document.getElementById('tableTitle');
+        if (tableTitle) {
+            const countryNames = this.comparisonCountries.map(c => c.country).join(', ');
+            tableTitle.textContent = `Visa Requirements - ${countryNames}`;
+        }
+        
+        // Render table rows
+        const tbody = document.getElementById('visaTableBody');
+        tbody.innerHTML = this.comparisonCountries.map(country => this.renderTableRow(country)).join('');
+    }
+    
+    renderTableRow(country) {
+        return `
+            <tr>
+                <td class="country-col">
+                    <div class="country-cell">
+                        <span class="country-flag">${country.flag}</span>
+                        <div class="country-info">
+                            <h4>${country.country}</h4>
+                            <p>${country.embassy}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="visa-type-col">
+                    <div style="font-weight: 500;">${country.visaType}</div>
+                    <div style="font-size: 12px; color: var(--gray-600); margin-top: 2px;">
+                        ${country.sourceName}
+                    </div>
+                </td>
+                <td class="cost-col">
+                    <span class="cost-value">${country.visaCost}</span>
+                </td>
+                <td class="validity-col">
+                    ${country.validity}
+                </td>
+                <td class="extension-col">
+                    <span class="${country.extensionPossible ? 'extension-yes' : 'extension-no'}">
+                        ${country.extensionPossible ? 'Yes' : 'No'}
+                    </span>
+                    ${country.extensionPossible ? `
+                        <div style="font-size: 12px; color: var(--gray-600); margin-top: 2px;">
+                            ${country.extensionDuration}
+                        </div>
+                    ` : ''}
+                </td>
+                <td class="actions-col">
+                    <button class="table-action-btn" onclick="visaApp.showVisaDetails('${country.country}')" title="View Details">
+                        👁️
+                    </button>
+                    <button class="table-action-btn remove" onclick="visaApp.removeFromComparison('${country.country}')" title="Remove">
+                        ×
+                    </button>
+                </td>
+            </tr>
+        `;
     }
     
     renderCountryCard(country) {
@@ -691,8 +752,8 @@ class VisaInformationApp {
         }
     }
 
-    showVisaDetails(rank) {
-        const visa = this.visaData.find(v => v.rank === rank);
+    showVisaDetails(countryName) {
+        const visa = this.visaData.find(v => v.country === countryName);
         if (!visa) return;
         
         const modal = document.getElementById('detailModal');
