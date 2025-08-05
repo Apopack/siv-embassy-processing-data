@@ -581,8 +581,11 @@ class VisaInformationApp {
     }
     
     renderTableRow(country) {
+        const rowId = `row-${country.country.replace(/\s+/g, '-').toLowerCase()}`;
+        const detailsId = `details-${country.country.replace(/\s+/g, '-').toLowerCase()}`;
+        
         return `
-            <tr>
+            <tr id="${rowId}">
                 <td class="country-col">
                     <div class="country-cell">
                         <span class="country-flag">${country.flag}</span>
@@ -614,16 +617,132 @@ class VisaInformationApp {
                         </div>
                     ` : ''}
                 </td>
-                <td class="actions-col">
-                    <button class="table-action-btn" onclick="visaApp.showVisaDetails('${country.country}')" title="View Details">
-                        👁️
-                    </button>
-                    <button class="table-action-btn remove" onclick="visaApp.removeFromComparison('${country.country}')" title="Remove">
-                        ×
+                <td class="details-col">
+                    <button class="show-details-btn" onclick="visaApp.toggleDetails('${country.country}')" id="btn-${detailsId}">
+                        <span id="icon-${detailsId}">▼</span>
+                        <span>Show Details</span>
                     </button>
                 </td>
             </tr>
+            <tr class="details-row" id="${detailsId}" style="display: none;">
+                <td colspan="6">
+                    <div class="details-content" id="content-${detailsId}">
+                        ${this.renderDetailsContent(country)}
+                    </div>
+                </td>
+            </tr>
         `;
+    }
+    
+    renderDetailsContent(country) {
+        return `
+            <div class="details-grid">
+                <div class="details-section">
+                    <h4>
+                        <span class="details-section-icon">📋</span>
+                        Application Process
+                    </h4>
+                    <div class="processing-steps">
+                        <ol>
+                            ${country.processingSteps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="details-section">
+                    <h4>
+                        <span class="details-section-icon">⏰</span>
+                        Extension Information
+                    </h4>
+                    ${country.extensionPossible ? `
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${country.extensionDuration}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Cost</div>
+                            <div class="detail-value">${country.extensionCost}</div>
+                        </div>
+                    ` : `
+                        <div class="detail-item">
+                            <div class="detail-value" style="color: var(--danger);">
+                                Extensions are not available for this destination
+                            </div>
+                        </div>
+                    `}
+                </div>
+            </div>
+            
+            <div class="details-grid">
+                <div class="details-section">
+                    <h4>
+                        <span class="details-section-icon">🔗</span>
+                        Official Resources
+                    </h4>
+                    <div class="official-links">
+                        ${country.links.map(link => `
+                            <a href="${link.url}" target="_blank" rel="noopener">
+                                ${link.text} →
+                            </a>
+                        `).join('<br>')}
+                    </div>
+                </div>
+                
+                <div class="details-section">
+                    <h4>
+                        <span class="details-section-icon">ℹ️</span>
+                        Source & Actions
+                    </h4>
+                    <div style="margin-bottom: 16px;">
+                        <div class="source-badge">
+                            📊 ${country.sourceName} (${country.sourceType})
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--gray-600); margin-bottom: 16px;">
+                        Update Frequency: ${country.updateFrequency}
+                    </div>
+                    <button class="remove-country-btn" onclick="visaApp.removeFromComparison('${country.country}')">
+                        Remove from Comparison
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    toggleDetails(countryName) {
+        const detailsId = `details-${countryName.replace(/\s+/g, '-').toLowerCase()}`;
+        const contentId = `content-${detailsId}`;
+        const btnId = `btn-${detailsId}`;
+        const iconId = `icon-${detailsId}`;
+        
+        const detailsRow = document.getElementById(detailsId);
+        const detailsContent = document.getElementById(contentId);
+        const btn = document.getElementById(btnId);
+        const icon = document.getElementById(iconId);
+        
+        if (detailsRow && detailsContent && btn && icon) {
+            const isExpanded = detailsContent.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse
+                detailsContent.classList.remove('expanded');
+                btn.classList.remove('expanded');
+                icon.textContent = '▼';
+                btn.querySelector('span:last-child').textContent = 'Show Details';
+                setTimeout(() => {
+                    detailsRow.style.display = 'none';
+                }, 300);
+            } else {
+                // Expand
+                detailsRow.style.display = 'table-row';
+                setTimeout(() => {
+                    detailsContent.classList.add('expanded');
+                    btn.classList.add('expanded');
+                    icon.textContent = '▲';
+                    btn.querySelector('span:last-child').textContent = 'Hide Details';
+                }, 10);
+            }
+        }
     }
     
     renderCountryCard(country) {
@@ -752,70 +871,7 @@ class VisaInformationApp {
         }
     }
 
-    showVisaDetails(countryName) {
-        const visa = this.visaData.find(v => v.country === countryName);
-        if (!visa) return;
-        
-        const modal = document.getElementById('detailModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
-        
-        modalTitle.textContent = `${visa.country} Visa Information`;
-        
-        modalBody.innerHTML = `
-            <div class="visa-detail-content">
-                <div class="detail-header">
-                    <div class="country-flag" style="font-size: 64px; margin-bottom: 16px;">${visa.flag}</div>
-                    <h3>${visa.country} - ${visa.embassy}</h3>
-                    <p class="visa-type">${visa.visaType}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h4>Visa Requirements</h4>
-                    <p>${visa.visaNeeded}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h4>Cost & Validity</h4>
-                    <p class="visa-cost" style="font-size: 18px; font-weight: 600;">${visa.visaCost}</p>
-                    <p><strong>Validity:</strong> ${visa.validity}</p>
-                    <p><strong>Source:</strong> ${visa.sourceName} (${visa.sourceType})</p>
-                    <p><strong>Update Frequency:</strong> ${visa.updateFrequency}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h4>Application Process</h4>
-                    <ol>
-                        ${visa.processingSteps.map(step => `<li>${step}</li>`).join('')}
-                    </ol>
-                </div>
-                
-                <div class="detail-section">
-                    <h4>Extension Policy</h4>
-                    <p><strong>Extensions Available:</strong> ${visa.extensionPossible ? 'Yes' : 'No'}</p>
-                    ${visa.extensionPossible ? `
-                        <p><strong>Extension Duration:</strong> ${visa.extensionDuration}</p>
-                        <p><strong>Extension Cost:</strong> ${visa.extensionCost}</p>
-                    ` : '<p>Visa extensions are not available for this destination.</p>'}
-                </div>
-                
-                <div class="detail-section">
-                    <h4>Official Links</h4>
-                    <ul class="links-list">
-                        ${visa.links.map(link => `
-                            <li><a href="${link.url}" target="_blank" rel="noopener">${link.text} →</a></li>
-                        `).join('')}
-                    </ul>
-                </div>
-            </div>
-        `;
-        
-        modal.classList.add('active');
-    }
 
-    closeDetailModal() {
-        document.getElementById('detailModal').classList.remove('active');
-    }
 
     // Comparison functionality
     openComparisonPanel() {
