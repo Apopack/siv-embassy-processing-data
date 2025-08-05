@@ -57,7 +57,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 0 24px;
 }
@@ -532,6 +532,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    table-layout: fixed;
 }
 
 .visa-data-table th {
@@ -560,32 +561,32 @@ body {
 
 /* Table column styles */
 .country-col {
-    width: 18%;
-    min-width: 150px;
+    width: 16%;
+    min-width: 180px;
 }
 
 .visa-type-col {
-    width: 22%;
-    min-width: 180px;
+    width: 28%;
+    min-width: 250px;
 }
 
 .cost-col {
     width: 12%;
-    min-width: 100px;
+    min-width: 120px;
 }
 
 .validity-col {
     width: 12%;
-    min-width: 100px;
+    min-width: 110px;
 }
 
 .extension-col {
     width: 16%;
-    min-width: 120px;
+    min-width: 140px;
 }
 
 .official-link-col {
-    width: 20%;
+    width: 16%;
     min-width: 150px;
 }
 
@@ -764,6 +765,12 @@ body {
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+
+.visa-type-container > div:first-child {
+    font-weight: 500;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .extension-container {

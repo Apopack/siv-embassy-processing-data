@@ -339,10 +339,26 @@ class VisaInformationApp {
 
     getCountryFlag(country) {
         const flagMap = {
+            // Current visa countries
             'Pakistan': '🇵🇰', 'Qatar': '🇶🇦', 'Albania': '🇦🇱', 'Turkey': '🇹🇷',
             'Germany': '🇩🇪', 'Canada': '🇨🇦', 'Philippines': '🇵🇭', 'UAE': '🇦🇪',
             'Iraq': '🇮🇶', 'Rwanda': '🇷🇼', 'United Arab Emirates': '🇦🇪',
-            'United States': '🇺🇸', 'India': '🇮🇳', 'Iran': '🇮🇷'
+            
+            // Additional common countries
+            'United States': '🇺🇸', 'India': '🇮🇳', 'Iran': '🇮🇷', 'Afghanistan': '🇦🇫',
+            'Australia': '🇦🇺', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Brazil': '🇧🇷',
+            'China': '🇨🇳', 'Denmark': '🇩🇰', 'Egypt': '🇪🇬', 'France': '🇫🇷',
+            'Greece': '🇬🇷', 'Italy': '🇮🇹', 'Japan': '🇯🇵', 'Jordan': '🇯🇴',
+            'Kazakhstan': '🇰🇿', 'Kuwait': '🇰🇼', 'Lebanon': '🇱🇧', 'Malaysia': '🇲🇾',
+            'Mexico': '🇲🇽', 'Netherlands': '🇳🇱', 'Norway': '🇳🇴', 'Poland': '🇵🇱',
+            'Russia': '🇷🇺', 'Saudi Arabia': '🇸🇦', 'South Korea': '🇰🇷', 'Spain': '🇪🇸',
+            'Sweden': '🇸🇪', 'Switzerland': '🇨🇭', 'Thailand': '🇹🇭', 'United Kingdom': '🇬🇧',
+            'Uzbekistan': '🇺🇿', 'Vietnam': '🇻🇳', 'Indonesia': '🇮🇩', 'Bangladesh': '🇧🇩',
+            'Sri Lanka': '🇱🇰', 'Nepal': '🇳🇵', 'Myanmar': '🇲🇲', 'Cambodia': '🇰🇭',
+            'Laos': '🇱🇦', 'Singapore': '🇸🇬', 'South Africa': '🇿🇦', 'Nigeria': '🇳🇬',
+            'Kenya': '🇰🇪', 'Ethiopia': '🇪🇹', 'Morocco': '🇲🇦', 'Tunisia': '🇹🇳',
+            'Algeria': '🇩🇿', 'Libya': '🇱🇾', 'Sudan': '🇸🇩', 'Somalia': '🇸🇴',
+            'Yemen': '🇾🇪', 'Oman': '🇴🇲', 'Bahrain': '🇧🇭', 'Syria': '🇸🇾'
         };
         return flagMap[country] || '🏛️';
     }
@@ -411,7 +427,7 @@ class VisaInformationApp {
             return;
         }
         
-        // Combine visa countries with SIV countries (remove duplicates)
+        // Get all available countries (exactly like comparison search)
         const allCountries = new Map();
         
         // Add visa countries first (they have detailed info)
@@ -438,10 +454,17 @@ class VisaInformationApp {
             });
         }
         
-        // Filter countries based on search query
-        const filteredCountries = Array.from(allCountries.values()).filter(country => 
-            country.name.toLowerCase().includes(query.toLowerCase())
-        );
+        // Filter countries based on search query (exactly like comparison search)
+        let filteredCountries = Array.from(allCountries.values());
+        
+        if (query.trim()) {
+            filteredCountries = filteredCountries.filter(country => 
+                country.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        
+        // Sort alphabetically
+        filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
         
         if (filteredCountries.length === 0) {
             searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
