@@ -392,16 +392,6 @@ class VisaInformationApp {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-        // Country search - show all countries initially, then filter
-        const countrySearchInput = document.getElementById('countrySearch');
-        if (countrySearchInput) {
-            countrySearchInput.addEventListener('input', (e) => {
-                this.handleCountrySearch(e.target.value);
-            });
-            countrySearchInput.addEventListener('focus', () => {
-                this.handleCountrySearch(countrySearchInput.value || '');
-            });
-        }
 
 
         // Add country to comparison
@@ -438,87 +428,12 @@ class VisaInformationApp {
             if (!e.target.closest('.info-dropdown')) {
                 this.closeAllDropdowns();
             }
-            if (!e.target.closest('.search-input-container')) {
-                this.hideSearchResults();
-            }
             if (!e.target.closest('.add-country-container')) {
                 this.closeCountrySelectionPopout();
             }
         });
     }
 
-    handleCountrySearch(query = '') {
-        const searchResults = document.getElementById('searchResults');
-        if (!searchResults) return;
-        
-        // Get all available countries - exactly like comparison search
-        const allCountries = new Map();
-        
-        // Add visa countries first (they have detailed info)
-        this.visaData.forEach(visa => {
-            allCountries.set(visa.country, {
-                name: visa.country,
-                flag: visa.flag,
-                embassy: visa.embassy,
-                hasVisaInfo: true
-            });
-        });
-        
-        // Add ALL SIV countries (this should include all countries from the issuances page)
-        if (this.sivCountries && Array.isArray(this.sivCountries)) {
-            this.sivCountries.forEach(country => {
-                if (!allCountries.has(country.name)) {
-                    allCountries.set(country.name, {
-                        name: country.name,
-                        flag: country.flag,
-                        embassy: country.embassy || 'Embassy information available',
-                        hasVisaInfo: false
-                    });
-                }
-            });
-        }
-        
-        // Filter countries based on search query
-        let filteredCountries = Array.from(allCountries.values());
-        
-        if (query.trim()) {
-            filteredCountries = filteredCountries.filter(country => 
-                country.name.toLowerCase().includes(query.toLowerCase())
-            );
-        }
-        
-        // Sort alphabetically
-        filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
-        
-        if (filteredCountries.length === 0) {
-            searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--gray-500);">No countries found</div>';
-        } else {
-            searchResults.innerHTML = filteredCountries.map(country => `
-                <div class="search-result-item" onclick="visaApp.selectCountryFromSearch('${country.name}')">
-                    <span class="search-result-flag">${country.flag}</span>
-                    <div class="search-result-info">
-                        <h4>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h4>
-                        <p>${country.embassy}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        searchResults.style.display = 'block';
-    }
-    
-    selectCountryFromSearch(countryName) {
-        document.getElementById('countrySearch').value = '';
-        this.hideSearchResults();
-        this.selectCountry(countryName);
-    }
-    
-    hideSearchResults() {
-        const searchResults = document.getElementById('searchResults');
-        if (searchResults) {
-            searchResults.style.display = 'none';
-        }
-    }
     
     toggleCountrySelectionPopout() {
         const popout = document.getElementById('countrySelectionPopout');
