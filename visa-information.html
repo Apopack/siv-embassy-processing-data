@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visa Information - SIV Resources</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="visa-information.css">
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Side Navigation -->
+    <nav class="side-nav" id="sideNav">
+        <div class="nav-header">
+            <h2>SIV Resources</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    SIV Issuances
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="visa-information.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Visa Information
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="travel-information.html" class="nav-link">
+                    <span class="nav-icon">✈️</span>
+                    Travel Information
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sticky Action Buttons -->
+    <div class="sticky-actions">
+        <button class="sticky-btn" id="compareBtn">
+            <span>⚖️</span>
+            Compare
+        </button>
+        <button class="sticky-btn" id="downloadBtn">
+            <span>📥</span>
+            Download
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <header class="page-header">
+                <h1>Visa Requirements for Afghan Nationals</h1>
+                <p class="page-subtitle">Comprehensive visa information for SIV applicants traveling to interview locations</p>
+            </header>
+
+            <!-- Info Notice -->
+            <div class="info-notice">
+                <div class="notice-icon">ℹ️</div>
+                <div class="notice-content">
+                    <strong>Important:</strong> This information is for Afghan nationals holding Afghan passports. Requirements may change - always verify with the embassy before applying.
+                </div>
+            </div>
+
+            <!-- Filter and Search -->
+            <div class="filter-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by country or embassy..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-filter="all">All Countries</button>
+                    <button class="filter-btn" data-filter="evisa">E-Visa Available</button>
+                    <button class="filter-btn" data-filter="schengen">Schengen Zone</button>
+                </div>
+            </div>
+
+            <!-- Visa Cards Grid -->
+            <div class="visa-grid" id="visaGrid">
+                <!-- Cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Comparison Panel -->
+    <div class="comparison-panel" id="comparisonPanel">
+        <div class="comparison-modal">
+            <div class="comparison-header">
+                <h2>Compare Visa Requirements</h2>
+                <p class="comparison-subtitle">Select up to 5 countries to compare side by side</p>
+                <button class="close-comparison-btn" onclick="visaApp.closeComparisonPanel()">&times;</button>
+            </div>
+            <div class="comparison-controls">
+                <div class="selected-countries" id="selectedCountries">
+                    <!-- Selected country chips will appear here -->
+                </div>
+                <button class="add-country-btn" id="addCountryBtn">
+                    <span>+</span> Add Country
+                </button>
+            </div>
+            <div class="comparison-content" id="comparisonContent">
+                <!-- Comparison table will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Country Selection Modal -->
+    <div class="modal" id="countrySelectionModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Select Country to Compare</h2>
+                <button class="close-btn" onclick="visaApp.closeCountrySelection()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="comparisonSearch" class="comparison-search" placeholder="Search countries...">
+                <div class="country-selection-list" id="countrySelectionList">
+                    <!-- Country list will populate here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed View Modal -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Visa Details</h2>
+                <button class="close-btn" onclick="visaApp.closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Detailed visa information will load here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="visa-information.js"></script>
+</body>
+</html>

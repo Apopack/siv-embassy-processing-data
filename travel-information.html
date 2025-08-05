@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Information - SIV Resources</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="travel-information.css">
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Side Navigation -->
+    <nav class="side-nav" id="sideNav">
+        <div class="nav-header">
+            <h2>SIV Resources</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    SIV Issuances
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="visa-information.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Visa Information
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="travel-information.html" class="nav-link">
+                    <span class="nav-icon">✈️</span>
+                    Travel Information
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sticky Action Buttons -->
+    <div class="sticky-actions">
+        <button class="sticky-btn" id="compareBtn">
+            <span>⚖️</span>
+            Compare
+        </button>
+        <button class="sticky-btn" id="calculatorBtn">
+            <span>🧮</span>
+            Cost Calculator
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Page Header -->
+            <header class="page-header">
+                <h1>Travel & Living Costs</h1>
+                <p class="page-subtitle">Flight costs, accommodation, and living expenses for SIV interview locations</p>
+            </header>
+
+            <!-- Info Cards -->
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="info-card-icon">✈️</div>
+                    <div class="info-card-content">
+                        <h3>Flight Costs</h3>
+                        <p>From major Afghan cities</p>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">🏨</div>
+                    <div class="info-card-content">
+                        <h3>Accommodation</h3>
+                        <p>Budget to mid-range options</p>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">🍽️</div>
+                    <div class="info-card-content">
+                        <h3>Daily Expenses</h3>
+                        <p>Food, transport, essentials</p>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-icon">🏥</div>
+                    <div class="info-card-content">
+                        <h3>Medical Costs</h3>
+                        <p>Required examinations</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by country or city..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="sort-options">
+                    <select id="sortSelect" class="sort-select">
+                        <option value="country">Sort by Country</option>
+                        <option value="cost-low">Cost: Low to High</option>
+                        <option value="cost-high">Cost: High to Low</option>
+                        <option value="distance">Distance from Afghanistan</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Travel Cards Grid -->
+            <div class="travel-grid" id="travelGrid">
+                <!-- Cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Comparison Panel -->
+    <div class="comparison-panel" id="comparisonPanel">
+        <div class="comparison-modal">
+            <div class="comparison-header">
+                <h2>Compare Travel Costs</h2>
+                <p class="comparison-subtitle">Select up to 5 destinations to compare side by side</p>
+                <button class="close-comparison-btn" onclick="travelApp.closeComparisonPanel()">&times;</button>
+            </div>
+            <div class="comparison-controls">
+                <div class="selected-destinations" id="selectedDestinations">
+                    <!-- Selected destination chips will appear here -->
+                </div>
+                <button class="add-destination-btn" id="addDestinationBtn">
+                    <span>+</span> Add Destination
+                </button>
+            </div>
+            <div class="comparison-content" id="comparisonContent">
+                <!-- Comparison table will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Destination Selection Modal -->
+    <div class="modal" id="destinationSelectionModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>Select Destination to Compare</h2>
+                <button class="close-btn" onclick="travelApp.closeDestinationSelection()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="comparisonSearch" class="comparison-search" placeholder="Search destinations...">
+                <div class="destination-selection-list" id="destinationSelectionList">
+                    <!-- Destination list will populate here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Calculator Modal -->
+    <div class="modal" id="calculatorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Travel Cost Calculator</h2>
+                <button class="close-btn" onclick="travelApp.closeCalculator()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="calculator-form">
+                    <div class="form-group">
+                        <label>Destination</label>
+                        <select id="calcDestination" class="form-control">
+                            <option value="">Select destination...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Travelers</label>
+                        <input type="number" id="calcTravelers" class="form-control" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Number of Days</label>
+                        <input type="number" id="calcDays" class="form-control" value="7" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Accommodation Type</label>
+                        <select id="calcAccommodation" class="form-control">
+                            <option value="budget">Budget</option>
+                            <option value="mid" selected>Mid-range</option>
+                            <option value="comfort">Comfortable</option>
+                        </select>
+                    </div>
+                    <button class="calculate-btn" onclick="travelApp.calculateCost()">Calculate Total Cost</button>
+                </div>
+                <div id="calculatorResult" class="calculator-result">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="travel-information.js"></script>
+</body>
+</html>
