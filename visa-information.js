@@ -369,10 +369,16 @@ class VisaInformationApp {
             document.getElementById('sideNav').classList.toggle('active');
         });
 
-        // Country search
-        document.getElementById('countrySearch')?.addEventListener('input', (e) => {
-            this.handleCountrySearch(e.target.value);
-        });
+        // Country search - show all countries initially, then filter
+        const countrySearchInput = document.getElementById('countrySearch');
+        if (countrySearchInput) {
+            countrySearchInput.addEventListener('input', (e) => {
+                this.handleCountrySearch(e.target.value);
+            });
+            countrySearchInput.addEventListener('focus', () => {
+                this.handleCountrySearch(countrySearchInput.value || '');
+            });
+        }
 
 
         // Add country to comparison
@@ -418,14 +424,9 @@ class VisaInformationApp {
         });
     }
 
-    handleCountrySearch(query) {
+    handleCountrySearch(query = '') {
         const searchResults = document.getElementById('searchResults');
         if (!searchResults) return;
-        
-        if (!query.trim()) {
-            this.hideSearchResults();
-            return;
-        }
         
         // Get all available countries (exactly like comparison search)
         const allCountries = new Map();
@@ -463,7 +464,7 @@ class VisaInformationApp {
             );
         }
         
-        // Sort alphabetically
+        // Sort alphabetically (exactly like comparison search)
         filteredCountries.sort((a, b) => a.name.localeCompare(b.name));
         
         if (filteredCountries.length === 0) {
