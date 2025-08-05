@@ -371,10 +371,6 @@ class VisaInformationApp {
             this.openCountrySelection();
         });
 
-        // Add more button in table
-        document.getElementById('addMoreBtn')?.addEventListener('click', () => {
-            this.openCountrySelection();
-        });
 
 
         // Comparison search
@@ -387,6 +383,14 @@ class VisaInformationApp {
             if (e.key === 'Escape') {
                 this.closeComparisonPanel();
                 this.closeCountrySelection();
+                this.closeAllDropdowns();
+            }
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.info-dropdown')) {
+                this.closeAllDropdowns();
             }
         });
     }
@@ -572,11 +576,12 @@ class VisaInformationApp {
     }
     
     renderTableRow(country) {
-        const rowId = `row-${country.country.replace(/\s+/g, '-').toLowerCase()}`;
-        const detailsId = `details-${country.country.replace(/\s+/g, '-').toLowerCase()}`;
+        const countryId = country.country.replace(/\s+/g, '-').toLowerCase();
+        const visaDropdownId = `visa-${countryId}`;
+        const extensionDropdownId = `extension-${countryId}`;
         
         return `
-            <tr id="${rowId}">
+            <tr>
                 <td class="country-col">
                     <div class="country-cell">
                         <span class="country-flag">${country.flag}</span>
@@ -587,9 +592,20 @@ class VisaInformationApp {
                     </div>
                 </td>
                 <td class="visa-type-col">
-                    <div style="font-weight: 500;">${country.visaType}</div>
-                    <div style="font-size: 12px; color: var(--gray-600); margin-top: 2px;">
-                        ${country.sourceName}
+                    <div class="visa-type-container">
+                        <div style="font-weight: 500;">${country.visaType}</div>
+                        <div class="info-dropdown">
+                            <button class="dropdown-trigger" onclick="visaApp.toggleDropdown('${visaDropdownId}')">
+                                <span>More Info</span>
+                                <span id="icon-${visaDropdownId}">▼</span>
+                            </button>
+                            <div class="dropdown-content" id="${visaDropdownId}">
+                                <h5>Application Process</h5>
+                                <ol>
+                                    ${country.processingSteps.map(step => `<li>${this.makeLinksClickable(step)}</li>`).join('')}
+                                </ol>
+                            </div>
+                        </div>
                     </div>
                 </td>
                 <td class="cost-col">
@@ -599,79 +615,85 @@ class VisaInformationApp {
                     ${country.validity}
                 </td>
                 <td class="extension-col">
-                    <span class="${country.extensionPossible ? 'extension-yes' : 'extension-no'}">
-                        ${country.extensionPossible ? 'Yes' : 'No'}
-                    </span>
-                    ${country.extensionPossible ? `
-                        <div style="font-size: 12px; color: var(--gray-600); margin-top: 2px;">
-                            ${country.extensionDuration}
-                        </div>
-                    ` : ''}
-                </td>
-            </tr>
-            <tr class="details-row" id="${detailsId}">
-                <td colspan="5">
-                    <div class="details-content expanded">
-                        ${this.renderDetailsContent(country)}
+                    <div class="extension-container">
+                        <span class="${country.extensionPossible ? 'extension-yes' : 'extension-no'}">
+                            ${country.extensionPossible ? 'Yes' : 'No'}
+                        </span>
+                        ${country.extensionPossible ? `
+                            <div class="info-dropdown">
+                                <button class="dropdown-trigger" onclick="visaApp.toggleDropdown('${extensionDropdownId}')">
+                                    <span>Details</span>
+                                    <span id="icon-${extensionDropdownId}">▼</span>
+                                </button>
+                                <div class="dropdown-content" id="${extensionDropdownId}">
+                                    <h5>Extension Information</h5>
+                                    <div class="extension-details">
+                                        <p><strong>Duration:</strong> ${country.extensionDuration}</p>
+                                        <p><strong>Cost:</strong> ${country.extensionCost}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
+                </td>
+                <td class="official-link-col">
+                    ${country.links.length > 0 ? `
+                        <a href="${country.links[0].url}" target="_blank" rel="noopener" class="official-link">
+                            <span>Apply Online</span>
+                            <span>→</span>
+                        </a>
+                    ` : `
+                        <span style="color: var(--gray-500); font-size: 13px;">Contact Embassy</span>
+                    `}
                 </td>
             </tr>
         `;
     }
     
-    renderDetailsContent(country) {
-        return `
-            <div class="details-grid">
-                <div class="details-section">
-                    <h4>
-                        <span class="details-section-icon">📋</span>
-                        Application Process
-                    </h4>
-                    <div class="processing-steps">
-                        <ol>
-                            ${country.processingSteps.map(step => `<li>${this.makeLinksClickable(step)}</li>`).join('')}
-                        </ol>
-                    </div>
-                </div>
-                
-                <div class="details-section">
-                    <h4>
-                        <span class="details-section-icon">⏰</span>
-                        Extension Information
-                    </h4>
-                    ${country.extensionPossible ? `
-                        <div class="detail-item">
-                            <div class="detail-label">Duration</div>
-                            <div class="detail-value">${country.extensionDuration}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Cost</div>
-                            <div class="detail-value">${country.extensionCost}</div>
-                        </div>
-                    ` : `
-                        <div class="detail-item">
-                            <div class="detail-value" style="color: var(--danger);">
-                                Extensions are not available for this destination
-                            </div>
-                        </div>
-                    `}
-                </div>
-            </div>
+    toggleDropdown(dropdownId) {
+        // Close all other dropdowns first
+        document.querySelectorAll('.dropdown-content.active').forEach(dropdown => {
+            if (dropdown.id !== dropdownId) {
+                dropdown.classList.remove('active');
+                const trigger = dropdown.previousElementSibling;
+                if (trigger) {
+                    trigger.classList.remove('active');
+                    const icon = trigger.querySelector('[id^="icon-"]');
+                    if (icon) icon.textContent = '▼';
+                }
+            }
+        });
+        
+        // Toggle the clicked dropdown
+        const dropdown = document.getElementById(dropdownId);
+        const trigger = dropdown?.previousElementSibling;
+        const icon = trigger?.querySelector('[id^="icon-"]');
+        
+        if (dropdown && trigger && icon) {
+            const isActive = dropdown.classList.contains('active');
             
-            <div class="details-section" style="grid-column: 1 / -1;">
-                <h4>
-                    <span class="details-section-icon">🔗</span>
-                    Official Resources
-                </h4>
-                <div class="official-links">
-                    ${country.links.map(link => `
-                        <a href="${link.url}" target="_blank" rel="noopener">
-                            ${link.text} →
-                        </a>
-                    `).join(' ')}
-                </div>
-            </div>
-        `;
+            if (isActive) {
+                dropdown.classList.remove('active');
+                trigger.classList.remove('active');
+                icon.textContent = '▼';
+            } else {
+                dropdown.classList.add('active');
+                trigger.classList.add('active');
+                icon.textContent = '▲';
+            }
+        }
+    }
+    
+    closeAllDropdowns() {
+        document.querySelectorAll('.dropdown-content.active').forEach(dropdown => {
+            dropdown.classList.remove('active');
+            const trigger = dropdown.previousElementSibling;
+            if (trigger) {
+                trigger.classList.remove('active');
+                const icon = trigger.querySelector('[id^="icon-"]');
+                if (icon) icon.textContent = '▼';
+            }
+        });
     }
     
     makeLinksClickable(text) {
