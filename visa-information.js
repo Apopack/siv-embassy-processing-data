@@ -361,6 +361,11 @@ class VisaInformationApp {
             }
         });
 
+        // Clear selection button
+        document.getElementById('clearSelectionBtn')?.addEventListener('click', () => {
+            this.clearSelection();
+        });
+
         // Add country to comparison
         document.getElementById('addCountryBtn')?.addEventListener('click', () => {
             this.openCountrySelection();
@@ -458,7 +463,45 @@ class VisaInformationApp {
                 this.comparisonCountries = [countryData]; // Replace with new selection
                 this.updateSelectedCountriesBar();
                 this.renderVisaInformation();
+                this.showSelectionActions();
             }
+        }
+    }
+    
+    clearSelection() {
+        // Clear all selections
+        this.comparisonCountries = [];
+        
+        // Reset dropdown
+        const dropdown = document.getElementById('countrySelect');
+        if (dropdown) {
+            dropdown.value = '';
+        }
+        
+        // Hide UI elements
+        this.updateSelectedCountriesBar();
+        this.renderVisaInformation();
+        this.hideSelectionActions();
+        
+        // Clear URL parameters
+        if (window.history) {
+            const url = new URL(window.location);
+            url.searchParams.delete('country');
+            window.history.pushState({}, '', url);
+        }
+    }
+    
+    showSelectionActions() {
+        const actions = document.getElementById('selectionActions');
+        if (actions) {
+            actions.style.display = 'block';
+        }
+    }
+    
+    hideSelectionActions() {
+        const actions = document.getElementById('selectionActions');
+        if (actions) {
+            actions.style.display = 'none';
         }
     }
     
@@ -619,6 +662,8 @@ class VisaInformationApp {
                 this.comparisonCountries.push(countryData);
                 this.updateSelectedCountriesBar();
                 this.renderVisaInformation();
+                this.closeCountrySelection();
+                this.renderComparisonTable();
             }
         }
     }
@@ -627,13 +672,21 @@ class VisaInformationApp {
         this.comparisonCountries = this.comparisonCountries.filter(c => c.country !== countryName);
         this.updateSelectedCountriesBar();
         this.renderVisaInformation();
+        this.renderSelectedCountries();
+        this.renderComparisonTable();
         
         // Update URL if this was the main country
         if (this.comparisonCountries.length === 0) {
+            this.hideSelectionActions();
             if (window.history) {
                 const url = new URL(window.location);
                 url.searchParams.delete('country');
                 window.history.pushState({}, '', url);
+            }
+            // Reset dropdown
+            const dropdown = document.getElementById('countrySelect');
+            if (dropdown) {
+                dropdown.value = '';
             }
         }
     }
@@ -711,7 +764,8 @@ class VisaInformationApp {
         panel.classList.add('active');
         btn.classList.add('active');
         
-        this.updateComparisonView();
+        this.renderSelectedCountries();
+        this.renderComparisonTable();
     }
 
     closeComparisonPanel() {
@@ -767,21 +821,7 @@ class VisaInformationApp {
         this.renderCountrySelectionList(query);
     }
 
-    addToComparison(countryName) {
-        const visa = this.visaData.find(v => v.country === countryName);
-        if (!visa || this.comparisonCountries.length >= this.maxComparisons) return;
-        
-        if (!this.comparisonCountries.some(c => c.country === countryName)) {
-            this.comparisonCountries.push(visa);
-            this.closeCountrySelection();
-            this.updateComparisonView();
-        }
-    }
 
-    removeFromComparison(countryName) {
-        this.comparisonCountries = this.comparisonCountries.filter(c => c.country !== countryName);
-        this.updateComparisonView();
-    }
 
     updateComparisonView() {
         this.renderSelectedCountries();

@@ -1,0 +1,186 @@
+{
+  "file_path": "/mnt/c/Users/avirp/Downloads/afghan_siv_visa_info.xlsx",
+  "sheet_name": "Sheet1",
+  "column_headers": [
+    "Rank",
+    "Embassy/City",
+    "Country",
+    "Visa needed",
+    "Type of visa",
+    "Visa cost (approx)",
+    "Processing steps (summary)",
+    "Extension (possible & cost)",
+    "Important links"
+  ],
+  "total_rows": 11,
+  "data_rows": 10,
+  "sample_data": [
+    [
+      "1",
+      "Islamabad",
+      "Pakistan",
+      "Yes – Afghan nationals need a visa to enter Pakistan for any purpose",
+      "Visitor visa (tourist/family visit via Pakistan Online Visa System)",
+      "≈ US$50–100 for single‑entry visitor visa (cost can vary by sub‑category)",
+      "1. Create an account on the Pakistan Online Visa System (POVS). 2. Select the appropriate visa category (tourist/visit or family visit) and fill out the online form with passport details, address and sponsor information. 3. Upload required documents (passport, photograph, invitation letter or hotel booking). 4. Pay the visa fee online. 5. Wait for the visa grant notice and print it before travelling.",
+      "Visitor visas are usually valid for up to 90 days; extensions can be requested through Pakistan’s Interior Ministry/Immigration office and typically cost another ≈ US$50 (exact fees vary).",
+      "Pakistan Online Visa: https://visa.nadra.gov.pk"
+    ],
+    [
+      "2",
+      "Doha",
+      "Qatar",
+      "Yes – Afghan citizens must obtain a visa for Qatar",
+      "Hayya e‑visa (tourist/entry visa issued electronically)",
+      "≈ QAR 100 (≈ US$27) for the Hayya tourist visa",
+      "1. Register for a Hayya account on the official portal. 2. Choose the visa type (visitor or Hayya With Me) and complete the online application with passport and personal details. 3. Upload a digital photo and proof of accommodation/host. 4. Pay the application fee online. 5. Receive the Hayya entry permit via email and download the mobile app for arrival.",
+      "Hayya tourist visas are generally valid for 30 days and can be extended once or twice in‑country through the Hayya portal for ≈ QAR 200 per 30‑day extension.",
+      "Hayya portal: https://hayya.qa"
+    ],
+    [
+      "3",
+      "Tirana",
+      "Albania",
+      "Yes – Afghans require an Albanian visa (short‑stay)",
+      "Short‑stay (Type C) Albanian e‑Visa (tourism/business)",
+      "≈ €50 for single‑entry e‑Visa",
+      "1. Create an account on the Albanian e‑Visa platform and start a new application. 2. Choose the visa category (tourist, family visit, business or transit). 3. Enter passport details and personal information. 4. Upload supporting documents (passport scan, photo, proof of accommodation or invitation letter, travel insurance and proof of funds). 5. Pay the visa fee online. 6. Wait for approval and download/print the e‑Visa.",
+      "Short‑stay visas are normally limited to 90 days within 180 days and cannot be extended except for emergencies; long‑term stay requires applying for a residence permit in Albania (€10 application fee).",
+      "Albanian e‑Visa portal: https://e‑visa.al"
+    ],
+    [
+      "4",
+      "Ankara",
+      "Turkey",
+      "Yes – Afghan passport holders need a visa",
+      "Single‑entry Turkish e‑visa (valid 30 days) if holding a valid US/UK/Schengen/Ireland visa/residence; otherwise apply for a sticker (visitor) visa at a Turkish mission",
+      "≈ US$60 for e‑visa (sticker‑visa fees may be slightly higher)",
+      "1. Determine eligibility for the Turkish e‑Visa (Afghan nationals must hold a valid Schengen, US, UK or Ireland visa/residence permit to apply online). 2. Go to www.evisa.gov.tr and complete the application with passport and travel information. 3. Pay the e‑Visa fee online and download the single‑entry e‑Visa. 4. If not eligible for e‑Visa, pre‑apply via the Turkish consulate’s Pre‑application system, schedule an appointment, submit the visa application form, passport, photos, bank statements and invitation/booking, and pay the sticker‑visa fee. 5. Attend the interview/biometrics and wait for the visa.",
+      "The 30‑day e‑Visa cannot be extended; travellers needing to stay longer must apply for a residence permit in Türkiye (approx. US$80–100) before their visa expires.",
+      "Turkish e‑Visa: https://www.evisa.gov.tr; Ministry of Foreign Affairs visa information: https://www.mfa.gov.tr/visa‑information‑for‑foreigners.en.mfa"
+    ],
+    [
+      "5",
+      "Frankfurt",
+      "Germany",
+      "Yes – Afghanistan citizens need a Schengen visa to enter Germany【900210025998671†L268-L271】",
+      "Schengen short‑stay visa (Type C) for travel up to 90 days",
+      "€90 for adults (Schengen visa fee increased in June 2024)",
+      "1. Fill out the Schengen visa application form (VIDEX or paper) and sign it. 2. Gather supporting documents: valid passport, two biometric photos, travel insurance covering €30,000, proof of accommodation, proof of funds, return ticket/appointment letter and a cover letter explaining the purpose of travel. 3. Schedule an appointment at the German embassy/consulate or visa application centre (VFS). 4. Pay the visa fee and submit biometrics at the appointment. 5. Wait for processing (typically 15–45 days) and collect the visa when approved.",
+      "Schengen visas may only be extended in exceptional situations (force majeure, humanitarian or serious personal reasons) at the local foreigners’ authority; a fee of about €30 applies (no fee if extension is due to force majeure).",
+      "German Federal Foreign Office: https://www.auswaertiges‑amt.de; EU Schengen visa information: https://home‑affairs.ec.europa.eu"
+    ]
+  ],
+  "all_data": [
+    [
+      "1",
+      "Islamabad",
+      "Pakistan",
+      "Yes – Afghan nationals need a visa to enter Pakistan for any purpose",
+      "Visitor visa (tourist/family visit via Pakistan Online Visa System)",
+      "≈ US$50–100 for single‑entry visitor visa (cost can vary by sub‑category)",
+      "1. Create an account on the Pakistan Online Visa System (POVS). 2. Select the appropriate visa category (tourist/visit or family visit) and fill out the online form with passport details, address and sponsor information. 3. Upload required documents (passport, photograph, invitation letter or hotel booking). 4. Pay the visa fee online. 5. Wait for the visa grant notice and print it before travelling.",
+      "Visitor visas are usually valid for up to 90 days; extensions can be requested through Pakistan’s Interior Ministry/Immigration office and typically cost another ≈ US$50 (exact fees vary).",
+      "Pakistan Online Visa: https://visa.nadra.gov.pk"
+    ],
+    [
+      "2",
+      "Doha",
+      "Qatar",
+      "Yes – Afghan citizens must obtain a visa for Qatar",
+      "Hayya e‑visa (tourist/entry visa issued electronically)",
+      "≈ QAR 100 (≈ US$27) for the Hayya tourist visa",
+      "1. Register for a Hayya account on the official portal. 2. Choose the visa type (visitor or Hayya With Me) and complete the online application with passport and personal details. 3. Upload a digital photo and proof of accommodation/host. 4. Pay the application fee online. 5. Receive the Hayya entry permit via email and download the mobile app for arrival.",
+      "Hayya tourist visas are generally valid for 30 days and can be extended once or twice in‑country through the Hayya portal for ≈ QAR 200 per 30‑day extension.",
+      "Hayya portal: https://hayya.qa"
+    ],
+    [
+      "3",
+      "Tirana",
+      "Albania",
+      "Yes – Afghans require an Albanian visa (short‑stay)",
+      "Short‑stay (Type C) Albanian e‑Visa (tourism/business)",
+      "≈ €50 for single‑entry e‑Visa",
+      "1. Create an account on the Albanian e‑Visa platform and start a new application. 2. Choose the visa category (tourist, family visit, business or transit). 3. Enter passport details and personal information. 4. Upload supporting documents (passport scan, photo, proof of accommodation or invitation letter, travel insurance and proof of funds). 5. Pay the visa fee online. 6. Wait for approval and download/print the e‑Visa.",
+      "Short‑stay visas are normally limited to 90 days within 180 days and cannot be extended except for emergencies; long‑term stay requires applying for a residence permit in Albania (€10 application fee).",
+      "Albanian e‑Visa portal: https://e‑visa.al"
+    ],
+    [
+      "4",
+      "Ankara",
+      "Turkey",
+      "Yes – Afghan passport holders need a visa",
+      "Single‑entry Turkish e‑visa (valid 30 days) if holding a valid US/UK/Schengen/Ireland visa/residence; otherwise apply for a sticker (visitor) visa at a Turkish mission",
+      "≈ US$60 for e‑visa (sticker‑visa fees may be slightly higher)",
+      "1. Determine eligibility for the Turkish e‑Visa (Afghan nationals must hold a valid Schengen, US, UK or Ireland visa/residence permit to apply online). 2. Go to www.evisa.gov.tr and complete the application with passport and travel information. 3. Pay the e‑Visa fee online and download the single‑entry e‑Visa. 4. If not eligible for e‑Visa, pre‑apply via the Turkish consulate’s Pre‑application system, schedule an appointment, submit the visa application form, passport, photos, bank statements and invitation/booking, and pay the sticker‑visa fee. 5. Attend the interview/biometrics and wait for the visa.",
+      "The 30‑day e‑Visa cannot be extended; travellers needing to stay longer must apply for a residence permit in Türkiye (approx. US$80–100) before their visa expires.",
+      "Turkish e‑Visa: https://www.evisa.gov.tr; Ministry of Foreign Affairs visa information: https://www.mfa.gov.tr/visa‑information‑for‑foreigners.en.mfa"
+    ],
+    [
+      "5",
+      "Frankfurt",
+      "Germany",
+      "Yes – Afghanistan citizens need a Schengen visa to enter Germany【900210025998671†L268-L271】",
+      "Schengen short‑stay visa (Type C) for travel up to 90 days",
+      "€90 for adults (Schengen visa fee increased in June 2024)",
+      "1. Fill out the Schengen visa application form (VIDEX or paper) and sign it. 2. Gather supporting documents: valid passport, two biometric photos, travel insurance covering €30,000, proof of accommodation, proof of funds, return ticket/appointment letter and a cover letter explaining the purpose of travel. 3. Schedule an appointment at the German embassy/consulate or visa application centre (VFS). 4. Pay the visa fee and submit biometrics at the appointment. 5. Wait for processing (typically 15–45 days) and collect the visa when approved.",
+      "Schengen visas may only be extended in exceptional situations (force majeure, humanitarian or serious personal reasons) at the local foreigners’ authority; a fee of about €30 applies (no fee if extension is due to force majeure).",
+      "German Federal Foreign Office: https://www.auswaertiges‑amt.de; EU Schengen visa information: https://home‑affairs.ec.europa.eu"
+    ],
+    [
+      "6",
+      "Montreal",
+      "Canada",
+      "Yes – Afghan nationals need a Canadian visitor visa",
+      "Visitor visa (Temporary Resident Visa – TRV)",
+      "CA$100 processing fee (plus CA$85 biometrics fee if required)【781686239386444†L85-L88】",
+      "1. Create an online account with Immigration, Refugees and Citizenship Canada (IRCC). 2. Complete the visitor visa application (IMM 5257) and upload digital copies of passport, photographs, purpose‑of‑travel letter (e.g., U.S. immigrant visa appointment), proof of ties to Afghanistan and proof of funds. 3. Pay the application fee (CA$100) and biometrics fee (CA$85) online. 4. Schedule an appointment at a visa application centre to give fingerprints and photographs. 5. After biometrics, wait for the visa decision and submit your passport for visa issuance when instructed.",
+      "Visitors who need to stay longer must apply for a visitor record before their visa expires; the fee for a visitor‑record extension starts at CA$100【343522636149754†L360-L404】.",
+      "IRCC visitor visa: https://www.canada.ca/en/immigration‑refugees‑citizenship/services/visit‑canada/visitor‑visa.html"
+    ],
+    [
+      "7",
+      "Manila",
+      "Philippines",
+      "Yes – Afghan citizens require a visa for the Philippines【900210025998671†L402-L403】",
+      "Tourist or business visa obtained from a Philippine embassy or consulate",
+      "≈ US$30 for a single‑entry tourist visa (multiple‑entry visas cost more)",
+      "1. Contact the nearest Philippine embassy/consulate to verify visa requirements. 2. Complete the visa application form and prepare supporting documents: passport valid for six months, passport‑size photos, proof of financial means, itinerary/flight reservation, and U.S. visa interview appointment letter. 3. Submit the application and pay the visa fee. 4. Wait for processing (around 5–10 working days) and collect the visa.",
+      "Tourist visas can typically be extended in 30‑day increments at the Philippine Bureau of Immigration; extensions cost approximately ₱ 3,000–4,000 (≈ US$50–70) per month.",
+      "Philippine Embassy visa information: https://dfa.gov.ph; Bureau of Immigration: https://immigration.gov.ph"
+    ],
+    [
+      "8",
+      "Abu Dhabi",
+      "United Arab Emirates (UAE)",
+      "Yes – Afghan nationals require a UAE visa【900210025998671†L464-L465】",
+      "Tourist visa sponsored by a UAE airline, hotel or travel agency (30‑ or 60‑day)",
+      "≈ AED 350–400 (≈ US$95–110) for a 30‑day tourist visa",
+      "1. Arrange a sponsor (UAE‑based airline, hotel, relative or travel agency). 2. Provide a passport copy valid for at least six months, passport photo, completed visa application form and travel itinerary. 3. The sponsor submits the application through the UAE’s Smart Services or ICP platform and pays the visa fee. 4. Receive the e‑Visa by email (usually within a week). 5. Print the e‑Visa and present it on arrival.",
+      "Single‑entry tourist visas can usually be extended twice for 30 days each without leaving the UAE; each extension costs about AED 600 (≈ US$160).",
+      "Federal Authority for Identity, Citizenship, Customs & Port Security (ICP): https://icp.gov.ae; Visit Dubai – visas: https://www.visitdubai.com/en/plan‑your‑trip/visa‑information"
+    ],
+    [
+      "9",
+      "Baghdad",
+      "Iraq",
+      "Yes – Afghan nationals can obtain an Iraqi e‑Visa【900210025998671†L294-L295】",
+      "Iraqi e‑Visa (tourist) valid for 30 days or a sticker visa issued by the Iraqi embassy",
+      "≈ US$75 for a single‑entry e‑Visa (fees can vary)",
+      "1. Apply through the Iraqi e‑Visa portal or at an Iraqi embassy/consulate. 2. Submit the application form with passport details, passport‑size photos, proof of accommodation or invitation and letter explaining the purpose of travel. 3. Pay the visa fee online or at the embassy. 4. Wait for the electronic visa approval or visa stamp. 5. Print the approval to present upon arrival.",
+      "Tourist visas are generally issued for 30 days and can be extended once at the Residency Directorate in Baghdad; extension fees are roughly US$50.",
+      "Iraqi e‑Visa portal: https://evisa.iraq.egov.iq"
+    ],
+    [
+      "10",
+      "Kigali",
+      "Rwanda",
+      "Yes – Afghans can obtain a Rwandan e‑Visa or visa on arrival【900210025998671†L411-L414】",
+      "Rwanda tourist visa (V‑1) valid for 30 days – available online or upon arrival",
+      "US$50 for a single‑entry tourist visa (visa on arrival or e‑visa)",
+      "1. Apply online through the Rwandan government’s Irembo portal or prepare to get a visa on arrival. 2. Fill out the application with passport details, travel dates and contact information. 3. Upload a passport‑style photograph and copy of passport. 4. Pay the US$50 fee online (credit card or mobile money). 5. Receive the e‑Visa by email within a few working days and print it for arrival; if obtaining a visa on arrival, pay the fee in cash at the airport.",
+      "Tourist visas are generally valid for 30 days and may be extended for another 90 days at the Directorate General of Immigration and Emigration in Kigali; extension fee is about US$30.",
+      "Irembo portal: https://irembo.gov.rw; Rwanda Directorate General of Immigration: https://migration.gov.rw"
+    ]
+  ]
+}

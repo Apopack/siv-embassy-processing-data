@@ -1,15 +1,15 @@
 /* Visa Information Page Styles */
 
-/* Use the same color scheme as main site */
+/* Modern data visualization inspired color scheme */
 :root {
-    --primary: #1a3a52;
-    --primary-light: #3498db;
-    --primary-dark: #2c3e50;
-    --secondary: #64748B;
+    --primary: #0066CC;
+    --primary-light: #4D94FF;
+    --primary-dark: #004499;
+    --secondary: #6B7280;
     --accent: #F59E0B;
-    --success: #10B981;
-    --danger: #EF4444;
-    --warning: #F59E0B;
+    --success: #059669;
+    --danger: #DC2626;
+    --warning: #D97706;
     
     --gray-50: #F8FAFC;
     --gray-100: #F1F5F9;
@@ -36,15 +36,16 @@
     --transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Inherit base styles from main site */
+/* Modern, clean base styles */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    background: #f5f5f5;
-    color: #333;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: var(--gray-900);
     line-height: 1.6;
     margin: 0;
     padding: 0;
     font-size: 14px;
+    min-height: 100vh;
 }
 
 /* Main Content */
@@ -64,18 +65,22 @@ body {
 /* Page Header */
 .page-header {
     text-align: center;
-    padding: 48px 0 32px;
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
+    padding: 64px 0 48px;
+    background: linear-gradient(135deg, var(--white) 0%, #f8fafc 100%);
+    border-radius: 16px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 25px rgba(0, 102, 204, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .page-header h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin: 0 0 8px;
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 12px;
     letter-spacing: -0.025em;
 }
 
@@ -112,11 +117,13 @@ body {
 /* Country Selection Section */
 .country-selection-section {
     background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 48px 24px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
+    border-radius: 16px;
+    padding: 48px 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 20px rgba(0, 102, 204, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     text-align: center;
+    backdrop-filter: blur(10px);
 }
 
 .selection-container h3 {
@@ -140,22 +147,25 @@ body {
 
 .country-dropdown {
     width: 100%;
-    padding: 16px 48px 16px 20px;
-    border: 2px solid var(--gray-200);
-    border-radius: var(--radius-lg);
+    padding: 18px 48px 18px 24px;
+    border: 2px solid transparent;
+    background: linear-gradient(var(--white), var(--white)) padding-box,
+                linear-gradient(135deg, var(--primary-light), var(--primary)) border-box;
+    border-radius: 12px;
     font-size: 16px;
-    background: var(--white);
+    font-weight: 500;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    box-shadow: 0 2px 10px rgba(0, 102, 204, 0.1);
 }
 
 .country-dropdown:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(26, 58, 82, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 102, 204, 0.15);
 }
 
 .dropdown-icon {
@@ -166,6 +176,35 @@ body {
     color: var(--gray-400);
     pointer-events: none;
     font-size: 12px;
+}
+
+/* Selection Actions */
+.selection-actions {
+    margin-top: 20px;
+}
+
+.clear-selection-btn {
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border: 2px solid transparent;
+    color: var(--gray-700);
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.clear-selection-btn:hover {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    color: var(--gray-800);
 }
 
 /* Selected Countries Bar */
@@ -248,15 +287,30 @@ body {
 /* Individual Visa Info Card */
 .visa-info-card {
     background: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 25px rgba(0, 102, 204, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
 }
 
 .visa-info-card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(0, 102, 204, 0.15);
+    transform: translateY(-8px);
+    border-color: rgba(77, 148, 255, 0.3);
+}
+
+.visa-info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
 }
 
 .visa-card-header {
@@ -573,33 +627,35 @@ body {
 /* Sticky Actions */
 .sticky-actions {
     position: fixed;
-    top: 20px;
+    top: 24px;
     right: 24px;
     z-index: 998;
     display: flex;
-    gap: 12px;
+    gap: 16px;
 }
 
 .sticky-btn {
-    background: var(--white);
-    border: 1px solid var(--gray-300);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     color: var(--gray-700);
-    padding: 12px 16px;
-    border-radius: var(--radius);
-    font-size: 13px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: var(--shadow);
-    transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(0, 102, 204, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .sticky-btn:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-400);
-    box-shadow: var(--shadow-md);
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(77, 148, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 102, 204, 0.15);
+    transform: translateY(-2px);
 }
 
 .sticky-btn.active {
