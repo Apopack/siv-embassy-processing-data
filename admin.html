@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - SIV Resources Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Side Navigation -->
+    <nav class="side-nav" id="sideNav">
+        <div class="nav-header">
+            <h2>SIV Admin Portal</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    SIV Issuances
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="visa-information.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Visa Information
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="travel-information.html" class="nav-link">
+                    <span class="nav-icon">✈️</span>
+                    Travel Information
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="admin.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    Admin Portal
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="admin-container">
+            <!-- Admin Header -->
+            <header class="admin-header">
+                <div class="header-content">
+                    <div class="header-title">
+                        <h1>Country Information Management</h1>
+                        <p class="header-subtitle">Update visa requirements and travel information for SIV applicants</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <span class="btn-icon">📥</span>
+                            Export Data
+                        </button>
+                        <button class="btn btn-primary" id="saveAllBtn">
+                            <span class="btn-icon">💾</span>
+                            Save All Changes
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-container">
+                    <div class="search-wrapper">
+                        <input type="text" id="countrySearch" class="admin-search-input" placeholder="Search for a country...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="search-results" id="searchResults" style="display: none;">
+                        <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Country Editor Section -->
+            <section class="editor-section" id="editorSection" style="display: none;">
+                <div class="editor-header">
+                    <div class="country-info">
+                        <span class="country-flag" id="countryFlag">🏳️</span>
+                        <div>
+                            <h2 class="country-name" id="countryName">Select a Country</h2>
+                            <p class="embassy-info" id="embassyInfo">Embassy information will appear here</p>
+                        </div>
+                    </div>
+                    <div class="editor-tabs">
+                        <button class="tab-btn active" data-tab="visa">Visa Information</button>
+                        <button class="tab-btn" data-tab="travel">Travel Information</button>
+                        <button class="tab-btn" data-tab="history">Change History</button>
+                    </div>
+                </div>
+
+                <!-- Visa Information Tab -->
+                <div class="tab-content active" id="visaTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Basic Requirements</h3>
+                            <div class="form-group">
+                                <label for="visaRequired">Visa Required</label>
+                                <select id="visaRequired" class="form-control">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                    <option value="on-arrival">Visa on Arrival</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="visaType">Visa Type</label>
+                                <input type="text" id="visaType" class="form-control" placeholder="e.g., Tourist Visa, Business Visa">
+                            </div>
+                            <div class="form-group">
+                                <label for="visaCost">Cost</label>
+                                <input type="text" id="visaCost" class="form-control" placeholder="e.g., US$50-100">
+                            </div>
+                            <div class="form-group">
+                                <label for="validity">Validity Period</label>
+                                <input type="text" id="validity" class="form-control" placeholder="e.g., 30 days, 3 months">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Processing Information</h3>
+                            <div class="form-group">
+                                <label for="processingTime">Processing Time</label>
+                                <input type="text" id="processingTime" class="form-control" placeholder="e.g., 3-5 business days">
+                            </div>
+                            <div class="form-group">
+                                <label for="applicationMethod">Application Method</label>
+                                <select id="applicationMethod" class="form-control">
+                                    <option value="online">Online (e-Visa)</option>
+                                    <option value="embassy">Embassy/Consulate</option>
+                                    <option value="both">Both Online and Embassy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="officialLink">Official Application Link</label>
+                                <input type="url" id="officialLink" class="form-control" placeholder="https://visa.example.gov">
+                            </div>
+                        </div>
+
+                        <div class="form-section full-width">
+                            <h3 class="section-title">Application Process</h3>
+                            <div class="form-group">
+                                <label for="processingSteps">Processing Steps</label>
+                                <div class="dynamic-list" id="processingStepsList">
+                                    <!-- Dynamic steps will appear here -->
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="addStepBtn">
+                                    <span class="btn-icon">+</span>
+                                    Add Step
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Extension Policy</h3>
+                            <div class="form-group">
+                                <label for="extensionPossible">Extension Available</label>
+                                <select id="extensionPossible" class="form-control">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="extensionDetails" style="display: none;">
+                                <label for="extensionDuration">Extension Duration</label>
+                                <input type="text" id="extensionDuration" class="form-control" placeholder="e.g., Up to 30 days">
+                            </div>
+                            <div class="form-group" id="extensionCostGroup" style="display: none;">
+                                <label for="extensionCost">Extension Cost</label>
+                                <input type="text" id="extensionCost" class="form-control" placeholder="e.g., US$50">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Source Information</h3>
+                            <div class="form-group">
+                                <label for="sourceName">Source Name</label>
+                                <input type="text" id="sourceName" class="form-control" placeholder="e.g., Official Government Portal">
+                            </div>
+                            <div class="form-group">
+                                <label for="sourceType">Source Type</label>
+                                <select id="sourceType" class="form-control">
+                                    <option value="government">Government Portal</option>
+                                    <option value="embassy">Embassy Website</option>
+                                    <option value="aggregator">Aggregator Service</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastUpdated">Last Updated</label>
+                                <input type="date" id="lastUpdated" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Travel Information Tab -->
+                <div class="tab-content" id="travelTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Flight Information</h3>
+                            <div class="form-group">
+                                <label for="directFlights">Direct Flights Available</label>
+                                <select id="directFlights" class="form-control">
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="airlines">Airlines</label>
+                                <input type="text" id="airlines" class="form-control" placeholder="e.g., Turkish Airlines, Emirates">
+                            </div>
+                            <div class="form-group">
+                                <label for="flightDuration">Average Flight Duration</label>
+                                <input type="text" id="flightDuration" class="form-control" placeholder="e.g., 8-12 hours">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Airport & Transportation</h3>
+                            <div class="form-group">
+                                <label for="mainAirport">Main International Airport</label>
+                                <input type="text" id="mainAirport" class="form-control" placeholder="e.g., John F. Kennedy International">
+                            </div>
+                            <div class="form-group">
+                                <label for="airportCode">Airport Code</label>
+                                <input type="text" id="airportCode" class="form-control" placeholder="e.g., JFK">
+                            </div>
+                            <div class="form-group">
+                                <label for="cityDistance">Distance to City Center</label>
+                                <input type="text" id="cityDistance" class="form-control" placeholder="e.g., 25km">
+                            </div>
+                        </div>
+
+                        <div class="form-section full-width">
+                            <h3 class="section-title">Travel Advisories</h3>
+                            <div class="form-group">
+                                <label for="safetyLevel">Safety Level</label>
+                                <select id="safetyLevel" class="form-control">
+                                    <option value="safe">Safe</option>
+                                    <option value="caution">Exercise Caution</option>
+                                    <option value="warning">Travel Warning</option>
+                                    <option value="donottravel">Do Not Travel</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="travelNotes">Travel Notes & Recommendations</label>
+                                <textarea id="travelNotes" class="form-control" rows="4" placeholder="Important information for travelers..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change History Tab -->
+                <div class="tab-content" id="historyTab">
+                    <div class="history-container">
+                        <div class="history-header">
+                            <h3 class="section-title">Recent Changes</h3>
+                            <span class="history-count">Showing last 10 changes</span>
+                        </div>
+                        <div class="history-list" id="historyList">
+                            <!-- Change history will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="editor-actions">
+                    <button class="btn btn-secondary" id="discardBtn">
+                        Discard Changes
+                    </button>
+                    <button class="btn btn-primary" id="saveBtn">
+                        Save Changes
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div class="notification-toast" id="notificationToast">
+        <span class="notification-icon">✓</span>
+        <span class="notification-message">Changes saved successfully!</span>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
