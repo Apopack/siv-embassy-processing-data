@@ -256,31 +256,8 @@ class DatabaseManager {
         if (saved) {
             this.data.history = JSON.parse(saved);
         } else {
-            // Sample history data
-            this.data.history = [
-                {
-                    id: 1,
-                    embassy: "Islamabad",
-                    table: "visa",
-                    action: "UPDATE",
-                    field: "visaCost",
-                    oldValue: "US$40-80",
-                    newValue: "US$50-100",
-                    user: "admin@example.com",
-                    timestamp: new Date(Date.now() - 86400000).toISOString()
-                },
-                {
-                    id: 2,
-                    embassy: "Doha", 
-                    table: "travel",
-                    action: "UPDATE",
-                    field: "accommodationCost",
-                    oldValue: "$70-130/night",
-                    newValue: "$80-150/night",
-                    user: "admin@example.com",
-                    timestamp: new Date(Date.now() - 43200000).toISOString()
-                }
-            ];
+            // Start with empty change history
+            this.data.history = [];
         }
     }
 
@@ -292,7 +269,7 @@ class DatabaseManager {
                 this.data.users.set(user.id, user);
             });
         } else {
-            // Sample user data
+            // Start with only default admin user
             const users = [
                 {
                     id: 1,
@@ -301,28 +278,8 @@ class DatabaseManager {
                     role: "Administrator",
                     permissions: "Full Access",
                     status: "Active",
-                    lastLogin: new Date(Date.now() - 3600000).toISOString(),
-                    created: "2024-01-01"
-                },
-                {
-                    id: 2,
-                    username: "editor",
-                    email: "editor@example.com", 
-                    role: "Editor",
-                    permissions: "Edit Visa & Travel Data",
-                    status: "Active",
-                    lastLogin: new Date(Date.now() - 7200000).toISOString(),
-                    created: "2024-06-15"
-                },
-                {
-                    id: 3,
-                    username: "viewer",
-                    email: "viewer@example.com",
-                    role: "Viewer",
-                    permissions: "View Only",
-                    status: "Active",
-                    lastLogin: new Date(Date.now() - 14400000).toISOString(),
-                    created: "2024-12-01"
+                    lastLogin: new Date().toISOString(),
+                    created: new Date().toISOString().split('T')[0]
                 }
             ];
 
@@ -337,48 +294,8 @@ class DatabaseManager {
         if (saved) {
             this.data.uploads = JSON.parse(saved);
         } else {
-            // Sample uploads data
-            this.data.uploads = [
-                {
-                    id: 1,
-                    filename: 'siv-data-jan-2025.xlsx',
-                    fileType: 'SIV Issuances',
-                    fileSize: '245 KB',
-                    status: 'success',
-                    recordsProcessed: 45,
-                    recordsUpdated: 43,
-                    errors: 2,
-                    uploadedBy: 'admin@example.com',
-                    uploadDate: new Date(Date.now() - 86400000).toISOString(),
-                    processingTime: '1.2s'
-                },
-                {
-                    id: 2,
-                    filename: 'embassy-monthly-dec-2024.xlsx',
-                    fileType: 'SIV Issuances',
-                    fileSize: '312 KB',
-                    status: 'success',
-                    recordsProcessed: 48,
-                    recordsUpdated: 48,
-                    errors: 0,
-                    uploadedBy: 'admin@example.com',
-                    uploadDate: new Date(Date.now() - 172800000).toISOString(),
-                    processingTime: '2.1s'
-                },
-                {
-                    id: 3,
-                    filename: 'invalid-format.xlsx',
-                    fileType: 'SIV Issuances',
-                    fileSize: '156 KB',
-                    status: 'error',
-                    recordsProcessed: 0,
-                    recordsUpdated: 0,
-                    errors: 1,
-                    uploadedBy: 'editor@example.com',
-                    uploadDate: new Date(Date.now() - 259200000).toISOString(),
-                    processingTime: '0.3s'
-                }
-            ];
+            // Start with empty uploads list
+            this.data.uploads = [];
         }
     }
 
