@@ -8,7 +8,8 @@ class DatabaseManager {
             travel: new Map(),
             siv: new Map(),
             history: [],
-            users: new Map()
+            users: new Map(),
+            uploads: []
         };
         this.filteredData = [];
         this.selectedRecords = new Set();
@@ -42,6 +43,9 @@ class DatabaseManager {
         
         // Load user management data
         this.loadUserData();
+        
+        // Load file uploads data
+        this.loadUploadsData();
     }
 
     async loadSIVData() {
@@ -294,6 +298,56 @@ class DatabaseManager {
         }
     }
 
+    loadUploadsData() {
+        const saved = localStorage.getItem('fileUploads');
+        if (saved) {
+            this.data.uploads = JSON.parse(saved);
+        } else {
+            // Sample uploads data
+            this.data.uploads = [
+                {
+                    id: 1,
+                    filename: 'siv-data-jan-2025.xlsx',
+                    fileType: 'SIV Issuances',
+                    fileSize: '245 KB',
+                    status: 'success',
+                    recordsProcessed: 45,
+                    recordsUpdated: 43,
+                    errors: 2,
+                    uploadedBy: 'admin@example.com',
+                    uploadDate: new Date(Date.now() - 86400000).toISOString(),
+                    processingTime: '1.2s'
+                },
+                {
+                    id: 2,
+                    filename: 'embassy-monthly-dec-2024.xlsx',
+                    fileType: 'SIV Issuances',
+                    fileSize: '312 KB',
+                    status: 'success',
+                    recordsProcessed: 48,
+                    recordsUpdated: 48,
+                    errors: 0,
+                    uploadedBy: 'admin@example.com',
+                    uploadDate: new Date(Date.now() - 172800000).toISOString(),
+                    processingTime: '2.1s'
+                },
+                {
+                    id: 3,
+                    filename: 'invalid-format.xlsx',
+                    fileType: 'SIV Issuances',
+                    fileSize: '156 KB',
+                    status: 'error',
+                    recordsProcessed: 0,
+                    recordsUpdated: 0,
+                    errors: 1,
+                    uploadedBy: 'editor@example.com',
+                    uploadDate: new Date(Date.now() - 259200000).toISOString(),
+                    processingTime: '0.3s'
+                }
+            ];
+        }
+    }
+
     setupEventListeners() {
         // Mobile menu toggle
         document.getElementById('mobileMenuToggle')?.addEventListener('click', () => {
@@ -415,8 +469,8 @@ class DatabaseManager {
         const searchTerm = query.toLowerCase();
         let data = [];
 
-        if (this.currentTable === 'history') {
-            data = this.data.history.filter(record =>
+        if (this.currentTable === 'history' || this.currentTable === 'uploads') {
+            data = this.data[this.currentTable].filter(record =>
                 Object.values(record).some(value =>
                     value && value.toString().toLowerCase().includes(searchTerm)
                 )
@@ -435,8 +489,8 @@ class DatabaseManager {
     }
 
     applyFilters() {
-        if (this.currentTable === 'history') {
-            this.filteredData = [...this.data.history];
+        if (this.currentTable === 'history' || this.currentTable === 'uploads') {
+            this.filteredData = [...this.data[this.currentTable]];
         } else {
             this.filteredData = Array.from(this.data[this.currentTable].values());
         }
@@ -463,6 +517,9 @@ class DatabaseManager {
                 break;
             case 'users':
                 this.renderUsersTable();
+                break;
+            case 'uploads':
+                this.renderUploadsTable();
                 break;
         }
 
@@ -696,10 +753,52 @@ class DatabaseManager {
         this.addCheckboxListeners();
     }
 
+    renderUploadsTable() {
+        const tbody = document.getElementById('uploadsTableBody');
+        const startIndex = (this.currentPage - 1) * this.recordsPerPage;
+        const endIndex = startIndex + this.recordsPerPage;
+        const pageData = this.filteredData.slice(startIndex, endIndex);
+
+        tbody.innerHTML = pageData.map(record => `
+            <tr ${this.selectedRecords.has(record.id) ? 'class="selected"' : ''}>
+                <td class="select-col">
+                    <input type="checkbox" class="select-checkbox record-checkbox" 
+                           data-id="${record.id}" 
+                           ${this.selectedRecords.has(record.id) ? 'checked' : ''}>
+                </td>
+                <td class="id-col cell-number">${record.id}</td>
+                <td class="filename-col cell-truncate" title="${record.filename}"><strong>${record.filename}</strong></td>
+                <td class="filetype-col">${record.fileType}</td>
+                <td class="filesize-col">${record.fileSize}</td>
+                <td class="status-col">
+                    <span class="status-badge status-${record.status}">
+                        ${record.status.toUpperCase()}
+                    </span>
+                </td>
+                <td class="records-processed-col cell-number">${record.recordsProcessed}</td>
+                <td class="records-updated-col cell-number">${record.recordsUpdated}</td>
+                <td class="errors-col cell-number">${record.errors}</td>
+                <td class="user-col">${record.uploadedBy}</td>
+                <td class="upload-date-col">${this.formatDateTime(record.uploadDate)}</td>
+                <td class="processing-time-col">${record.processingTime}</td>
+                <td class="actions-col">
+                    <button class="action-btn edit-btn" onclick="dbManager.viewUploadDetails(${record.id})" title="View Details">
+                        👁️
+                    </button>
+                    <button class="action-btn delete-btn" onclick="dbManager.deleteRecord(${record.id})" title="Delete">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+
+        this.addCheckboxListeners();
+    }
+
     addCheckboxListeners() {
         document.querySelectorAll('.record-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
-                const id = this.currentTable === 'history' || this.currentTable === 'users' ? 
+                const id = this.currentTable === 'history' || this.currentTable === 'users' || this.currentTable === 'uploads' ? 
                     parseInt(e.target.dataset.id) : e.target.dataset.id;
                 this.toggleRecordSelection(id, e.target.checked);
             });
@@ -776,6 +875,9 @@ class DatabaseManager {
                 this.data.history = this.data.history.filter(r => r.id !== id);
             } else if (this.currentTable === 'users') {
                 this.data.users.delete(id);
+            } else if (this.currentTable === 'uploads') {
+                this.data.uploads = this.data.uploads.filter(r => r.id !== id);
+                localStorage.setItem('fileUploads', JSON.stringify(this.data.uploads));
             } else {
                 this.data[this.currentTable].delete(id);
             }
@@ -868,6 +970,8 @@ class DatabaseManager {
                     this.data.history = this.data.history.filter(r => r.id !== id);
                 } else if (this.currentTable === 'users') {
                     this.data.users.delete(id);
+                } else if (this.currentTable === 'uploads') {
+                    this.data.uploads = this.data.uploads.filter(r => r.id !== id);
                 } else {
                     this.data[this.currentTable].delete(id);
                 }
@@ -902,8 +1006,35 @@ class DatabaseManager {
         localStorage.setItem('databaseSIVData', JSON.stringify(Array.from(this.data.siv.values())));
         localStorage.setItem('databaseHistoryData', JSON.stringify(this.data.history));
         localStorage.setItem('databaseUserData', JSON.stringify(Array.from(this.data.users.values())));
+        localStorage.setItem('fileUploads', JSON.stringify(this.data.uploads));
         
         this.showNotification('All data saved successfully!');
+    }
+
+    viewUploadDetails(id) {
+        const upload = this.data.uploads.find(u => u.id === id);
+        if (upload) {
+            const details = `
+                Upload Details:
+                
+                File: ${upload.filename}
+                Type: ${upload.fileType}
+                Size: ${upload.fileSize}
+                Status: ${upload.status.toUpperCase()}
+                
+                Processing Results:
+                Records Processed: ${upload.recordsProcessed}
+                Records Updated: ${upload.recordsUpdated}
+                Errors: ${upload.errors}
+                Processing Time: ${upload.processingTime}
+                
+                Upload Info:
+                Uploaded By: ${upload.uploadedBy}
+                Upload Date: ${this.formatDateTime(upload.uploadDate)}
+                Upload ID: ${upload.id}
+            `;
+            alert(details);
+        }
     }
 
     showNotification(message) {

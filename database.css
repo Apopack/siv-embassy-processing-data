@@ -479,6 +479,16 @@
 .last-login-col { width: 140px; min-width: 120px; max-width: 160px; }
 .created-col { width: 120px; min-width: 100px; max-width: 140px; }
 
+/* Additional columns for Uploads table */
+.filename-col { width: 200px; min-width: 150px; max-width: 250px; }
+.filetype-col { width: 100px; min-width: 80px; max-width: 120px; }
+.filesize-col { width: 100px; min-width: 80px; max-width: 120px; }
+.records-processed-col { width: 120px; min-width: 100px; max-width: 140px; }
+.records-updated-col { width: 120px; min-width: 100px; max-width: 140px; }
+.errors-col { width: 80px; min-width: 60px; max-width: 100px; }
+.upload-date-col { width: 140px; min-width: 120px; max-width: 160px; }
+.processing-time-col { width: 120px; min-width: 100px; max-width: 140px; }
+
 /* Select Checkbox */
 .select-checkbox {
     cursor: pointer;

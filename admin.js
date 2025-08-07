@@ -6,6 +6,8 @@ class AdminPortal {
         this.unsavedChanges = false;
         this.countryData = {};
         this.changeHistory = [];
+        this.fileUploads = [];
+        this.currentImport = null;
         
         this.init();
     }
@@ -14,6 +16,8 @@ class AdminPortal {
         await this.loadCountryData();
         this.setupEventListeners();
         this.initializeFormValidation();
+        this.setupFileImport();
+        this.loadImportHistory();
     }
 
     async loadCountryData() {
@@ -661,6 +665,662 @@ class AdminPortal {
         } catch (_) {
             return false;
         }
+    }
+
+    // Excel Import Functionality
+    setupFileImport() {
+        // SIV File Upload Setup
+        const sivUploadArea = document.getElementById('sivUploadArea');
+        const sivFileInput = document.getElementById('sivFileInput');
+        const sivPreviewBtn = document.getElementById('sivPreviewBtn');
+        const sivImportBtn = document.getElementById('sivImportBtn');
+
+        // File upload area click handler
+        sivUploadArea.addEventListener('click', () => {
+            sivFileInput.click();
+        });
+
+        // Drag and drop handlers
+        sivUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            sivUploadArea.classList.add('dragover');
+        });
+
+        sivUploadArea.addEventListener('dragleave', () => {
+            sivUploadArea.classList.remove('dragover');
+        });
+
+        sivUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            sivUploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleFileSelect(files[0], 'siv');
+            }
+        });
+
+        // File input change handler
+        sivFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.handleFileSelect(e.target.files[0], 'siv');
+            }
+        });
+
+        // Button handlers
+        sivPreviewBtn.addEventListener('click', () => this.previewImport());
+        sivImportBtn.addEventListener('click', () => this.startImport());
+        
+        // Cancel import
+        document.getElementById('cancelImportBtn')?.addEventListener('click', () => {
+            this.cancelImport();
+        });
+    }
+
+    handleFileSelect(file, type) {
+        // Validate file type
+        const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+        if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+            this.showNotification('Please select a valid Excel file (.xlsx or .xls)', 'error');
+            return;
+        }
+
+        // Validate file size (50MB max)
+        if (file.size > 50 * 1024 * 1024) {
+            this.showNotification('File size too large. Maximum 50MB allowed.', 'error');
+            return;
+        }
+
+        // Store current file
+        this.currentImport = {
+            file: file,
+            type: type,
+            data: null,
+            status: 'ready'
+        };
+
+        // Update UI
+        this.updateUploadUI(file, type);
+        
+        // Parse file immediately for preview
+        this.parseExcelFile(file, type);
+    }
+
+    updateUploadUI(file, type) {
+        const uploadArea = document.getElementById(`${type}UploadArea`);
+        const previewBtn = document.getElementById(`${type}PreviewBtn`);
+        const importBtn = document.getElementById(`${type}ImportBtn`);
+        
+        // Update upload area content
+        uploadArea.innerHTML = `
+            <div class="upload-content">
+                <span class="upload-icon">📄</span>
+                <p class="upload-text"><strong>${file.name}</strong></p>
+                <p class="upload-hint">${this.formatFileSize(file.size)} - Ready to process</p>
+                <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('${type}')">Remove</button>
+            </div>
+        `;
+        
+        // Enable buttons
+        previewBtn.disabled = false;
+        importBtn.disabled = false;
+    }
+
+    clearFile(type) {
+        const uploadArea = document.getElementById(`${type}UploadArea`);
+        const previewBtn = document.getElementById(`${type}PreviewBtn`);
+        const importBtn = document.getElementById(`${type}ImportBtn`);
+        const fileInput = document.getElementById(`${type}FileInput`);
+        
+        // Reset UI
+        uploadArea.innerHTML = `
+            <div class="upload-content">
+                <span class="upload-icon">📁</span>
+                <p class="upload-text">Drop Excel file here or <span class="upload-link">browse files</span></p>
+                <p class="upload-hint">Supports .xlsx and .xls formats</p>
+            </div>
+        `;
+        
+        // Disable buttons
+        previewBtn.disabled = true;
+        importBtn.disabled = true;
+        
+        // Clear file input
+        fileInput.value = '';
+        
+        // Clear current import
+        this.currentImport = null;
+    }
+
+    async parseExcelFile(file, type) {
+        try {
+            this.showProgressLog(`Parsing ${file.name}...`);
+            
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            
+            if (type === 'siv') {
+                this.currentImport.data = this.parseSIVData(workbook);
+            }
+            
+            this.showProgressLog(`File parsed successfully. Found ${this.currentImport.data.length} records.`);
+            
+        } catch (error) {
+            console.error('Error parsing Excel file:', error);
+            this.showNotification('Error parsing Excel file: ' + error.message, 'error');
+            this.currentImport = null;
+        }
+    }
+
+    parseSIVData(workbook) {
+        // Assume first sheet contains the data
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        
+        if (jsonData.length < 2) {
+            throw new Error('Excel file must contain header row and data rows');
+        }
+        
+        // Find header row (look for Embassy/Country columns)
+        let headerRowIndex = -1;
+        for (let i = 0; i < Math.min(5, jsonData.length); i++) {
+            const row = jsonData[i];
+            if (row && row.some(cell => 
+                cell && typeof cell === 'string' && 
+                (cell.toLowerCase().includes('embassy') || cell.toLowerCase().includes('country'))
+            )) {
+                headerRowIndex = i;
+                break;
+            }
+        }
+        
+        if (headerRowIndex === -1) {
+            throw new Error('Could not find header row with Embassy or Country columns');
+        }
+        
+        const headers = jsonData[headerRowIndex].map(h => h ? h.toString().trim() : '');
+        const dataRows = jsonData.slice(headerRowIndex + 1);
+        
+        // Map column indices
+        const columnMap = this.mapSIVColumns(headers);
+        
+        // Process data rows
+        const processedData = [];
+        dataRows.forEach((row, index) => {
+            if (!row || row.every(cell => !cell)) return; // Skip empty rows
+            
+            try {
+                const record = this.processSIVRow(row, columnMap, index + headerRowIndex + 2);
+                if (record) {
+                    processedData.push(record);
+                }
+            } catch (error) {
+                console.warn(`Error processing row ${index + headerRowIndex + 2}:`, error);
+            }
+        });
+        
+        return processedData;
+    }
+
+    mapSIVColumns(headers) {
+        const columnMap = {};
+        
+        headers.forEach((header, index) => {
+            const lowerHeader = header.toLowerCase();
+            
+            // Map common column variations
+            if (lowerHeader.includes('embassy') || lowerHeader.includes('city')) {
+                columnMap.embassy = index;
+            } else if (lowerHeader.includes('country')) {
+                columnMap.country = index;
+            } else if (lowerHeader.includes('rank')) {
+                columnMap.rank = index;
+            } else if (lowerHeader.includes('total')) {
+                columnMap.total = index;
+            } else {
+                // Check for month patterns (Oct, Nov, Dec, Jan, etc.)
+                const monthPatterns = {
+                    'oct': '2024-10', 'november': '2024-11', 'december': '2024-12',
+                    'jan': '2025-01', 'february': '2025-02', 'march': '2025-03',
+                    'apr': '2025-04', 'may': '2025-05', 'jun': '2025-06',
+                    'jul': '2025-07', 'aug': '2025-08', 'sep': '2025-09'
+                };
+                
+                for (const [pattern, monthKey] of Object.entries(monthPatterns)) {
+                    if (lowerHeader.includes(pattern)) {
+                        columnMap[monthKey] = index;
+                        break;
+                    }
+                }
+            }
+        });
+        
+        return columnMap;
+    }
+
+    processSIVRow(row, columnMap, rowNumber) {
+        const embassy = row[columnMap.embassy];
+        const country = row[columnMap.country];
+        
+        if (!embassy && !country) {
+            return null; // Skip rows without embassy or country
+        }
+        
+        const record = {
+            embassy: embassy || country,
+            country: country || embassy,
+            rank: parseInt(row[columnMap.rank]) || 0,
+            total: 0,
+            lastUpdated: new Date().toISOString().split('T')[0],
+            sourceRow: rowNumber
+        };
+        
+        // Process monthly data
+        let monthlyTotal = 0;
+        Object.keys(columnMap).forEach(key => {
+            if (key.match(/^\d{4}-\d{2}$/)) { // Month pattern
+                const value = parseInt(row[columnMap[key]]) || 0;
+                record[key] = value;
+                monthlyTotal += value;
+            }
+        });
+        
+        // Use calculated total if no total column
+        if (columnMap.total !== undefined) {
+            record.total = parseInt(row[columnMap.total]) || monthlyTotal;
+        } else {
+            record.total = monthlyTotal;
+        }
+        
+        return record;
+    }
+
+    previewImport() {
+        if (!this.currentImport || !this.currentImport.data) {
+            this.showNotification('No data to preview', 'error');
+            return;
+        }
+        
+        // Show import progress panel
+        document.getElementById('importProgress').style.display = 'block';
+        document.getElementById('progressStatus').textContent = 'Data Preview';
+        document.getElementById('progressFill').style.width = '100%';
+        
+        // Generate preview
+        const data = this.currentImport.data;
+        const previewHTML = `
+            <div class="preview-summary">
+                <h4>Import Preview - ${this.currentImport.file.name}</h4>
+                <p><strong>Records found:</strong> ${data.length}</p>
+                <p><strong>File type:</strong> SIV Issuances Data</p>
+                <p><strong>Date range:</strong> ${this.getDataDateRange(data)}</p>
+            </div>
+            <div class="preview-table">
+                <h5>Sample Records (first 5):</h5>
+                <table class="preview-data-table">
+                    <thead>
+                        <tr>
+                            <th>Embassy</th>
+                            <th>Country</th>
+                            <th>Rank</th>
+                            <th>Monthly Data</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.slice(0, 5).map(record => `
+                            <tr>
+                                <td>${record.embassy}</td>
+                                <td>${record.country}</td>
+                                <td>${record.rank || '-'}</td>
+                                <td>${this.getMonthlyDataSummary(record)}</td>
+                                <td>${record.total}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+            ${this.validateImportData(data)}
+        `;
+        
+        document.getElementById('progressLog').innerHTML = previewHTML;
+    }
+
+    getDataDateRange(data) {
+        const months = [];
+        if (data.length > 0) {
+            Object.keys(data[0]).forEach(key => {
+                if (key.match(/^\d{4}-\d{2}$/)) {
+                    months.push(key);
+                }
+            });
+        }
+        months.sort();
+        return months.length > 0 ? `${months[0]} to ${months[months.length - 1]}` : 'No date columns found';
+    }
+
+    getMonthlyDataSummary(record) {
+        const months = [];
+        Object.keys(record).forEach(key => {
+            if (key.match(/^\d{4}-\d{2}$/) && record[key] > 0) {
+                months.push(`${key}: ${record[key]}`);
+            }
+        });
+        return months.slice(0, 3).join(', ') + (months.length > 3 ? '...' : '');
+    }
+
+    validateImportData(data) {
+        const errors = [];
+        const warnings = [];
+        
+        // Check for required fields
+        data.forEach((record, index) => {
+            if (!record.embassy && !record.country) {
+                errors.push(`Row ${record.sourceRow || index + 1}: Missing embassy and country`);
+            }
+            if (record.total === 0) {
+                warnings.push(`Row ${record.sourceRow || index + 1}: Total is 0 for ${record.embassy || record.country}`);
+            }
+        });
+        
+        // Check for duplicates
+        const embassySet = new Set();
+        data.forEach((record, index) => {
+            if (embassySet.has(record.embassy)) {
+                warnings.push(`Duplicate embassy found: ${record.embassy}`);
+            }
+            embassySet.add(record.embassy);
+        });
+        
+        let validationHTML = '';
+        if (errors.length > 0) {
+            validationHTML += `
+                <div class="validation-errors">
+                    <h5 style="color: #DC2626;">⚠️ Errors (${errors.length}):</h5>
+                    <ul>${errors.map(error => `<li>${error}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+        
+        if (warnings.length > 0) {
+            validationHTML += `
+                <div class="validation-warnings">
+                    <h5 style="color: #D97706;">⚠️ Warnings (${warnings.length}):</h5>
+                    <ul>${warnings.map(warning => `<li>${warning}</li>`).join('')}</ul>
+                </div>
+            `;
+        }
+        
+        if (errors.length === 0 && warnings.length === 0) {
+            validationHTML = '<div class="validation-success"><h5 style="color: #059669;">✅ All validations passed!</h5></div>';
+        }
+        
+        return validationHTML;
+    }
+
+    async startImport() {
+        if (!this.currentImport || !this.currentImport.data) {
+            this.showNotification('No data to import', 'error');
+            return;
+        }
+        
+        const replaceData = document.getElementById('sivReplaceData').checked;
+        const validateData = document.getElementById('sivValidateData').checked;
+        
+        // Show progress
+        document.getElementById('importProgress').style.display = 'block';
+        document.getElementById('progressStatus').textContent = 'Importing data...';
+        document.getElementById('progressFill').style.width = '0%';
+        
+        try {
+            const result = await this.processSIVImport(this.currentImport.data, replaceData, validateData);
+            
+            // Update progress
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressStatus').textContent = 'Import completed successfully!';
+            
+            // Create import record
+            const importRecord = {
+                id: Date.now(),
+                filename: this.currentImport.file.name,
+                fileType: 'SIV Issuances',
+                fileSize: this.formatFileSize(this.currentImport.file.size),
+                status: 'success',
+                recordsProcessed: this.currentImport.data.length,
+                recordsUpdated: result.updated,
+                errors: result.errors,
+                uploadedBy: 'admin@example.com',
+                uploadDate: new Date().toISOString(),
+                processingTime: result.processingTime + 'ms'
+            };
+            
+            this.fileUploads.unshift(importRecord);
+            this.saveImportHistory();
+            this.updateImportHistoryTable();
+            
+            this.showNotification(`Import completed! Updated ${result.updated} records.`, 'success');
+            
+            // Clear current import
+            setTimeout(() => {
+                this.clearFile('siv');
+                document.getElementById('importProgress').style.display = 'none';
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Import error:', error);
+            document.getElementById('progressStatus').textContent = 'Import failed: ' + error.message;
+            this.showNotification('Import failed: ' + error.message, 'error');
+        }
+    }
+
+    async processSIVImport(data, replaceData, validateData) {
+        const startTime = Date.now();
+        let updated = 0;
+        let errors = 0;
+        
+        // Load existing SIV data
+        let existingSIVData = {};
+        try {
+            const response = await fetch('data/embassy-siv-data.json');
+            const sivData = await response.json();
+            sivData.embassies.forEach(embassy => {
+                existingSIVData[embassy.embassy] = embassy;
+            });
+        } catch (error) {
+            console.warn('Could not load existing SIV data:', error);
+        }
+        
+        // Process each record
+        for (let i = 0; i < data.length; i++) {
+            const record = data[i];
+            const progress = ((i + 1) / data.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            
+            try {
+                // Update or create embassy record
+                if (existingSIVData[record.embassy]) {
+                    // Update existing
+                    const existing = existingSIVData[record.embassy];
+                    
+                    // Update monthly data
+                    Object.keys(record).forEach(key => {
+                        if (key.match(/^\d{4}-\d{2}$/) && (replaceData || !existing[key])) {
+                            existing[key] = record[key];
+                        }
+                    });
+                    
+                    // Update totals
+                    if (replaceData || !existing.total) {
+                        existing.total = record.total;
+                    }
+                    
+                    if (replaceData || !existing.rank) {
+                        existing.rank = record.rank;
+                    }
+                } else {
+                    // Create new
+                    existingSIVData[record.embassy] = record;
+                }
+                
+                updated++;
+                
+            } catch (error) {
+                console.error(`Error processing record for ${record.embassy}:`, error);
+                errors++;
+            }
+            
+            // Small delay to show progress
+            if (i % 10 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+        
+        // Save updated data to localStorage
+        const sivArray = Object.values(existingSIVData);
+        localStorage.setItem('sivImportData', JSON.stringify({ embassies: sivArray }));
+        
+        return {
+            updated,
+            errors,
+            processingTime: Date.now() - startTime
+        };
+    }
+
+    cancelImport() {
+        this.currentImport = null;
+        document.getElementById('importProgress').style.display = 'none';
+        this.showNotification('Import cancelled', 'warning');
+    }
+
+    loadImportHistory() {
+        const saved = localStorage.getItem('fileUploads');
+        if (saved) {
+            this.fileUploads = JSON.parse(saved);
+        } else {
+            // Sample import history
+            this.fileUploads = [
+                {
+                    id: 1,
+                    filename: 'siv-data-jan-2025.xlsx',
+                    fileType: 'SIV Issuances',
+                    fileSize: '245 KB',
+                    status: 'success',
+                    recordsProcessed: 45,
+                    recordsUpdated: 43,
+                    errors: 2,
+                    uploadedBy: 'admin@example.com',
+                    uploadDate: new Date(Date.now() - 86400000).toISOString(),
+                    processingTime: '1.2s'
+                }
+            ];
+        }
+        this.updateImportHistoryTable();
+    }
+
+    updateImportHistoryTable() {
+        const tbody = document.getElementById('importsTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = this.fileUploads.slice(0, 10).map(upload => `
+            <tr>
+                <td>${upload.filename}</td>
+                <td>${upload.fileType}</td>
+                <td>
+                    <span class="status-badge status-${upload.status}">
+                        ${upload.status.toUpperCase()}
+                    </span>
+                </td>
+                <td>${upload.recordsProcessed}/${upload.recordsUpdated}</td>
+                <td>${this.formatDate(upload.uploadDate)}</td>
+                <td>${upload.uploadedBy}</td>
+                <td>
+                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.viewImportDetails(${upload.id})" title="View Details">
+                        👁️
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="adminPortal.deleteImport(${upload.id})" title="Delete">
+                        🗑️
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    saveImportHistory() {
+        localStorage.setItem('fileUploads', JSON.stringify(this.fileUploads));
+    }
+
+    viewImportDetails(id) {
+        const upload = this.fileUploads.find(u => u.id === id);
+        if (upload) {
+            alert(`Import Details:\n\nFile: ${upload.filename}\nType: ${upload.fileType}\nStatus: ${upload.status}\nRecords: ${upload.recordsProcessed} processed, ${upload.recordsUpdated} updated\nErrors: ${upload.errors}\nDate: ${this.formatDate(upload.uploadDate)}\nUser: ${upload.uploadedBy}\nProcessing Time: ${upload.processingTime}`);
+        }
+    }
+
+    deleteImport(id) {
+        if (confirm('Are you sure you want to delete this import record?')) {
+            this.fileUploads = this.fileUploads.filter(u => u.id !== id);
+            this.saveImportHistory();
+            this.updateImportHistoryTable();
+            this.showNotification('Import record deleted', 'success');
+        }
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    showProgressLog(message) {
+        const log = document.getElementById('progressLog');
+        if (log) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+    }
+
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    showNotification(message, type = 'success') {
+        const toast = document.getElementById('notificationToast');
+        const icon = toast.querySelector('.notification-icon');
+        const messageEl = toast.querySelector('.notification-message');
+        
+        // Update content
+        messageEl.textContent = message;
+        
+        // Update icon based on type
+        switch (type) {
+            case 'success':
+                icon.textContent = '✓';
+                break;
+            case 'error':
+                icon.textContent = '⚠️';
+                break;
+            case 'warning':
+                icon.textContent = '⚠️';
+                break;
+            default:
+                icon.textContent = 'ℹ️';
+        }
+        
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 5000);
     }
 }
 

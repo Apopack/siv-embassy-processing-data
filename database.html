@@ -107,6 +107,10 @@
                         <span class="tab-icon">👥</span>
                         User Management
                     </button>
+                    <button class="tab-btn" data-table="uploads">
+                        <span class="tab-icon">📁</span>
+                        File Uploads
+                    </button>
                 </div>
             </section>
 
@@ -302,6 +306,40 @@
                         </thead>
                         <tbody id="usersTableBody">
                             <!-- User data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- File Uploads Table -->
+            <div class="table-container" id="uploadsTable">
+                <div class="table-header">
+                    <h3>File Uploads Table</h3>
+                    <p class="table-description">Uploaded Excel files and import history</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="uploadsSelectAll" class="select-checkbox">
+                                </th>
+                                <th class="id-col sortable" data-field="id">Upload ID</th>
+                                <th class="filename-col sortable" data-field="filename">File Name</th>
+                                <th class="filetype-col sortable" data-field="fileType">File Type</th>
+                                <th class="filesize-col sortable" data-field="fileSize">File Size</th>
+                                <th class="status-col sortable" data-field="status">Status</th>
+                                <th class="records-processed-col sortable" data-field="recordsProcessed">Records Processed</th>
+                                <th class="records-updated-col sortable" data-field="recordsUpdated">Records Updated</th>
+                                <th class="errors-col sortable" data-field="errors">Errors</th>
+                                <th class="user-col sortable" data-field="uploadedBy">Uploaded By</th>
+                                <th class="upload-date-col sortable" data-field="uploadDate">Upload Date</th>
+                                <th class="processing-time-col sortable" data-field="processingTime">Processing Time</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="uploadsTableBody">
+                            <!-- Upload data will be populated here -->
                         </tbody>
                     </table>
                 </div>

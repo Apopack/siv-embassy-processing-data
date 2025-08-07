@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="admin.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
     <!-- Mobile menu toggle -->
@@ -89,6 +90,126 @@
                     </div>
                     <div class="search-results" id="searchResults" style="display: none;">
                         <!-- Search results will appear here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Excel Import Section -->
+            <section class="import-section">
+                <div class="import-container">
+                    <div class="import-header">
+                        <h2>📊 Data Import Center</h2>
+                        <p class="import-subtitle">Upload Excel files to automatically update SIV issuances and other data</p>
+                    </div>
+                    
+                    <div class="import-cards">
+                        <!-- SIV Issuances Import -->
+                        <div class="import-card">
+                            <div class="import-card-header">
+                                <span class="import-icon">📈</span>
+                                <div>
+                                    <h3>SIV Issuances Data</h3>
+                                    <p>Upload monthly embassy processing reports</p>
+                                </div>
+                            </div>
+                            <div class="import-card-body">
+                                <div class="file-upload-area" id="sivUploadArea">
+                                    <input type="file" id="sivFileInput" accept=".xlsx,.xls" hidden>
+                                    <div class="upload-content">
+                                        <span class="upload-icon">📁</span>
+                                        <p class="upload-text">Drop Excel file here or <span class="upload-link">browse files</span></p>
+                                        <p class="upload-hint">Supports .xlsx and .xls formats</p>
+                                    </div>
+                                </div>
+                                <div class="import-options">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="sivReplaceData" checked>
+                                        Replace existing data for matching months
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="sivValidateData" checked>
+                                        Validate data before import
+                                    </label>
+                                </div>
+                                <div class="import-actions">
+                                    <button class="btn btn-secondary" id="sivPreviewBtn" disabled>
+                                        <span class="btn-icon">👁️</span>
+                                        Preview Data
+                                    </button>
+                                    <button class="btn btn-primary" id="sivImportBtn" disabled>
+                                        <span class="btn-icon">⬆️</span>
+                                        Import Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Future: Additional import types -->
+                        <div class="import-card disabled">
+                            <div class="import-card-header">
+                                <span class="import-icon">📋</span>
+                                <div>
+                                    <h3>Visa Information</h3>
+                                    <p>Coming soon - Upload visa requirement updates</p>
+                                </div>
+                            </div>
+                            <div class="import-card-body">
+                                <div class="coming-soon">
+                                    <span>🚧 Feature coming soon</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="import-card disabled">
+                            <div class="import-card-header">
+                                <span class="import-icon">✈️</span>
+                                <div>
+                                    <h3>Travel Information</h3>
+                                    <p>Coming soon - Upload travel cost updates</p>
+                                </div>
+                            </div>
+                            <div class="import-card-body">
+                                <div class="coming-soon">
+                                    <span>🚧 Feature coming soon</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Import Progress -->
+                    <div class="import-progress" id="importProgress" style="display: none;">
+                        <div class="progress-header">
+                            <h3>Import Progress</h3>
+                            <button class="btn btn-secondary btn-sm" id="cancelImportBtn">Cancel</button>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-status" id="progressStatus">Processing file...</div>
+                        <div class="progress-log" id="progressLog"></div>
+                    </div>
+                    
+                    <!-- Recent Imports -->
+                    <div class="recent-imports">
+                        <h3>Recent Imports</h3>
+                        <div class="imports-table">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Records</th>
+                                        <th>Date</th>
+                                        <th>User</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importsTableBody">
+                                    <!-- Recent imports will appear here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
