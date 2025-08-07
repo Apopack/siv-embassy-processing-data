@@ -489,6 +489,9 @@ class AdminPortal {
         // Save to localStorage (in production, this would be an API call)
         localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
         localStorage.setItem('adminChangeHistory', JSON.stringify(this.changeHistory));
+        
+        // Update database-specific storage for database view
+        this.updateDatabaseStorage();
 
         // Reset unsaved changes
         this.unsavedChanges = false;
@@ -589,7 +592,57 @@ class AdminPortal {
     saveAllChanges() {
         // In production, this would sync with backend
         localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
+        this.updateDatabaseStorage();
         this.showNotification('All changes saved to database!');
+    }
+
+    updateDatabaseStorage() {
+        // Update database-specific storage entries for the database view
+        // Convert admin country data to database format
+        const visaData = [];
+        const travelData = [];
+        
+        Object.values(this.countryData).forEach(country => {
+            if (country.embassy) {
+                // Add to visa data
+                visaData.push({
+                    embassy: country.embassy,
+                    country: country.country,
+                    visaRequired: country.visaRequired || "",
+                    visaType: country.visaType || "",
+                    visaCost: country.visaCost || "",
+                    validity: country.validity || "",
+                    processingTime: country.processingTime || "",
+                    applicationMethod: country.applicationMethod || "",
+                    officialLink: country.officialLink || "",
+                    extensionPossible: country.extensionPossible || "",
+                    sourceName: country.sourceName || "",
+                    lastUpdated: country.lastUpdated || new Date().toISOString().split('T')[0]
+                });
+                
+                // Add to travel data
+                travelData.push({
+                    embassy: country.embassy,
+                    country: country.country,
+                    directFlights: country.directFlights || "",
+                    airlines: country.airlines || "",
+                    flightDuration: country.flightDuration || "",
+                    mainAirport: country.mainAirport || "",
+                    airportCode: country.airportCode || "",
+                    cityDistance: country.cityDistance || "",
+                    safetyLevel: country.safetyLevel || "",
+                    travelNotes: country.travelNotes || "",
+                    lastUpdated: new Date().toISOString().split('T')[0]
+                });
+            }
+        });
+        
+        // Save database-specific formats
+        localStorage.setItem('databaseVisaData', JSON.stringify(visaData));
+        localStorage.setItem('databaseTravelData', JSON.stringify(travelData));
+        localStorage.setItem('databaseHistoryData', JSON.stringify(this.changeHistory));
+        
+        console.log('Updated database storage: ', visaData.length, 'visa records,', travelData.length, 'travel records');
     }
 
     exportData() {
@@ -1184,6 +1237,9 @@ class AdminPortal {
         // Save updated data to localStorage
         const sivArray = Object.values(existingSIVData);
         localStorage.setItem('sivImportData', JSON.stringify({ embassies: sivArray }));
+        
+        // Also update database SIV data
+        localStorage.setItem('databaseSIVData', JSON.stringify(sivArray));
         
         return {
             updated,

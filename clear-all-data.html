@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear All Data - SIV Info Portal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #c82333;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            color: #155724;
+            display: none;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗑️ Clear All Data</h1>
+        
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> This will permanently clear ALL data from the SIV Info Portal, including:
+            <ul>
+                <li>All SIV issuance data</li>
+                <li>All visa information</li>
+                <li>All travel information</li>
+                <li>All admin entries</li>
+                <li>All file upload history</li>
+                <li>All change history</li>
+            </ul>
+        </div>
+        
+        <button onclick="clearAllData()">Clear All Data</button>
+        <button onclick="window.location.href='index.html'" style="background: #6c757d;">Cancel</button>
+        
+        <div id="success" class="success">
+            ✅ All data has been cleared successfully!<br>
+            The system is now in a clean state. You can start fresh by:
+            <ol>
+                <li>Going to the <a href="admin.html">Admin Portal</a></li>
+                <li>Uploading Excel files via Data Import Center</li>
+                <li>Adding visa and travel information</li>
+            </ol>
+        </div>
+        
+        <div id="log" class="log" style="display: none;"></div>
+        
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </div>
+    
+    <script>
+        function clearAllData() {
+            const log = document.getElementById('log');
+            const success = document.getElementById('success');
+            log.style.display = 'block';
+            log.innerHTML = '';
+            
+            function addLog(message) {
+                log.innerHTML += message + '<br>';
+                log.scrollTop = log.scrollHeight;
+            }
+            
+            addLog('🔄 Starting complete data clear...');
+            
+            // List of all localStorage keys to remove
+            const keysToRemove = [
+                'sivImportData',
+                'adminCountryData',
+                'databaseVisaData',
+                'databaseTravelData',
+                'fileUploads',
+                'adminChangeHistory',
+                'databaseHistoryData',
+                'databaseUserData',
+                'databaseSIVData',
+                'savedEmbassyData'
+            ];
+            
+            // Remove each key
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    addLog(`✅ Cleared: ${key}`);
+                } else {
+                    addLog(`⏭️ Skipped: ${key} (not found)`);
+                }
+            });
+            
+            // Initialize empty structures
+            const emptyStructures = {
+                'sivImportData': JSON.stringify({ embassies: [] }),
+                'adminCountryData': JSON.stringify({}),
+                'fileUploads': JSON.stringify([]),
+                'adminChangeHistory': JSON.stringify([]),
+                'databaseHistoryData': JSON.stringify([]),
+                'databaseUserData': JSON.stringify([{
+                    id: 1,
+                    username: "admin",
+                    email: "admin@example.com",
+                    role: "Administrator",
+                    permissions: "Full Access",
+                    status: "Active",
+                    lastLogin: new Date().toISOString(),
+                    created: new Date().toISOString().split('T')[0]
+                }])
+            };
+            
+            Object.entries(emptyStructures).forEach(([key, value]) => {
+                localStorage.setItem(key, value);
+                addLog(`🆕 Initialized: ${key}`);
+            });
+            
+            addLog('');
+            addLog('✨ Complete data clear finished!');
+            addLog('📊 Final state:');
+            
+            // Show final state
+            Object.keys(emptyStructures).forEach(key => {
+                const data = JSON.parse(localStorage.getItem(key));
+                if (Array.isArray(data)) {
+                    addLog(`${key}: ${data.length} items`);
+                } else if (data.embassies) {
+                    addLog(`${key}: ${data.embassies.length} embassies`);
+                } else {
+                    addLog(`${key}: ${Object.keys(data).length} keys`);
+                }
+            });
+            
+            success.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
