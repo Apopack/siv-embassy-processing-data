@@ -763,6 +763,9 @@ class AdminPortal {
         const importBtn = document.getElementById(`${type}ImportBtn`);
         const fileInput = document.getElementById(`${type}FileInput`);
         
+        // Clear current import data
+        this.currentImport = null;
+        
         // Reset UI
         uploadArea.innerHTML = `
             <div class="upload-content">
@@ -799,7 +802,26 @@ class AdminPortal {
         } catch (error) {
             console.error('Error parsing Excel file:', error);
             this.showNotification('Error parsing Excel file: ' + error.message, 'error');
-            this.currentImport = null;
+            
+            // Show error in progress log but keep the file loaded so user can remove it
+            document.getElementById('progressLog').innerHTML = `
+                <div style="color: var(--danger); padding: 20px;">
+                    <h4>⚠️ Error Parsing File</h4>
+                    <p>${error.message}</p>
+                    <p style="margin-top: 10px; font-size: 14px;">
+                        This file format may not be compatible. Please ensure:
+                        <ul>
+                            <li>The file contains embassy/post data with SQ visa columns</li>
+                            <li>The file follows the "MONTH YEAR - IV Issuances by Post and Visa Class" format</li>
+                            <li>The data includes columns for Post/Embassy and SQ visa counts</li>
+                        </ul>
+                    </p>
+                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv')" style="margin-top: 10px;">
+                        Remove File and Try Again
+                    </button>
+                </div>
+            `;
+            document.getElementById('importProgress').style.display = 'block';
         }
     }
 
@@ -815,13 +837,15 @@ class AdminPortal {
             throw new Error('Excel file must contain header row and data rows');
         }
         
-        // Find header row (look for Embassy/Country columns)
+        // Find header row (look for Embassy/Country/Post columns)
         let headerRowIndex = -1;
-        for (let i = 0; i < Math.min(5, jsonData.length); i++) {
+        for (let i = 0; i < Math.min(10, jsonData.length); i++) {
             const row = jsonData[i];
             if (row && row.some(cell => 
                 cell && typeof cell === 'string' && 
-                (cell.toLowerCase().includes('embassy') || cell.toLowerCase().includes('country'))
+                (cell.toLowerCase().includes('embassy') || 
+                 cell.toLowerCase().includes('country') || 
+                 cell.toLowerCase().includes('post'))
             )) {
                 headerRowIndex = i;
                 break;
@@ -829,13 +853,17 @@ class AdminPortal {
         }
         
         if (headerRowIndex === -1) {
-            throw new Error('Could not find header row with Embassy or Country columns');
+            // Show first few rows to help debug
+            const preview = jsonData.slice(0, 5).map((row, i) => 
+                `Row ${i}: ${row.slice(0, 5).join(' | ')}`
+            ).join('\n');
+            throw new Error(`Could not find header row with Embassy/Country/Post columns.\n\nFile preview:\n${preview}`);
         }
         
         const headers = jsonData[headerRowIndex].map(h => h ? h.toString().trim() : '');
         const dataRows = jsonData.slice(headerRowIndex + 1);
         
-        // Map column indices
+        // Map column indices - specifically look for SQ visa columns
         const columnMap = this.mapSIVColumns(headers);
         
         // Process data rows
@@ -845,13 +873,16 @@ class AdminPortal {
             
             try {
                 const record = this.processSIVRow(row, columnMap, index + headerRowIndex + 2);
-                if (record) {
+                if (record && record.sqCount > 0) { // Only include if has SQ visas
                     processedData.push(record);
                 }
             } catch (error) {
                 console.warn(`Error processing row ${index + headerRowIndex + 2}:`, error);
             }
         });
+        
+        // Sort by SQ count descending
+        processedData.sort((a, b) => b.sqCount - a.sqCount);
         
         return processedData;
     }
@@ -863,31 +894,24 @@ class AdminPortal {
             const lowerHeader = header.toLowerCase();
             
             // Map common column variations
-            if (lowerHeader.includes('embassy') || lowerHeader.includes('city')) {
+            if (lowerHeader.includes('embassy') || lowerHeader.includes('post') || lowerHeader.includes('city')) {
                 columnMap.embassy = index;
             } else if (lowerHeader.includes('country')) {
                 columnMap.country = index;
-            } else if (lowerHeader.includes('rank')) {
-                columnMap.rank = index;
-            } else if (lowerHeader.includes('total')) {
+            } else if (lowerHeader === 'sq' || lowerHeader.includes('sq1') || lowerHeader.includes('sq2')) {
+                // Look for SQ visa columns
+                columnMap.sq = index;
+            } else if (lowerHeader.includes('total') && !lowerHeader.includes('grand')) {
                 columnMap.total = index;
-            } else {
-                // Check for month patterns (Oct, Nov, Dec, Jan, etc.)
-                const monthPatterns = {
-                    'oct': '2024-10', 'november': '2024-11', 'december': '2024-12',
-                    'jan': '2025-01', 'february': '2025-02', 'march': '2025-03',
-                    'apr': '2025-04', 'may': '2025-05', 'jun': '2025-06',
-                    'jul': '2025-07', 'aug': '2025-08', 'sep': '2025-09'
-                };
-                
-                for (const [pattern, monthKey] of Object.entries(monthPatterns)) {
-                    if (lowerHeader.includes(pattern)) {
-                        columnMap[monthKey] = index;
-                        break;
-                    }
-                }
+            } else if (lowerHeader.includes('grand total')) {
+                columnMap.grandTotal = index;
             }
         });
+        
+        // If no specific embassy/post column, look for the first column
+        if (columnMap.embassy === undefined) {
+            columnMap.embassy = 0;
+        }
         
         return columnMap;
     }
@@ -896,34 +920,48 @@ class AdminPortal {
         const embassy = row[columnMap.embassy];
         const country = row[columnMap.country];
         
-        if (!embassy && !country) {
-            return null; // Skip rows without embassy or country
+        // Skip if no embassy/post name
+        if (!embassy || embassy.toString().trim() === '') {
+            return null;
+        }
+        
+        // Extract SQ visa count
+        const sqCount = columnMap.sq !== undefined ? (parseInt(row[columnMap.sq]) || 0) : 0;
+        
+        // Skip rows with no SQ visas
+        if (sqCount === 0) {
+            return null;
+        }
+        
+        // Extract the month and year from the filename
+        const filename = this.currentImport?.file?.name || '';
+        const monthMatch = filename.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/i);
+        
+        let monthKey = '';
+        if (monthMatch) {
+            const monthName = monthMatch[1].toLowerCase();
+            const year = monthMatch[2];
+            const monthMap = {
+                'january': '01', 'february': '02', 'march': '03', 'april': '04',
+                'may': '05', 'june': '06', 'july': '07', 'august': '08',
+                'september': '09', 'october': '10', 'november': '11', 'december': '12'
+            };
+            monthKey = `${year}-${monthMap[monthName]}`;
         }
         
         const record = {
-            embassy: embassy || country,
-            country: country || embassy,
-            rank: parseInt(row[columnMap.rank]) || 0,
-            total: 0,
+            embassy: embassy.toString().trim(),
+            country: country ? country.toString().trim() : embassy.toString().trim(),
+            sqCount: sqCount,
             lastUpdated: new Date().toISOString().split('T')[0],
-            sourceRow: rowNumber
+            sourceRow: rowNumber,
+            sourceFile: filename
         };
         
-        // Process monthly data
-        let monthlyTotal = 0;
-        Object.keys(columnMap).forEach(key => {
-            if (key.match(/^\d{4}-\d{2}$/)) { // Month pattern
-                const value = parseInt(row[columnMap[key]]) || 0;
-                record[key] = value;
-                monthlyTotal += value;
-            }
-        });
-        
-        // Use calculated total if no total column
-        if (columnMap.total !== undefined) {
-            record.total = parseInt(row[columnMap.total]) || monthlyTotal;
-        } else {
-            record.total = monthlyTotal;
+        // If we identified the month, add it to the record
+        if (monthKey) {
+            record[monthKey] = sqCount;
+            record.monthData = { [monthKey]: sqCount };
         }
         
         return record;
@@ -954,11 +992,11 @@ class AdminPortal {
                 <table class="preview-data-table">
                     <thead>
                         <tr>
-                            <th>Embassy</th>
+                            <th>Embassy/Post</th>
                             <th>Country</th>
-                            <th>Rank</th>
-                            <th>Monthly Data</th>
-                            <th>Total</th>
+                            <th>SQ Visas</th>
+                            <th>Month</th>
+                            <th>Source File</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -966,9 +1004,9 @@ class AdminPortal {
                             <tr>
                                 <td>${record.embassy}</td>
                                 <td>${record.country}</td>
-                                <td>${record.rank || '-'}</td>
-                                <td>${this.getMonthlyDataSummary(record)}</td>
-                                <td>${record.total}</td>
+                                <td>${record.sqCount}</td>
+                                <td>${record.monthData ? Object.keys(record.monthData)[0] : 'N/A'}</td>
+                                <td>${record.sourceFile}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -1112,16 +1150,20 @@ class AdminPortal {
         let updated = 0;
         let errors = 0;
         
-        // Load existing SIV data
+        // Load existing SIV data from localStorage first
         let existingSIVData = {};
-        try {
-            const response = await fetch('data/embassy-siv-data.json');
-            const sivData = await response.json();
-            sivData.embassies.forEach(embassy => {
-                existingSIVData[embassy.embassy] = embassy;
-            });
-        } catch (error) {
-            console.warn('Could not load existing SIV data:', error);
+        const savedData = localStorage.getItem('sivImportData');
+        if (savedData) {
+            try {
+                const parsed = JSON.parse(savedData);
+                if (parsed.embassies) {
+                    parsed.embassies.forEach(embassy => {
+                        existingSIVData[embassy.embassy] = embassy;
+                    });
+                }
+            } catch (error) {
+                console.warn('Could not parse existing SIV data:', error);
+            }
         }
         
         // Process each record
@@ -1133,27 +1175,38 @@ class AdminPortal {
             try {
                 // Update or create embassy record
                 if (existingSIVData[record.embassy]) {
-                    // Update existing
+                    // Update existing embassy data
                     const existing = existingSIVData[record.embassy];
                     
-                    // Update monthly data
-                    Object.keys(record).forEach(key => {
-                        if (key.match(/^\d{4}-\d{2}$/) && (replaceData || !existing[key])) {
-                            existing[key] = record[key];
-                        }
-                    });
-                    
-                    // Update totals
-                    if (replaceData || !existing.total) {
-                        existing.total = record.total;
+                    // Initialize monthlyData if not exists
+                    if (!existing.monthlyData) {
+                        existing.monthlyData = {};
                     }
                     
-                    if (replaceData || !existing.rank) {
-                        existing.rank = record.rank;
+                    // Add month data from this record
+                    if (record.monthData) {
+                        Object.entries(record.monthData).forEach(([month, count]) => {
+                            existing.monthlyData[month] = count;
+                        });
                     }
+                    
+                    // Update country if not set
+                    if (!existing.country && record.country) {
+                        existing.country = record.country;
+                    }
+                    
+                    // Recalculate total from all monthly data
+                    existing.total = Object.values(existing.monthlyData).reduce((sum, val) => sum + (val || 0), 0);
+                    
                 } else {
-                    // Create new
-                    existingSIVData[record.embassy] = record;
+                    // Create new embassy record
+                    existingSIVData[record.embassy] = {
+                        embassy: record.embassy,
+                        country: record.country,
+                        monthlyData: record.monthData || {},
+                        total: record.sqCount || 0,
+                        lastUpdated: record.lastUpdated
+                    };
                 }
                 
                 updated++;
@@ -1169,8 +1222,12 @@ class AdminPortal {
             }
         }
         
+        // Sort by total descending and add rank
+        const sivArray = Object.values(existingSIVData)
+            .sort((a, b) => (b.total || 0) - (a.total || 0))
+            .map((embassy, index) => ({ ...embassy, rank: index + 1 }));
+        
         // Save updated data to localStorage
-        const sivArray = Object.values(existingSIVData);
         localStorage.setItem('sivImportData', JSON.stringify({ embassies: sivArray }));
         
         // Also update database SIV data
@@ -1194,22 +1251,8 @@ class AdminPortal {
         if (saved) {
             this.fileUploads = JSON.parse(saved);
         } else {
-            // Sample import history
-            this.fileUploads = [
-                {
-                    id: 1,
-                    filename: 'siv-data-jan-2025.xlsx',
-                    fileType: 'SIV Issuances',
-                    fileSize: '245 KB',
-                    status: 'success',
-                    recordsProcessed: 45,
-                    recordsUpdated: 43,
-                    errors: 2,
-                    uploadedBy: 'admin@example.com',
-                    uploadDate: new Date(Date.now() - 86400000).toISOString(),
-                    processingTime: '1.2s'
-                }
-            ];
+            // Start with empty import history
+            this.fileUploads = [];
         }
         this.updateImportHistoryTable();
     }
