@@ -748,7 +748,7 @@ class AdminPortal {
                 <span class="upload-icon">📄</span>
                 <p class="upload-text"><strong>${file.name}</strong></p>
                 <p class="upload-hint">${this.formatFileSize(file.size)} - Ready to process</p>
-                <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('${type}')">Remove</button>
+                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); adminPortal.clearFile('${type}')">Remove</button>
             </div>
         `;
         
@@ -816,7 +816,7 @@ class AdminPortal {
                             <li>The data includes columns for Post/Embassy and SQ visa counts</li>
                         </ul>
                     </p>
-                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv')" style="margin-top: 10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); adminPortal.clearFile('siv')" style="margin-top: 10px;">
                         Remove File and Try Again
                     </button>
                 </div>
