@@ -21,85 +21,20 @@ class AdminPortal {
     }
 
     async loadCountryData() {
-        // Load existing visa data
-        const visaData = [
-            {
-                country: "Pakistan",
-                flag: "🇵🇰",
-                embassy: "Islamabad",
-                visaRequired: "yes",
-                visaType: "Visitor Visa (Tourist/Family Visit)",
-                visaCost: "US$50–100",
-                validity: "3 months (90 days)",
-                processingTime: "3-5 business days",
-                applicationMethod: "online",
-                officialLink: "https://visa.nadra.gov.pk",
-                processingSteps: [
-                    "Visit the Pakistan Online Visa portal at https://visa.nadra.gov.pk",
-                    "Create account and complete online application form",
-                    "Upload required documents: passport copy, photo, invitation letter (if applicable)",
-                    "Pay visa fee online (US$50-100)",
-                    "Wait for processing (typically 3-5 business days)",
-                    "Download and print approved e-visa"
-                ],
-                extensionPossible: "yes",
-                extensionDuration: "Up to additional 90 days",
-                extensionCost: "Varies (portal fee; approx US$20)",
-                sourceName: "Pakistan Online Visa",
-                sourceType: "government",
-                lastUpdated: "2025-01-15",
-                // Travel information
-                directFlights: "yes",
-                airlines: "PIA, Turkish Airlines, Emirates",
-                flightDuration: "8-12 hours",
-                mainAirport: "Islamabad International Airport",
-                airportCode: "ISB",
-                cityDistance: "25km",
-                safetyLevel: "caution",
-                travelNotes: "Check current security advisories. Visa required for all Afghan nationals."
-            },
-            {
-                country: "Qatar",
-                flag: "🇶🇦",
-                embassy: "Doha",
-                visaRequired: "yes",
-                visaType: "Hayya Entry Permit",
-                visaCost: "US$27",
-                validity: "30 days",
-                processingTime: "Same day",
-                applicationMethod: "online",
-                officialLink: "https://hayya.qa",
-                processingSteps: [
-                    "Visit the official Hayya Portal at https://hayya.qa",
-                    "Create account and fill application form",
-                    "Upload required documents: passport copy, photo, proof of accommodation",
-                    "Pay entry permit fee online (US$27)",
-                    "Receive approval notification (usually same day)",
-                    "Download and print Hayya Entry Permit"
-                ],
-                extensionPossible: "no",
-                extensionDuration: "",
-                extensionCost: "",
-                sourceName: "Hayya Portal",
-                sourceType: "government",
-                lastUpdated: "2025-01-15",
-                // Travel information
-                directFlights: "yes",
-                airlines: "Qatar Airways",
-                flightDuration: "6-8 hours",
-                mainAirport: "Hamad International Airport",
-                airportCode: "DOH",
-                cityDistance: "15km",
-                safetyLevel: "safe",
-                travelNotes: "Modern facilities. Entry permit required."
+        // Load country data from localStorage if it exists
+        const savedData = localStorage.getItem('adminCountryData');
+        if (savedData) {
+            try {
+                this.countryData = JSON.parse(savedData);
+                console.log('Loaded admin country data:', Object.keys(this.countryData).length, 'countries');
+            } catch (error) {
+                console.error('Error loading saved country data:', error);
+                this.countryData = {};
             }
-            // Add more countries as needed
-        ];
-
-        // Convert to map for easy access
-        visaData.forEach(country => {
-            this.countryData[country.country] = country;
-        });
+        } else {
+            // Start with empty data
+            this.countryData = {};
+        }
 
         // Load SIV countries for search
         try {

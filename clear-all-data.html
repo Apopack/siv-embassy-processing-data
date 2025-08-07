@@ -130,8 +130,18 @@
                 'databaseHistoryData',
                 'databaseUserData',
                 'databaseSIVData',
-                'savedEmbassyData'
+                'savedEmbassyData',
+                'embassyData',
+                'countryData'
             ];
+            
+            // Also clear any other keys that might exist
+            const allKeys = Object.keys(localStorage);
+            allKeys.forEach(key => {
+                if (!keysToRemove.includes(key)) {
+                    keysToRemove.push(key);
+                }
+            });
             
             // Remove each key
             keysToRemove.forEach(key => {
