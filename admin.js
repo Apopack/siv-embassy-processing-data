@@ -196,6 +196,10 @@ class AdminPortal {
         document.getElementById('discardBtn')?.addEventListener('click', () => this.discardChanges());
         document.getElementById('exportBtn')?.addEventListener('click', () => this.exportData());
         document.getElementById('addStepBtn')?.addEventListener('click', () => this.addProcessingStep());
+        
+        // Import center toggle
+        document.getElementById('dataImportBtn')?.addEventListener('click', () => this.toggleImportCenter());
+        document.getElementById('closeImportBtn')?.addEventListener('click', () => this.closeImportCenter());
 
         // Close dropdowns on outside click
         document.addEventListener('click', (e) => {
@@ -1226,7 +1230,6 @@ class AdminPortal {
         tbody.innerHTML = this.fileUploads.slice(0, 10).map(upload => `
             <tr>
                 <td>${upload.filename}</td>
-                <td>${upload.fileType}</td>
                 <td>
                     <span class="status-badge status-${upload.status}">
                         ${upload.status.toUpperCase()}
@@ -1321,6 +1324,55 @@ class AdminPortal {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 5000);
+    }
+
+    // Import Center Toggle
+    toggleImportCenter() {
+        const importSection = document.getElementById('importSection');
+        const isVisible = importSection.style.display !== 'none';
+        
+        if (isVisible) {
+            this.closeImportCenter();
+        } else {
+            this.openImportCenter();
+        }
+    }
+
+    openImportCenter() {
+        const importSection = document.getElementById('importSection');
+        const editorSection = document.getElementById('editorSection');
+        
+        // Hide country editor if visible
+        if (editorSection.style.display !== 'none') {
+            editorSection.style.display = 'none';
+        }
+        
+        // Show import center
+        importSection.style.display = 'block';
+        
+        // Smooth scroll to import center
+        importSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Update button text
+        const btn = document.getElementById('dataImportBtn');
+        btn.innerHTML = '<span class="btn-icon">📊</span>Hide Import Center';
+    }
+
+    closeImportCenter() {
+        const importSection = document.getElementById('importSection');
+        importSection.style.display = 'none';
+        
+        // Reset button text
+        const btn = document.getElementById('dataImportBtn');
+        btn.innerHTML = '<span class="btn-icon">📊</span>Data Import Center';
+        
+        // Clear any current import
+        if (this.currentImport) {
+            this.clearFile('siv');
+        }
+        
+        // Hide progress panel
+        document.getElementById('importProgress').style.display = 'none';
     }
 }
 

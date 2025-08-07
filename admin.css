@@ -563,6 +563,7 @@ textarea.form-control {
 .import-header {
     margin-bottom: 32px;
     text-align: center;
+    position: relative;
 }
 
 .import-header h2 {
@@ -575,14 +576,13 @@ textarea.form-control {
 .import-subtitle {
     font-size: 16px;
     color: var(--admin-gray-600);
-    margin: 0;
+    margin: 0 0 16px;
 }
 
-.import-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 24px;
-    margin-bottom: 32px;
+.close-import-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .import-card {
@@ -590,16 +590,15 @@ textarea.form-control {
     border-radius: 12px;
     background: white;
     transition: all 0.2s ease;
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.import-card:not(.disabled):hover {
+.import-card:hover {
     border-color: var(--admin-primary);
     box-shadow: var(--admin-shadow-md);
-}
-
-.import-card.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
 }
 
 .import-card-header {
@@ -932,10 +931,6 @@ textarea.form-control {
 }
 
 @media (max-width: 1024px) {
-    .import-cards {
-        grid-template-columns: 1fr;
-    }
-    
     .import-section {
         margin: 0 16px 16px;
     }
@@ -951,6 +946,11 @@ textarea.form-control {
     .btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    .close-import-btn {
+        position: static;
+        margin-top: 8px;
     }
 }
 

@@ -69,6 +69,10 @@
                         <p class="header-subtitle">Update visa requirements and travel information for SIV applicants</p>
                     </div>
                     <div class="header-actions">
+                        <button class="btn btn-secondary" id="dataImportBtn">
+                            <span class="btn-icon">📊</span>
+                            Data Import Center
+                        </button>
                         <button class="btn btn-secondary" id="exportBtn">
                             <span class="btn-icon">📥</span>
                             Export Data
@@ -95,83 +99,53 @@
             </section>
 
             <!-- Excel Import Section -->
-            <section class="import-section">
+            <section class="import-section" id="importSection" style="display: none;">
                 <div class="import-container">
                     <div class="import-header">
-                        <h2>📊 Data Import Center</h2>
-                        <p class="import-subtitle">Upload Excel files to automatically update SIV issuances and other data</p>
+                        <h2>📊 SIV Data Import Center</h2>
+                        <p class="import-subtitle">Upload Excel files to automatically update SIV issuances data</p>
+                        <button class="btn btn-secondary btn-sm close-import-btn" id="closeImportBtn">
+                            <span class="btn-icon">×</span>
+                            Close Import Center
+                        </button>
                     </div>
                     
-                    <div class="import-cards">
-                        <!-- SIV Issuances Import -->
-                        <div class="import-card">
-                            <div class="import-card-header">
-                                <span class="import-icon">📈</span>
-                                <div>
-                                    <h3>SIV Issuances Data</h3>
-                                    <p>Upload monthly embassy processing reports</p>
-                                </div>
-                            </div>
-                            <div class="import-card-body">
-                                <div class="file-upload-area" id="sivUploadArea">
-                                    <input type="file" id="sivFileInput" accept=".xlsx,.xls" hidden>
-                                    <div class="upload-content">
-                                        <span class="upload-icon">📁</span>
-                                        <p class="upload-text">Drop Excel file here or <span class="upload-link">browse files</span></p>
-                                        <p class="upload-hint">Supports .xlsx and .xls formats</p>
-                                    </div>
-                                </div>
-                                <div class="import-options">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="sivReplaceData" checked>
-                                        Replace existing data for matching months
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="sivValidateData" checked>
-                                        Validate data before import
-                                    </label>
-                                </div>
-                                <div class="import-actions">
-                                    <button class="btn btn-secondary" id="sivPreviewBtn" disabled>
-                                        <span class="btn-icon">👁️</span>
-                                        Preview Data
-                                    </button>
-                                    <button class="btn btn-primary" id="sivImportBtn" disabled>
-                                        <span class="btn-icon">⬆️</span>
-                                        Import Data
-                                    </button>
-                                </div>
+                    <div class="import-card">
+                        <div class="import-card-header">
+                            <span class="import-icon">📈</span>
+                            <div>
+                                <h3>SIV Issuances Data</h3>
+                                <p>Upload monthly embassy processing reports</p>
                             </div>
                         </div>
-                        
-                        <!-- Future: Additional import types -->
-                        <div class="import-card disabled">
-                            <div class="import-card-header">
-                                <span class="import-icon">📋</span>
-                                <div>
-                                    <h3>Visa Information</h3>
-                                    <p>Coming soon - Upload visa requirement updates</p>
+                        <div class="import-card-body">
+                            <div class="file-upload-area" id="sivUploadArea">
+                                <input type="file" id="sivFileInput" accept=".xlsx,.xls" hidden>
+                                <div class="upload-content">
+                                    <span class="upload-icon">📁</span>
+                                    <p class="upload-text">Drop Excel file here or <span class="upload-link">browse files</span></p>
+                                    <p class="upload-hint">Supports .xlsx and .xls formats</p>
                                 </div>
                             </div>
-                            <div class="import-card-body">
-                                <div class="coming-soon">
-                                    <span>🚧 Feature coming soon</span>
-                                </div>
+                            <div class="import-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sivReplaceData" checked>
+                                    Replace existing data for matching months
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="sivValidateData" checked>
+                                    Validate data before import
+                                </label>
                             </div>
-                        </div>
-                        
-                        <div class="import-card disabled">
-                            <div class="import-card-header">
-                                <span class="import-icon">✈️</span>
-                                <div>
-                                    <h3>Travel Information</h3>
-                                    <p>Coming soon - Upload travel cost updates</p>
-                                </div>
-                            </div>
-                            <div class="import-card-body">
-                                <div class="coming-soon">
-                                    <span>🚧 Feature coming soon</span>
-                                </div>
+                            <div class="import-actions">
+                                <button class="btn btn-secondary" id="sivPreviewBtn" disabled>
+                                    <span class="btn-icon">👁️</span>
+                                    Preview Data
+                                </button>
+                                <button class="btn btn-primary" id="sivImportBtn" disabled>
+                                    <span class="btn-icon">⬆️</span>
+                                    Import Data
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -197,7 +171,6 @@
                                 <thead>
                                     <tr>
                                         <th>File Name</th>
-                                        <th>Type</th>
                                         <th>Status</th>
                                         <th>Records</th>
                                         <th>Date</th>
