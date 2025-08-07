@@ -748,7 +748,7 @@ class AdminPortal {
                 <span class="upload-icon">📄</span>
                 <p class="upload-text"><strong>${file.name}</strong></p>
                 <p class="upload-hint">${this.formatFileSize(file.size)} - Ready to process</p>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); adminPortal.clearFile('${type}')">Remove</button>
+                <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('${type}', event); return false;">Remove</button>
             </div>
         `;
         
@@ -757,7 +757,13 @@ class AdminPortal {
         importBtn.disabled = false;
     }
 
-    clearFile(type) {
+    clearFile(type, event) {
+        // Prevent event bubbling if called from button click
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
         const uploadArea = document.getElementById(`${type}UploadArea`);
         const previewBtn = document.getElementById(`${type}PreviewBtn`);
         const importBtn = document.getElementById(`${type}ImportBtn`);
@@ -816,7 +822,7 @@ class AdminPortal {
                             <li>The data includes columns for Post/Embassy and SQ visa counts</li>
                         </ul>
                     </p>
-                    <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); adminPortal.clearFile('siv')" style="margin-top: 10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv', event); return false;" style="margin-top: 10px;">
                         Remove File and Try Again
                     </button>
                 </div>
