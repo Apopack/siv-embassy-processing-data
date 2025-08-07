@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database View - SIV Resources Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="database.css">
+</head>
+<body>
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Side Navigation -->
+    <nav class="side-nav" id="sideNav">
+        <div class="nav-header">
+            <h2>SIV Database</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    SIV Issuances
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="visa-information.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    Visa Information
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="travel-information.html" class="nav-link">
+                    <span class="nav-icon">✈️</span>
+                    Travel Information
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="admin.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    Admin Portal
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="database.html" class="nav-link">
+                    <span class="nav-icon">🗄️</span>
+                    Database View
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="database-container">
+            <!-- Database Header -->
+            <header class="database-header">
+                <div class="header-content">
+                    <div class="header-title">
+                        <h1>Native Database View</h1>
+                        <p class="header-subtitle">Direct access to country information database - ServiceNow style native view</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="refreshBtn">
+                            <span class="btn-icon">🔄</span>
+                            Refresh
+                        </button>
+                        <button class="btn btn-secondary" id="addRecordBtn">
+                            <span class="btn-icon">➕</span>
+                            New Record
+                        </button>
+                        <button class="btn btn-primary" id="saveAllBtn">
+                            <span class="btn-icon">💾</span>
+                            Save All
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Database Controls -->
+            <section class="database-controls">
+                <div class="controls-row">
+                    <div class="search-wrapper">
+                        <input type="text" id="databaseSearch" class="database-search-input" placeholder="Search records...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="view-controls">
+                        <select id="recordsPerPage" class="records-select">
+                            <option value="25">25 records</option>
+                            <option value="50" selected>50 records</option>
+                            <option value="100">100 records</option>
+                            <option value="all">All records</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" id="filterBtn">
+                            <span class="btn-icon">⚙️</span>
+                            Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Panel -->
+                <div class="filter-panel" id="filterPanel" style="display: none;">
+                    <div class="filter-header">
+                        <h4>Filter Records</h4>
+                        <button class="close-filter-btn" id="closeFilterBtn">&times;</button>
+                    </div>
+                    <div class="filter-content">
+                        <div class="filter-group">
+                            <label>Visa Required</label>
+                            <select id="filterVisaRequired" class="filter-control">
+                                <option value="">All</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                                <option value="on-arrival">Visa on Arrival</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Application Method</label>
+                            <select id="filterApplicationMethod" class="filter-control">
+                                <option value="">All</option>
+                                <option value="online">Online</option>
+                                <option value="embassy">Embassy</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Safety Level</label>
+                            <select id="filterSafetyLevel" class="filter-control">
+                                <option value="">All</option>
+                                <option value="safe">Safe</option>
+                                <option value="caution">Exercise Caution</option>
+                                <option value="warning">Travel Warning</option>
+                                <option value="donottravel">Do Not Travel</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary btn-sm" id="clearFiltersBtn">Clear</button>
+                            <button class="btn btn-primary btn-sm" id="applyFiltersBtn">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Database Table -->
+            <section class="database-table-section">
+                <div class="table-wrapper">
+                    <table class="database-table" id="databaseTable">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="selectAll" class="select-checkbox">
+                                </th>
+                                <th class="country-col sortable" data-field="country">
+                                    Country
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="flag-col">Flag</th>
+                                <th class="embassy-col sortable" data-field="embassy">
+                                    Embassy
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="visa-required-col sortable" data-field="visaRequired">
+                                    Visa Required
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="visa-type-col">Visa Type</th>
+                                <th class="cost-col">Cost</th>
+                                <th class="validity-col">Validity</th>
+                                <th class="processing-time-col">Processing Time</th>
+                                <th class="application-method-col sortable" data-field="applicationMethod">
+                                    Application Method
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="safety-level-col sortable" data-field="safetyLevel">
+                                    Safety Level
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="last-updated-col sortable" data-field="lastUpdated">
+                                    Last Updated
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="databaseTableBody">
+                            <!-- Table rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container" id="paginationContainer">
+                    <div class="pagination-info" id="paginationInfo">
+                        Showing 1-50 of 120 records
+                    </div>
+                    <div class="pagination-controls" id="paginationControls">
+                        <button class="pagination-btn" id="firstPageBtn" disabled>First</button>
+                        <button class="pagination-btn" id="prevPageBtn" disabled>Previous</button>
+                        <span class="pagination-pages" id="paginationPages">
+                            <!-- Page buttons will be populated here -->
+                        </span>
+                        <button class="pagination-btn" id="nextPageBtn">Next</button>
+                        <button class="pagination-btn" id="lastPageBtn">Last</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bulk Actions Panel -->
+            <div class="bulk-actions-panel" id="bulkActionsPanel" style="display: none;">
+                <div class="bulk-actions-content">
+                    <span class="bulk-actions-text" id="bulkActionsText">0 records selected</span>
+                    <div class="bulk-actions-buttons">
+                        <button class="btn btn-secondary btn-sm" id="bulkEditBtn">
+                            <span class="btn-icon">✏️</span>
+                            Edit Selected
+                        </button>
+                        <button class="btn btn-danger btn-sm" id="bulkDeleteBtn">
+                            <span class="btn-icon">🗑️</span>
+                            Delete Selected
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="exportSelectedBtn">
+                            <span class="btn-icon">📥</span>
+                            Export Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Edit Record</h3>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Form will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                <button class="btn btn-primary" id="saveEditBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="notification-toast" id="notificationToast">
+        <span class="notification-icon">✓</span>
+        <span class="notification-message">Action completed successfully!</span>
+    </div>
+
+    <script src="database.js"></script>
+</body>
+</html>

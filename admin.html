@@ -48,6 +48,12 @@
                     Admin Portal
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="database.html" class="nav-link">
+                    <span class="nav-icon">🗄️</span>
+                    Database View
+                </a>
+            </li>
         </ul>
     </nav>
 
@@ -112,9 +118,11 @@
                             <div class="form-group">
                                 <label for="visaRequired">Visa Required</label>
                                 <select id="visaRequired" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
                                     <option value="on-arrival">Visa on Arrival</option>
+                                    <option value="unknown">Unknown</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -140,6 +148,7 @@
                             <div class="form-group">
                                 <label for="applicationMethod">Application Method</label>
                                 <select id="applicationMethod" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="online">Online (e-Visa)</option>
                                     <option value="embassy">Embassy/Consulate</option>
                                     <option value="both">Both Online and Embassy</option>
@@ -170,8 +179,10 @@
                             <div class="form-group">
                                 <label for="extensionPossible">Extension Available</label>
                                 <select id="extensionPossible" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
+                                    <option value="unknown">Unknown</option>
                                 </select>
                             </div>
                             <div class="form-group" id="extensionDetails" style="display: none;">
@@ -193,6 +204,7 @@
                             <div class="form-group">
                                 <label for="sourceType">Source Type</label>
                                 <select id="sourceType" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="government">Government Portal</option>
                                     <option value="embassy">Embassy Website</option>
                                     <option value="aggregator">Aggregator Service</option>
@@ -214,6 +226,7 @@
                             <div class="form-group">
                                 <label for="directFlights">Direct Flights Available</label>
                                 <select id="directFlights" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
                                 </select>
@@ -249,6 +262,7 @@
                             <div class="form-group">
                                 <label for="safetyLevel">Safety Level</label>
                                 <select id="safetyLevel" class="form-control">
+                                    <option value="">-- Select --</option>
                                     <option value="safe">Safe</option>
                                     <option value="caution">Exercise Caution</option>
                                     <option value="warning">Travel Warning</option>
