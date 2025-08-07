@@ -49,6 +49,43 @@ class DatabaseManager {
     }
 
     async loadSIVData() {
+        // Check for imported data first (from admin panel)
+        const importedData = localStorage.getItem('sivImportData');
+        if (importedData) {
+            try {
+                const data = JSON.parse(importedData);
+                data.embassies.forEach(embassy => {
+                    const months = Object.keys(embassy).filter(key => 
+                        key.match(/^\d{4}-\d{2}$/) || key.includes('2024') || key.includes('2025')
+                    );
+                    
+                    const monthlyData = {};
+                    let total = 0;
+                    
+                    months.forEach(month => {
+                        const value = parseInt(embassy[month]) || 0;
+                        monthlyData[month] = value;
+                        total += value;
+                    });
+                    
+                    this.data.siv.set(embassy.embassy, {
+                        embassy: embassy.embassy,
+                        country: embassy.country,
+                        rank: embassy.rank || 0,
+                        ...monthlyData,
+                        total: total,
+                        average: months.length > 0 ? Math.round(total / months.length) : 0,
+                        lastUpdated: embassy.lastUpdated || new Date().toISOString().split('T')[0]
+                    });
+                });
+                console.log('Loaded SIV data from imports:', this.data.siv.size, 'records');
+                return;
+            } catch (error) {
+                console.error('Error loading imported SIV data:', error);
+            }
+        }
+
+        // Fallback to original data file if no imports
         try {
             const response = await fetch('data/embassy-siv-data.json');
             const data = await response.json();
@@ -73,54 +110,50 @@ class DatabaseManager {
                     rank: embassy.rank || 0,
                     ...monthlyData,
                     total: total,
-                    average: Math.round(total / months.length),
+                    average: months.length > 0 ? Math.round(total / months.length) : 0,
                     lastUpdated: new Date().toISOString().split('T')[0]
                 });
             });
+            console.log('Loaded SIV data from file:', this.data.siv.size, 'records');
         } catch (error) {
-            console.error('Error loading SIV data:', error);
+            console.error('Error loading SIV data from file:', error);
+            console.log('Starting with empty SIV database');
         }
     }
 
     async loadVisaData() {
-        // Sample visa data
-        const visaData = [
-            {
-                embassy: "Islamabad",
-                country: "Pakistan",
-                visaRequired: "yes",
-                visaType: "Visitor Visa (Tourist/Family Visit)",
-                visaCost: "US$50–100",
-                validity: "3 months (90 days)",
-                processingTime: "3-5 business days",
-                applicationMethod: "online",
-                officialLink: "https://visa.nadra.gov.pk",
-                extensionPossible: "yes",
-                sourceName: "Pakistan Online Visa",
-                lastUpdated: "2025-01-15"
-            },
-            {
-                embassy: "Doha",
-                country: "Qatar", 
-                visaRequired: "yes",
-                visaType: "Hayya Entry Permit",
-                visaCost: "US$27",
-                validity: "30 days",
-                processingTime: "Same day",
-                applicationMethod: "online",
-                officialLink: "https://hayya.qa",
-                extensionPossible: "no",
-                sourceName: "Hayya Portal",
-                lastUpdated: "2025-01-15"
+        // Load admin-entered visa data first
+        const adminVisaData = localStorage.getItem('adminCountryData');
+        if (adminVisaData) {
+            try {
+                const adminData = JSON.parse(adminVisaData);
+                Object.values(adminData).forEach(countryData => {
+                    if (countryData.embassy) {
+                        this.data.visa.set(countryData.embassy, {
+                            embassy: countryData.embassy,
+                            country: countryData.country,
+                            visaRequired: countryData.visaRequired || "",
+                            visaType: countryData.visaType || "",
+                            visaCost: countryData.visaCost || "",
+                            validity: countryData.validity || "",
+                            processingTime: countryData.processingTime || "",
+                            applicationMethod: countryData.applicationMethod || "",
+                            officialLink: countryData.officialLink || "",
+                            extensionPossible: countryData.extensionPossible || "",
+                            sourceName: countryData.sourceName || "",
+                            lastUpdated: countryData.lastUpdated || new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+                console.log('Loaded visa data from admin:', this.data.visa.size, 'records');
+            } catch (error) {
+                console.error('Error loading admin visa data:', error);
             }
-        ];
+        }
 
-        // Initialize visa data for all embassies from SIV data
+        // Create empty visa records for embassies that exist in SIV data but not in visa data
         this.data.siv.forEach((sivRecord, embassy) => {
-            const existing = visaData.find(v => v.embassy === embassy);
-            if (existing) {
-                this.data.visa.set(embassy, existing);
-            } else {
+            if (!this.data.visa.has(embassy)) {
                 this.data.visa.set(embassy, {
                     embassy: embassy,
                     country: sivRecord.country,
@@ -138,57 +171,54 @@ class DatabaseManager {
             }
         });
 
-        // Load any saved data
+        // Load any additional saved database data
         const savedVisa = localStorage.getItem('databaseVisaData');
         if (savedVisa) {
-            const parsedData = JSON.parse(savedVisa);
-            parsedData.forEach(record => {
-                this.data.visa.set(record.embassy, record);
-            });
+            try {
+                const parsedData = JSON.parse(savedVisa);
+                parsedData.forEach(record => {
+                    this.data.visa.set(record.embassy, record);
+                });
+            } catch (error) {
+                console.error('Error loading saved visa data:', error);
+            }
         }
     }
 
     async loadTravelData() {
-        // Sample travel data
-        const travelData = [
-            {
-                embassy: "Islamabad",
-                country: "Pakistan",
-                directFlights: "yes",
-                airlines: "PIA, Turkish Airlines, Emirates",
-                flightDuration: "8-12 hours",
-                flightCost: "$400-800",
-                mainAirport: "Islamabad International Airport",
-                accommodationCost: "$20-50/night",
-                dailyExpenses: "$15-30/day",
-                medicalCost: "$100-200",
-                safetyLevel: "caution",
-                distanceFromAfghanistan: "500 km",
-                lastUpdated: "2025-01-15"
-            },
-            {
-                embassy: "Doha",
-                country: "Qatar",
-                directFlights: "yes",
-                airlines: "Qatar Airways",
-                flightDuration: "6-8 hours",
-                flightCost: "$500-900",
-                mainAirport: "Hamad International Airport",
-                accommodationCost: "$80-150/night",
-                dailyExpenses: "$50-100/day",
-                medicalCost: "$150-300",
-                safetyLevel: "safe",
-                distanceFromAfghanistan: "800 km",
-                lastUpdated: "2025-01-15"
+        // Load admin-entered travel data first
+        const adminCountryData = localStorage.getItem('adminCountryData');
+        if (adminCountryData) {
+            try {
+                const adminData = JSON.parse(adminCountryData);
+                Object.values(adminData).forEach(countryData => {
+                    if (countryData.embassy) {
+                        this.data.travel.set(countryData.embassy, {
+                            embassy: countryData.embassy,
+                            country: countryData.country,
+                            directFlights: countryData.directFlights || "",
+                            airlines: countryData.airlines || "",
+                            flightDuration: countryData.flightDuration || "",
+                            flightCost: countryData.flightCost || "",
+                            mainAirport: countryData.mainAirport || "",
+                            accommodationCost: countryData.accommodationCost || "",
+                            dailyExpenses: countryData.dailyExpenses || "",
+                            medicalCost: countryData.medicalCost || "",
+                            safetyLevel: countryData.safetyLevel || "",
+                            distanceFromAfghanistan: countryData.distanceFromAfghanistan || "",
+                            lastUpdated: countryData.lastUpdated || new Date().toISOString().split('T')[0]
+                        });
+                    }
+                });
+                console.log('Loaded travel data from admin:', this.data.travel.size, 'records');
+            } catch (error) {
+                console.error('Error loading admin travel data:', error);
             }
-        ];
+        }
 
-        // Initialize travel data for all embassies
+        // Create empty travel records for embassies that exist in SIV data but not in travel data
         this.data.siv.forEach((sivRecord, embassy) => {
-            const existing = travelData.find(t => t.embassy === embassy);
-            if (existing) {
-                this.data.travel.set(embassy, existing);
-            } else {
+            if (!this.data.travel.has(embassy)) {
                 this.data.travel.set(embassy, {
                     embassy: embassy,
                     country: sivRecord.country,
@@ -207,13 +237,17 @@ class DatabaseManager {
             }
         });
 
-        // Load any saved data
+        // Load any additional saved database data
         const savedTravel = localStorage.getItem('databaseTravelData');
         if (savedTravel) {
-            const parsedData = JSON.parse(savedTravel);
-            parsedData.forEach(record => {
-                this.data.travel.set(record.embassy, record);
-            });
+            try {
+                const parsedData = JSON.parse(savedTravel);
+                parsedData.forEach(record => {
+                    this.data.travel.set(record.embassy, record);
+                });
+            } catch (error) {
+                console.error('Error loading saved travel data:', error);
+            }
         }
     }
 

@@ -7,31 +7,95 @@ let visibleMonths = [];
 
 async function loadData() {
     try {
-        const response = await fetch('data/embassy-siv-data.json');
-        allData = await response.json();
-        
-        document.getElementById('lastUpdated').textContent = formatDate(allData.lastUpdated);
-        
-        // Process and convert data to calendar format
-        embassyData = processEmbassyData(allData.embassies);
-        
-        // Determine available months
-        availableMonths = getAvailableMonths();
-        
-        // Set default date range to January 2025 through latest available data
-        setDefaultDateRange();
-        
-        // Calculate visible months based on current date range
-        updateVisibleMonths();
-        
-        // Initial render
-        filteredData = [...embassyData];
-        renderTable();
-        hideLoading();
+        // Check for imported data first (from admin panel)
+        const importedData = localStorage.getItem('sivImportData');
+        if (importedData) {
+            try {
+                allData = JSON.parse(importedData);
+                console.log('Loading data from admin imports:', allData.embassies.length, 'embassies');
+                
+                // Set last updated to current time for imported data
+                document.getElementById('lastUpdated').textContent = formatDate(new Date().toISOString());
+                
+                // Process and convert data to calendar format
+                embassyData = processEmbassyData(allData.embassies);
+                
+                if (embassyData.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+                
+                // Determine available months
+                availableMonths = getAvailableMonths();
+                
+                // Set default date range to January 2025 through latest available data
+                setDefaultDateRange();
+                
+                // Calculate visible months based on current date range
+                updateVisibleMonths();
+                
+                // Initial render
+                filteredData = [...embassyData];
+                renderTable();
+                hideLoading();
+                return;
+            } catch (error) {
+                console.error('Error parsing imported SIV data:', error);
+            }
+        }
+
+        // Fallback to static JSON file if no imported data
+        try {
+            const response = await fetch('data/embassy-siv-data.json');
+            allData = await response.json();
+            
+            document.getElementById('lastUpdated').textContent = formatDate(allData.lastUpdated);
+            
+            // Process and convert data to calendar format
+            embassyData = processEmbassyData(allData.embassies);
+            
+            // Determine available months
+            availableMonths = getAvailableMonths();
+            
+            // Set default date range to January 2025 through latest available data
+            setDefaultDateRange();
+            
+            // Calculate visible months based on current date range
+            updateVisibleMonths();
+            
+            // Initial render
+            filteredData = [...embassyData];
+            renderTable();
+            hideLoading();
+        } catch (fetchError) {
+            console.log('No static data file found, showing empty state');
+            showEmptyState();
+        }
     } catch (error) {
         console.error('Error loading data:', error);
-        showError('Failed to load embassy data. Please try again later.');
+        showEmptyState();
     }
+}
+
+function showEmptyState() {
+    const container = document.querySelector('.table-container');
+    container.innerHTML = `
+        <div class="empty-state" style="text-align: center; padding: 60px 20px; color: #6B7280;">
+            <div style="font-size: 64px; margin-bottom: 20px;">📊</div>
+            <h3 style="color: #374151; margin-bottom: 10px;">No SIV Data Available</h3>
+            <p style="margin-bottom: 20px;">Start by importing Excel files through the Admin Portal.</p>
+            <div style="background: #F3F4F6; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                <h4 style="color: #374151; margin: 0 0 10px;">Getting Started:</h4>
+                <ol style="color: #6B7280; margin: 0; padding-left: 20px;">
+                    <li>Go to <strong>Admin Portal</strong> in the navigation</li>
+                    <li>Click <strong>"Data Import Center"</strong></li>
+                    <li>Upload your SIV Excel files</li>
+                    <li>Data will automatically appear on this page</li>
+                </ol>
+            </div>
+            <a href="admin.html" class="btn" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500;">Go to Admin Portal</a>
+        </div>
+    `;
 }
 
 function processEmbassyData(embassies) {

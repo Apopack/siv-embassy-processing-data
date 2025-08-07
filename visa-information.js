@@ -19,7 +19,26 @@ class VisaInformationApp {
     }
 
     async loadVisaData() {
-        // Visa data from the CSV file: Visa_Information_Sources_with_Extension_Details.csv
+        // Check for visa data from admin panel first
+        const adminData = localStorage.getItem('databaseVisaData');
+        if (adminData) {
+            try {
+                const data = JSON.parse(adminData);
+                this.visaData = Array.from(data.values ? data.values() : data);
+                console.log('Loading visa data from admin portal:', this.visaData.length, 'countries');
+                this.filteredData = [...this.visaData];
+                
+                if (this.visaData.length === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+                return;
+            } catch (error) {
+                console.error('Error parsing admin visa data:', error);
+            }
+        }
+
+        // Fallback to static visa data if no admin data available
         this.visaData = [
             {
                 rank: 1,
@@ -314,12 +333,90 @@ class VisaInformationApp {
         ];
         
         this.filteredData = [...this.visaData];
+        
+        // Show empty state if no data
+        if (this.visaData.length === 0) {
+            this.showEmptyState();
+        }
+    }
+    
+    showEmptyState() {
+        const container = document.querySelector('.container');
+        if (!container) return;
+        
+        // Hide normal content sections
+        const sectionsToHide = ['.visa-table-container', '.country-selection-section'];
+        sectionsToHide.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) element.style.display = 'none';
+        });
+        
+        // Create and show empty state
+        const existingEmptyState = document.querySelector('.visa-empty-state');
+        if (existingEmptyState) {
+            existingEmptyState.remove();
+        }
+        
+        const emptyStateHTML = `
+            <div class="visa-empty-state" style="text-align: center; padding: 60px 20px; color: #6B7280; margin: 40px 0;">
+                <div style="font-size: 64px; margin-bottom: 20px;">📋</div>
+                <h3 style="color: #374151; margin-bottom: 10px;">No Visa Information Available</h3>
+                <p style="margin-bottom: 20px;">Visa information will appear here once added through the Admin Portal.</p>
+                <div style="background: #F3F4F6; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <h4 style="color: #374151; margin: 0 0 10px;">How to Add Visa Information:</h4>
+                    <ol style="color: #6B7280; margin: 0; padding-left: 20px;">
+                        <li>Go to <strong>Admin Portal</strong> in the navigation</li>
+                        <li>Search for a country using the search box</li>
+                        <li>Select a country and fill in visa requirements</li>
+                        <li>Save the information</li>
+                        <li>Data will automatically appear on this page</li>
+                    </ol>
+                </div>
+                <a href="admin.html" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 12px;">Go to Admin Portal</a>
+                <button onclick="location.reload()" style="display: inline-block; background: #6B7280; color: white; padding: 12px 24px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer;">Refresh Page</button>
+            </div>
+        `;
+        
+        // Insert after page header
+        const pageHeader = document.querySelector('.page-header');
+        if (pageHeader) {
+            pageHeader.insertAdjacentHTML('afterend', emptyStateHTML);
+        }
+    }
+    
+    getCountryFlag(country) {
+        const flagMap = {
+            'Pakistan': '🇵🇰', 'Qatar': '🇶🇦', 'Albania': '🇦🇱', 'Turkey': '🇹🇷',
+            'Germany': '🇩🇪', 'Canada': '🇨🇦', 'Philippines': '🇵🇭', 'UAE': '🇦🇪',
+            'Iraq': '🇮🇶', 'Rwanda': '🇷🇼', 'United Arab Emirates': '🇦🇪',
+            'United States': '🇺🇸', 'India': '🇮🇳', 'Iran': '🇮🇷', 'Afghanistan': '🇦🇫',
+            'Australia': '🇦🇺', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Brazil': '🇧🇷',
+            'China': '🇨🇳', 'Denmark': '🇩🇰', 'Egypt': '🇪🇬', 'France': '🇫🇷'
+        };
+        return flagMap[country] || '🏳️';
     }
 
     async loadSIVCountries() {
         // Load the same SIV embassy data that's used in the main issuances page
         try {
-            // First try to get data from script.js global variable if available
+            // First check for imported SIV data from admin panel
+            const importedData = localStorage.getItem('sivImportData');
+            if (importedData) {
+                try {
+                    const data = JSON.parse(importedData);
+                    this.sivCountries = data.embassies.map(embassy => ({
+                        name: embassy.country,
+                        embassy: embassy.embassy,
+                        flag: this.getCountryFlag(embassy.country)
+                    }));
+                    console.log('Loading SIV countries from admin imports:', this.sivCountries.length, 'countries');
+                    return;
+                } catch (error) {
+                    console.error('Error parsing imported SIV data:', error);
+                }
+            }
+
+            // Try to get data from script.js global variable if available
             if (typeof embassyData !== 'undefined' && embassyData.embassies) {
                 this.sivCountries = embassyData.embassies.map(embassy => ({
                     name: embassy.country,

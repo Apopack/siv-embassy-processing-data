@@ -18,7 +18,26 @@ class TravelInformationApp {
     }
 
     async loadTravelData() {
-        // Travel data based on common SIV interview locations
+        // Check for travel data from admin panel first
+        const adminData = localStorage.getItem('databaseTravelData');
+        if (adminData) {
+            try {
+                const data = JSON.parse(adminData);
+                this.travelData = Array.from(data.values ? data.values() : data);
+                console.log('Loading travel data from admin portal:', this.travelData.length, 'destinations');
+                this.filteredData = [...this.travelData];
+                
+                if (this.travelData.length === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+                return;
+            } catch (error) {
+                console.error('Error parsing admin travel data:', error);
+            }
+        }
+
+        // Fallback to static travel data if no admin data available
         this.travelData = [
             {
                 id: 1,
@@ -293,6 +312,31 @@ class TravelInformationApp {
         ];
         
         this.filteredData = [...this.travelData];
+    }
+
+    showEmptyState() {
+        const grid = document.getElementById('travelGrid');
+        if (!grid) return;
+
+        grid.innerHTML = `
+            <div class="travel-empty-state" style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #6B7280;">
+                <div style="font-size: 64px; margin-bottom: 20px;">✈️</div>
+                <h3 style="color: #374151; margin-bottom: 10px;">No Travel Information Available</h3>
+                <p style="margin-bottom: 20px;">Travel information will appear here once added through the Admin Portal.</p>
+                <div style="background: #F3F4F6; border-radius: 8px; padding: 20px; margin: 20px auto; text-align: left; max-width: 600px;">
+                    <h4 style="color: #374151; margin: 0 0 10px;">How to Add Travel Information:</h4>
+                    <ol style="color: #6B7280; margin: 0; padding-left: 20px;">
+                        <li>Go to <strong>Admin Portal</strong> in the navigation</li>
+                        <li>Search for a country using the search box</li>
+                        <li>Select a country and fill in travel costs and details</li>
+                        <li>Save the information</li>
+                        <li>Data will automatically appear on this page</li>
+                    </ol>
+                </div>
+                <a href="admin.html" style="display: inline-block; background: #2563EB; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; margin-right: 12px;">Go to Admin Portal</a>
+                <button onclick="location.reload()" style="display: inline-block; background: #6B7280; color: white; padding: 12px 24px; border-radius: 6px; border: none; font-weight: 500; cursor: pointer;">Refresh Page</button>
+            </div>
+        `;
     }
 
     setupEventListeners() {
