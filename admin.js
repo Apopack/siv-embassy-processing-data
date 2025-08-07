@@ -863,145 +863,119 @@ class AdminPortal {
     }
 
     parseSIVData(workbook) {
-        // Assume first sheet contains the data
+        // Get first sheet
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         
         // Convert to JSON
         const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
         
-        if (jsonData.length < 2) {
-            throw new Error('Excel file must contain header row and data rows');
+        if (jsonData.length < 3) {
+            throw new Error('Excel file must contain title, header, and data rows');
         }
         
-        // Find header row (look for Embassy/Country/Post columns)
-        let headerRowIndex = -1;
-        for (let i = 0; i < Math.min(10, jsonData.length); i++) {
-            const row = jsonData[i];
-            if (row && row.some(cell => 
-                cell && typeof cell === 'string' && 
-                (cell.toLowerCase().includes('embassy') || 
-                 cell.toLowerCase().includes('country') || 
-                 cell.toLowerCase().includes('post'))
-            )) {
-                headerRowIndex = i;
-                break;
-            }
+        // Validate file format - Row 1 should contain title with month/year
+        const titleRow = jsonData[0];
+        if (!titleRow || !titleRow[0] || !titleRow[0].toString().toLowerCase().includes('immigrant visa issuances')) {
+            throw new Error('File does not appear to be an "IV Issuances by Post and Visa Class" file');
         }
         
-        if (headerRowIndex === -1) {
-            // Show first few rows to help debug
-            const preview = jsonData.slice(0, 5).map((row, i) => 
-                `Row ${i}: ${row.slice(0, 5).join(' | ')}`
-            ).join('\n');
-            throw new Error(`Could not find header row with Embassy/Country/Post columns.\n\nFile preview:\n${preview}`);
+        // Row 2 should contain headers: Post, Visa Class, Issuances
+        const headerRow = jsonData[1];
+        if (!headerRow || headerRow.length < 3) {
+            throw new Error('Invalid header row format');
         }
         
-        const headers = jsonData[headerRowIndex].map(h => h ? h.toString().trim() : '');
-        const dataRows = jsonData.slice(headerRowIndex + 1);
+        const headers = headerRow.map(h => h ? h.toString().trim().toLowerCase() : '');
+        if (!headers.includes('post') || !headers.includes('visa class') || !headers.includes('issuances')) {
+            throw new Error('Missing required columns: Post, Visa Class, Issuances');
+        }
         
-        // Map column indices - specifically look for SQ visa columns
-        const columnMap = this.mapSIVColumns(headers);
+        // Map column indices
+        const postIndex = headers.indexOf('post');
+        const visaClassIndex = headers.indexOf('visa class');
+        const issuancesIndex = headers.indexOf('issuances');
         
-        // Process data rows
-        const processedData = [];
+        // Extract month/year from title or filename
+        const monthYear = this.extractMonthYear(titleRow[0].toString(), this.currentImport?.file?.name || '');
+        if (!monthYear) {
+            throw new Error('Could not extract month and year from file');
+        }
+        
+        // Process data rows (starting from row 3)
+        const dataRows = jsonData.slice(2);
+        const sqByPost = {}; // Aggregate SQ visas by post
+        
         dataRows.forEach((row, index) => {
             if (!row || row.every(cell => !cell)) return; // Skip empty rows
             
-            try {
-                const record = this.processSIVRow(row, columnMap, index + headerRowIndex + 2);
-                if (record && record.sqCount > 0) { // Only include if has SQ visas
-                    processedData.push(record);
+            const post = row[postIndex] ? row[postIndex].toString().trim() : '';
+            const visaClass = row[visaClassIndex] ? row[visaClassIndex].toString().trim() : '';
+            const issuances = parseInt(row[issuancesIndex]) || 0;
+            
+            // Only process SQ visa classes
+            if (post && visaClass.startsWith('SQ') && issuances > 0) {
+                if (!sqByPost[post]) {
+                    sqByPost[post] = {
+                        embassy: post,
+                        country: post, // Use post as country for now
+                        sqCount: 0,
+                        sqBreakdown: {},
+                        lastUpdated: new Date().toISOString().split('T')[0],
+                        sourceFile: this.currentImport?.file?.name || '',
+                        monthYear: monthYear.key,
+                        month: monthYear.month,
+                        year: monthYear.year,
+                        monthData: {} // Initialize monthly data structure
+                    };
                 }
-            } catch (error) {
-                console.warn(`Error processing row ${index + headerRowIndex + 2}:`, error);
+                
+                sqByPost[post].sqCount += issuances;
+                sqByPost[post].sqBreakdown[visaClass] = issuances;
             }
         });
         
-        // Sort by SQ count descending
-        processedData.sort((a, b) => b.sqCount - a.sqCount);
+        // Add monthly data to each post record and convert to array
+        const processedData = Object.values(sqByPost).map(post => {
+            // Set the monthly data for this specific month/year
+            post.monthData[monthYear.key] = post.sqCount;
+            return post;
+        }).sort((a, b) => b.sqCount - a.sqCount);
+        
+        if (processedData.length === 0) {
+            throw new Error('No SQ visa data found in the file');
+        }
         
         return processedData;
     }
 
-    mapSIVColumns(headers) {
-        const columnMap = {};
+    extractMonthYear(title, filename) {
+        // Try to extract from title first (e.g., "Immigrant Visa Issuances by Post May 2025")
+        let monthMatch = title.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/i);
         
-        headers.forEach((header, index) => {
-            const lowerHeader = header.toLowerCase();
-            
-            // Map common column variations
-            if (lowerHeader.includes('embassy') || lowerHeader.includes('post') || lowerHeader.includes('city')) {
-                columnMap.embassy = index;
-            } else if (lowerHeader.includes('country')) {
-                columnMap.country = index;
-            } else if (lowerHeader === 'sq' || lowerHeader.includes('sq1') || lowerHeader.includes('sq2')) {
-                // Look for SQ visa columns
-                columnMap.sq = index;
-            } else if (lowerHeader.includes('total') && !lowerHeader.includes('grand')) {
-                columnMap.total = index;
-            } else if (lowerHeader.includes('grand total')) {
-                columnMap.grandTotal = index;
-            }
-        });
-        
-        // If no specific embassy/post column, look for the first column
-        if (columnMap.embassy === undefined) {
-            columnMap.embassy = 0;
+        // If not in title, try filename (e.g., "MAY 2025 - IV Issuances...")
+        if (!monthMatch) {
+            monthMatch = filename.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/i);
         }
         
-        return columnMap;
-    }
-
-    processSIVRow(row, columnMap, rowNumber) {
-        const embassy = row[columnMap.embassy];
-        const country = row[columnMap.country];
-        
-        // Skip if no embassy/post name
-        if (!embassy || embassy.toString().trim() === '') {
+        if (!monthMatch) {
             return null;
         }
         
-        // Extract SQ visa count
-        const sqCount = columnMap.sq !== undefined ? (parseInt(row[columnMap.sq]) || 0) : 0;
-        
-        // Skip rows with no SQ visas
-        if (sqCount === 0) {
-            return null;
-        }
-        
-        // Extract the month and year from the filename
-        const filename = this.currentImport?.file?.name || '';
-        const monthMatch = filename.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/i);
-        
-        let monthKey = '';
-        if (monthMatch) {
-            const monthName = monthMatch[1].toLowerCase();
-            const year = monthMatch[2];
-            const monthMap = {
-                'january': '01', 'february': '02', 'march': '03', 'april': '04',
-                'may': '05', 'june': '06', 'july': '07', 'august': '08',
-                'september': '09', 'october': '10', 'november': '11', 'december': '12'
-            };
-            monthKey = `${year}-${monthMap[monthName]}`;
-        }
-        
-        const record = {
-            embassy: embassy.toString().trim(),
-            country: country ? country.toString().trim() : embassy.toString().trim(),
-            sqCount: sqCount,
-            lastUpdated: new Date().toISOString().split('T')[0],
-            sourceRow: rowNumber,
-            sourceFile: filename
+        const monthName = monthMatch[1].toLowerCase();
+        const year = monthMatch[2];
+        const monthMap = {
+            'january': '01', 'february': '02', 'march': '03', 'april': '04',
+            'may': '05', 'june': '06', 'july': '07', 'august': '08',
+            'september': '09', 'october': '10', 'november': '11', 'december': '12'
         };
         
-        // If we identified the month, add it to the record
-        if (monthKey) {
-            record[monthKey] = sqCount;
-            record.monthData = { [monthKey]: sqCount };
-        }
-        
-        return record;
+        return {
+            month: monthName,
+            year: year,
+            key: `${year}-${monthMap[monthName]}`,
+            display: `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} ${year}`
+        };
     }
 
     previewImport() {
