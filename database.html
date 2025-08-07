@@ -64,17 +64,17 @@
             <header class="database-header">
                 <div class="header-content">
                     <div class="header-title">
-                        <h1>Native Database View</h1>
-                        <p class="header-subtitle">Direct access to country information database - ServiceNow style native view</p>
+                        <h1>Database Management System</h1>
+                        <p class="header-subtitle">Normalized database tables with embassy as unique identifier</p>
                     </div>
                     <div class="header-actions">
                         <button class="btn btn-secondary" id="refreshBtn">
                             <span class="btn-icon">🔄</span>
-                            Refresh
+                            Refresh All
                         </button>
-                        <button class="btn btn-secondary" id="addRecordBtn">
-                            <span class="btn-icon">➕</span>
-                            New Record
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <span class="btn-icon">📥</span>
+                            Export Data
                         </button>
                         <button class="btn btn-primary" id="saveAllBtn">
                             <span class="btn-icon">💾</span>
@@ -84,134 +84,244 @@
                 </div>
             </header>
 
-            <!-- Database Controls -->
-            <section class="database-controls">
+            <!-- Database Tables Tabs -->
+            <section class="database-tabs">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-table="visa">
+                        <span class="tab-icon">📋</span>
+                        Visa Information
+                    </button>
+                    <button class="tab-btn" data-table="travel">
+                        <span class="tab-icon">✈️</span>
+                        Travel Information
+                    </button>
+                    <button class="tab-btn" data-table="siv">
+                        <span class="tab-icon">📊</span>
+                        SIV Issuances
+                    </button>
+                    <button class="tab-btn" data-table="history">
+                        <span class="tab-icon">📝</span>
+                        Change History
+                    </button>
+                    <button class="tab-btn" data-table="users">
+                        <span class="tab-icon">👥</span>
+                        User Management
+                    </button>
+                </div>
+            </section>
+
+            <!-- Table Controls -->
+            <section class="table-controls">
                 <div class="controls-row">
                     <div class="search-wrapper">
-                        <input type="text" id="databaseSearch" class="database-search-input" placeholder="Search records...">
+                        <input type="text" id="tableSearch" class="table-search-input" placeholder="Search current table...">
                         <span class="search-icon">🔍</span>
                     </div>
-                    <div class="view-controls">
+                    <div class="table-actions">
+                        <button class="btn btn-secondary btn-sm" id="addRecordBtn">
+                            <span class="btn-icon">➕</span>
+                            Add Record
+                        </button>
+                        <button class="btn btn-secondary btn-sm" id="filterBtn">
+                            <span class="btn-icon">⚙️</span>
+                            Filter
+                        </button>
                         <select id="recordsPerPage" class="records-select">
                             <option value="25">25 records</option>
                             <option value="50" selected>50 records</option>
                             <option value="100">100 records</option>
                             <option value="all">All records</option>
                         </select>
-                        <button class="btn btn-secondary btn-sm" id="filterBtn">
-                            <span class="btn-icon">⚙️</span>
-                            Filters
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Filter Panel -->
-                <div class="filter-panel" id="filterPanel" style="display: none;">
-                    <div class="filter-header">
-                        <h4>Filter Records</h4>
-                        <button class="close-filter-btn" id="closeFilterBtn">&times;</button>
-                    </div>
-                    <div class="filter-content">
-                        <div class="filter-group">
-                            <label>Visa Required</label>
-                            <select id="filterVisaRequired" class="filter-control">
-                                <option value="">All</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
-                                <option value="on-arrival">Visa on Arrival</option>
-                                <option value="unknown">Unknown</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Application Method</label>
-                            <select id="filterApplicationMethod" class="filter-control">
-                                <option value="">All</option>
-                                <option value="online">Online</option>
-                                <option value="embassy">Embassy</option>
-                                <option value="both">Both</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Safety Level</label>
-                            <select id="filterSafetyLevel" class="filter-control">
-                                <option value="">All</option>
-                                <option value="safe">Safe</option>
-                                <option value="caution">Exercise Caution</option>
-                                <option value="warning">Travel Warning</option>
-                                <option value="donottravel">Do Not Travel</option>
-                            </select>
-                        </div>
-                        <div class="filter-actions">
-                            <button class="btn btn-secondary btn-sm" id="clearFiltersBtn">Clear</button>
-                            <button class="btn btn-primary btn-sm" id="applyFiltersBtn">Apply</button>
-                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Database Table -->
-            <section class="database-table-section">
+            <!-- Visa Information Table -->
+            <div class="table-container active" id="visaTable">
+                <div class="table-header">
+                    <h3>Visa Information Table</h3>
+                    <p class="table-description">Visa requirements and processing information by embassy</p>
+                </div>
                 <div class="table-wrapper">
-                    <table class="database-table" id="databaseTable">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th class="select-col">
-                                    <input type="checkbox" id="selectAll" class="select-checkbox">
+                                    <input type="checkbox" id="visaSelectAll" class="select-checkbox">
                                 </th>
-                                <th class="country-col sortable" data-field="country">
-                                    Country
-                                    <span class="sort-indicator"></span>
-                                </th>
-                                <th class="flag-col">Flag</th>
-                                <th class="embassy-col sortable" data-field="embassy">
-                                    Embassy
-                                    <span class="sort-indicator"></span>
-                                </th>
-                                <th class="visa-required-col sortable" data-field="visaRequired">
-                                    Visa Required
-                                    <span class="sort-indicator"></span>
-                                </th>
+                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="country-col sortable" data-field="country">Country</th>
+                                <th class="visa-required-col sortable" data-field="visaRequired">Visa Required</th>
                                 <th class="visa-type-col">Visa Type</th>
                                 <th class="cost-col">Cost</th>
                                 <th class="validity-col">Validity</th>
                                 <th class="processing-time-col">Processing Time</th>
-                                <th class="application-method-col sortable" data-field="applicationMethod">
-                                    Application Method
-                                    <span class="sort-indicator"></span>
-                                </th>
-                                <th class="safety-level-col sortable" data-field="safetyLevel">
-                                    Safety Level
-                                    <span class="sort-indicator"></span>
-                                </th>
-                                <th class="last-updated-col sortable" data-field="lastUpdated">
-                                    Last Updated
-                                    <span class="sort-indicator"></span>
-                                </th>
+                                <th class="application-method-col">Application Method</th>
+                                <th class="official-link-col">Official Link</th>
+                                <th class="extension-col">Extension Possible</th>
+                                <th class="source-col">Source</th>
+                                <th class="last-updated-col sortable" data-field="lastUpdated">Last Updated</th>
                                 <th class="actions-col">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="databaseTableBody">
-                            <!-- Table rows will be populated here -->
+                        <tbody id="visaTableBody">
+                            <!-- Visa data will be populated here -->
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                <!-- Pagination -->
-                <div class="pagination-container" id="paginationContainer">
-                    <div class="pagination-info" id="paginationInfo">
-                        Showing 1-50 of 120 records
-                    </div>
-                    <div class="pagination-controls" id="paginationControls">
-                        <button class="pagination-btn" id="firstPageBtn" disabled>First</button>
-                        <button class="pagination-btn" id="prevPageBtn" disabled>Previous</button>
-                        <span class="pagination-pages" id="paginationPages">
-                            <!-- Page buttons will be populated here -->
-                        </span>
-                        <button class="pagination-btn" id="nextPageBtn">Next</button>
-                        <button class="pagination-btn" id="lastPageBtn">Last</button>
-                    </div>
+            <!-- Travel Information Table -->
+            <div class="table-container" id="travelTable">
+                <div class="table-header">
+                    <h3>Travel Information Table</h3>
+                    <p class="table-description">Flight costs, accommodation, and travel details by embassy</p>
                 </div>
-            </section>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="travelSelectAll" class="select-checkbox">
+                                </th>
+                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="country-col sortable" data-field="country">Country</th>
+                                <th class="direct-flights-col">Direct Flights</th>
+                                <th class="airlines-col">Airlines</th>
+                                <th class="flight-duration-col">Flight Duration</th>
+                                <th class="flight-cost-col">Flight Cost</th>
+                                <th class="airport-col">Main Airport</th>
+                                <th class="accommodation-cost-col">Accommodation Cost</th>
+                                <th class="daily-expenses-col">Daily Expenses</th>
+                                <th class="medical-cost-col">Medical Cost</th>
+                                <th class="safety-level-col sortable" data-field="safetyLevel">Safety Level</th>
+                                <th class="distance-col">Distance from Afghanistan</th>
+                                <th class="last-updated-col sortable" data-field="lastUpdated">Last Updated</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="travelTableBody">
+                            <!-- Travel data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SIV Issuances Table -->
+            <div class="table-container" id="sivTable">
+                <div class="table-header">
+                    <h3>SIV Issuances Table</h3>
+                    <p class="table-description">Monthly SIV processing data by embassy</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="sivSelectAll" class="select-checkbox">
+                                </th>
+                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="country-col sortable" data-field="country">Country</th>
+                                <th class="rank-col sortable" data-field="rank">Rank</th>
+                                <th class="month-col">Oct 2024</th>
+                                <th class="month-col">Nov 2024</th>
+                                <th class="month-col">Dec 2024</th>
+                                <th class="month-col">Jan 2025</th>
+                                <th class="month-col">Feb 2025</th>
+                                <th class="month-col">Mar 2025</th>
+                                <th class="month-col">Apr 2025</th>
+                                <th class="month-col">May 2025</th>
+                                <th class="total-col sortable" data-field="total">Total</th>
+                                <th class="average-col">Monthly Avg</th>
+                                <th class="last-updated-col sortable" data-field="lastUpdated">Last Updated</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sivTableBody">
+                            <!-- SIV data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Change History Table -->
+            <div class="table-container" id="historyTable">
+                <div class="table-header">
+                    <h3>Change History Table</h3>
+                    <p class="table-description">Audit trail of all database modifications</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="historySelectAll" class="select-checkbox">
+                                </th>
+                                <th class="id-col sortable" data-field="id">ID</th>
+                                <th class="embassy-col sortable" data-field="embassy">Embassy</th>
+                                <th class="table-col sortable" data-field="table">Table</th>
+                                <th class="action-col sortable" data-field="action">Action</th>
+                                <th class="field-col">Field Changed</th>
+                                <th class="old-value-col">Old Value</th>
+                                <th class="new-value-col">New Value</th>
+                                <th class="user-col sortable" data-field="user">User</th>
+                                <th class="timestamp-col sortable" data-field="timestamp">Timestamp</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Change history will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- User Management Table -->
+            <div class="table-container" id="usersTable">
+                <div class="table-header">
+                    <h3>User Management Table</h3>
+                    <p class="table-description">User accounts and permission management</p>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="select-col">
+                                    <input type="checkbox" id="usersSelectAll" class="select-checkbox">
+                                </th>
+                                <th class="id-col sortable" data-field="id">User ID</th>
+                                <th class="username-col sortable" data-field="username">Username</th>
+                                <th class="email-col sortable" data-field="email">Email</th>
+                                <th class="role-col sortable" data-field="role">Role</th>
+                                <th class="permissions-col">Permissions</th>
+                                <th class="status-col sortable" data-field="status">Status</th>
+                                <th class="last-login-col sortable" data-field="lastLogin">Last Login</th>
+                                <th class="created-col sortable" data-field="created">Created</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <!-- User data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container" id="paginationContainer">
+                <div class="pagination-info" id="paginationInfo">
+                    Showing 1-50 of 120 records
+                </div>
+                <div class="pagination-controls" id="paginationControls">
+                    <button class="pagination-btn" id="firstPageBtn" disabled>First</button>
+                    <button class="pagination-btn" id="prevPageBtn" disabled>Previous</button>
+                    <span class="pagination-pages" id="paginationPages">
+                        <!-- Page buttons will be populated here -->
+                    </span>
+                    <button class="pagination-btn" id="nextPageBtn">Next</button>
+                    <button class="pagination-btn" id="lastPageBtn">Last</button>
+                </div>
+            </div>
 
             <!-- Bulk Actions Panel -->
             <div class="bulk-actions-panel" id="bulkActionsPanel" style="display: none;">
@@ -244,12 +354,23 @@
                 <button class="modal-close" id="closeModalBtn">&times;</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Form will be populated here -->
+                <!-- Dynamic form will be populated here -->
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
                 <button class="btn btn-primary" id="saveEditBtn">Save Changes</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel" id="filterPanel" style="display: none;">
+        <div class="filter-header">
+            <h4>Filter Records</h4>
+            <button class="close-filter-btn" id="closeFilterBtn">&times;</button>
+        </div>
+        <div class="filter-content" id="filterContent">
+            <!-- Dynamic filters will be populated here -->
         </div>
     </div>
 

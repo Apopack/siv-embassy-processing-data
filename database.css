@@ -129,8 +129,53 @@
     font-size: 16px;
 }
 
-/* Database Controls */
-.database-controls {
+/* Database Tabs */
+.database-tabs {
+    background: white;
+    border-bottom: 1px solid var(--db-gray-200);
+    padding: 0 24px;
+}
+
+.tabs-header {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--db-gray-600);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab-btn:hover {
+    color: var(--db-gray-900);
+    background: var(--db-gray-50);
+}
+
+.tab-btn.active {
+    color: var(--db-primary);
+    border-bottom-color: var(--db-primary);
+    background: white;
+}
+
+.tab-icon {
+    font-size: 16px;
+}
+
+/* Table Controls */
+.table-controls {
     background: white;
     padding: 16px 24px;
     border-bottom: 1px solid var(--db-gray-200);
@@ -149,7 +194,7 @@
     max-width: 400px;
 }
 
-.database-search-input {
+.table-search-input {
     width: 100%;
     padding: 10px 40px 10px 12px;
     font-size: 14px;
@@ -159,7 +204,7 @@
     transition: border-color 0.2s ease;
 }
 
-.database-search-input:focus {
+.table-search-input:focus {
     outline: none;
     border-color: var(--db-primary);
 }
@@ -174,7 +219,7 @@
     pointer-events: none;
 }
 
-.view-controls {
+.table-actions {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -187,6 +232,28 @@
     border-radius: 6px;
     background: white;
     cursor: pointer;
+}
+
+/* Table Cell Styling */
+.cell-truncate {
+    max-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cell-wrap {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.cell-number {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+}
+
+.cell-center {
+    text-align: center;
 }
 
 /* Filter Panel */
@@ -259,35 +326,63 @@
     margin-top: 8px;
 }
 
-/* Database Table */
-.database-table-section {
+/* Table Containers */
+.table-container {
+    display: none;
     background: white;
     margin: 0;
     box-shadow: var(--db-shadow-sm);
 }
 
-.table-wrapper {
-    overflow-x: auto;
-    border: 1px solid var(--db-gray-200);
+.table-container.active {
+    display: block;
 }
 
-.database-table {
+.table-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--db-gray-200);
+}
+
+.table-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--db-gray-900);
+    margin: 0 0 4px;
+}
+
+.table-description {
+    font-size: 14px;
+    color: var(--db-gray-600);
+    margin: 0;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    border-left: 1px solid var(--db-gray-200);
+    border-right: 1px solid var(--db-gray-200);
+}
+
+.data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
     background: white;
+    min-width: 1200px;
 }
 
-.database-table th,
-.database-table td {
+.data-table th,
+.data-table td {
     padding: 12px 8px;
     text-align: left;
     border-right: 1px solid var(--db-gray-200);
     border-bottom: 1px solid var(--db-gray-100);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
 }
 
-.database-table th {
+.data-table th {
     background: var(--db-gray-50);
     font-weight: 600;
     color: var(--db-gray-900);
@@ -297,13 +392,13 @@
     border-bottom: 2px solid var(--db-gray-200);
 }
 
-.database-table th.sortable {
+.data-table th.sortable {
     cursor: pointer;
     user-select: none;
     position: relative;
 }
 
-.database-table th.sortable:hover {
+.data-table th.sortable:hover {
     background: var(--db-gray-100);
 }
 
@@ -312,38 +407,77 @@
     opacity: 0.5;
 }
 
-.database-table th.sortable.sorted-asc .sort-indicator::after {
+.data-table th.sortable.sorted-asc .sort-indicator::after {
     content: '↑';
     opacity: 1;
 }
 
-.database-table th.sortable.sorted-desc .sort-indicator::after {
+.data-table th.sortable.sorted-desc .sort-indicator::after {
     content: '↓';
     opacity: 1;
 }
 
-.database-table tbody tr:hover {
+.data-table tbody tr:hover {
     background: var(--db-gray-50);
 }
 
-.database-table tbody tr.selected {
+.data-table tbody tr.selected {
     background: #EBF4FF;
 }
 
 /* Column Widths */
-.select-col { width: 40px; min-width: 40px; }
-.country-col { width: 150px; min-width: 120px; }
-.flag-col { width: 50px; min-width: 50px; text-align: center; }
-.embassy-col { width: 150px; min-width: 120px; }
-.visa-required-col { width: 100px; min-width: 80px; }
-.visa-type-col { width: 200px; min-width: 150px; }
-.cost-col { width: 100px; min-width: 80px; }
-.validity-col { width: 120px; min-width: 100px; }
-.processing-time-col { width: 120px; min-width: 100px; }
-.application-method-col { width: 120px; min-width: 100px; }
-.safety-level-col { width: 120px; min-width: 100px; }
-.last-updated-col { width: 120px; min-width: 100px; }
-.actions-col { width: 80px; min-width: 80px; }
+.select-col { width: 40px; min-width: 40px; max-width: 40px; }
+.id-col { width: 80px; min-width: 60px; max-width: 100px; }
+.country-col { width: 120px; min-width: 100px; max-width: 150px; }
+.flag-col { width: 50px; min-width: 50px; max-width: 50px; text-align: center; }
+.embassy-col { width: 150px; min-width: 120px; max-width: 180px; }
+.visa-required-col { width: 100px; min-width: 90px; max-width: 120px; }
+.visa-type-col { width: 200px; min-width: 150px; max-width: 250px; }
+.cost-col { width: 100px; min-width: 80px; max-width: 120px; }
+.validity-col { width: 120px; min-width: 100px; max-width: 140px; }
+.processing-time-col { width: 120px; min-width: 100px; max-width: 140px; }
+.application-method-col { width: 120px; min-width: 100px; max-width: 140px; }
+.official-link-col { width: 150px; min-width: 120px; max-width: 180px; }
+.extension-col { width: 100px; min-width: 90px; max-width: 120px; }
+.source-col { width: 120px; min-width: 100px; max-width: 140px; }
+.safety-level-col { width: 120px; min-width: 100px; max-width: 140px; }
+.last-updated-col { width: 120px; min-width: 100px; max-width: 140px; }
+.actions-col { width: 100px; min-width: 80px; max-width: 120px; }
+
+/* Additional columns for Travel table */
+.direct-flights-col { width: 100px; min-width: 90px; max-width: 120px; }
+.airlines-col { width: 180px; min-width: 150px; max-width: 220px; }
+.flight-duration-col { width: 120px; min-width: 100px; max-width: 140px; }
+.flight-cost-col { width: 100px; min-width: 80px; max-width: 120px; }
+.airport-col { width: 180px; min-width: 150px; max-width: 220px; }
+.accommodation-cost-col { width: 140px; min-width: 120px; max-width: 160px; }
+.daily-expenses-col { width: 120px; min-width: 100px; max-width: 140px; }
+.medical-cost-col { width: 120px; min-width: 100px; max-width: 140px; }
+.distance-col { width: 140px; min-width: 120px; max-width: 160px; }
+
+/* Additional columns for SIV table */
+.rank-col { width: 60px; min-width: 50px; max-width: 80px; }
+.month-col { width: 80px; min-width: 70px; max-width: 100px; }
+.total-col { width: 100px; min-width: 80px; max-width: 120px; }
+.average-col { width: 100px; min-width: 80px; max-width: 120px; }
+
+/* Additional columns for History table */
+.table-col { width: 100px; min-width: 80px; max-width: 120px; }
+.action-col { width: 100px; min-width: 80px; max-width: 120px; }
+.field-col { width: 120px; min-width: 100px; max-width: 140px; }
+.old-value-col { width: 150px; min-width: 120px; max-width: 180px; }
+.new-value-col { width: 150px; min-width: 120px; max-width: 180px; }
+.user-col { width: 120px; min-width: 100px; max-width: 140px; }
+.timestamp-col { width: 140px; min-width: 120px; max-width: 160px; }
+
+/* Additional columns for Users table */
+.username-col { width: 120px; min-width: 100px; max-width: 140px; }
+.email-col { width: 180px; min-width: 150px; max-width: 220px; }
+.role-col { width: 100px; min-width: 80px; max-width: 120px; }
+.permissions-col { width: 200px; min-width: 150px; max-width: 250px; }
+.status-col { width: 100px; min-width: 80px; max-width: 120px; }
+.last-login-col { width: 140px; min-width: 120px; max-width: 160px; }
+.created-col { width: 120px; min-width: 100px; max-width: 140px; }
 
 /* Select Checkbox */
 .select-checkbox {
@@ -625,13 +759,22 @@
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .database-table {
+    .data-table {
         font-size: 12px;
     }
     
-    .database-table th,
-    .database-table td {
+    .data-table th,
+    .data-table td {
         padding: 8px 6px;
+    }
+    
+    .tabs-header {
+        padding: 0 16px;
+    }
+    
+    .tab-btn {
+        padding: 12px 16px;
+        font-size: 13px;
     }
 }
 
@@ -650,7 +793,7 @@
         justify-content: space-between;
     }
     
-    .database-controls {
+    .table-controls {
         padding: 12px 16px;
     }
     
@@ -659,9 +802,29 @@
         gap: 12px;
     }
     
-    .view-controls {
+    .table-actions {
         width: 100%;
         justify-content: space-between;
+    }
+    
+    .tabs-header {
+        padding: 0 12px;
+        gap: 0;
+    }
+    
+    .tab-btn {
+        padding: 12px 8px;
+        font-size: 12px;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .tab-icon {
+        font-size: 14px;
+    }
+    
+    .table-header {
+        padding: 16px;
     }
     
     .filter-content {
@@ -693,5 +856,9 @@
     
     .form-row {
         grid-template-columns: 1fr;
+    }
+    
+    .data-table {
+        min-width: 800px;
     }
 }
