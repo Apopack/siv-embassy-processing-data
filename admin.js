@@ -742,15 +742,35 @@ class AdminPortal {
         const previewBtn = document.getElementById(`${type}PreviewBtn`);
         const importBtn = document.getElementById(`${type}ImportBtn`);
         
-        // Update upload area content
+        // Update upload area content (without remove button to prevent click conflicts)
         uploadArea.innerHTML = `
             <div class="upload-content">
                 <span class="upload-icon">📄</span>
                 <p class="upload-text"><strong>${file.name}</strong></p>
                 <p class="upload-hint">${this.formatFileSize(file.size)} - Ready to process</p>
-                <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('${type}', event); return false;">Remove</button>
             </div>
         `;
+        
+        // Add remove button outside the clickable upload area
+        const uploadContainer = uploadArea.parentElement;
+        let removeButton = uploadContainer.querySelector('.remove-file-btn');
+        if (!removeButton) {
+            removeButton = document.createElement('div');
+            removeButton.className = 'remove-file-btn';
+            removeButton.style.marginTop = '10px';
+            removeButton.style.textAlign = 'center';
+            uploadContainer.insertBefore(removeButton, uploadArea.nextSibling);
+        }
+        
+        removeButton.innerHTML = `
+            <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('${type}'); return false;">
+                🗑️ Remove File
+            </button>
+        `;
+        
+        // Disable upload area click when file is loaded
+        uploadArea.style.pointerEvents = 'none';
+        uploadArea.style.opacity = '0.8';
         
         // Enable buttons
         previewBtn.disabled = false;
@@ -780,6 +800,17 @@ class AdminPortal {
                 <p class="upload-hint">Supports .xlsx and .xls formats</p>
             </div>
         `;
+        
+        // Re-enable upload area click
+        uploadArea.style.pointerEvents = '';
+        uploadArea.style.opacity = '';
+        
+        // Remove the separate remove button
+        const uploadContainer = uploadArea.parentElement;
+        const removeButton = uploadContainer.querySelector('.remove-file-btn');
+        if (removeButton) {
+            removeButton.remove();
+        }
         
         // Disable buttons
         previewBtn.disabled = true;
@@ -822,7 +853,7 @@ class AdminPortal {
                             <li>The data includes columns for Post/Embassy and SQ visa counts</li>
                         </ul>
                     </p>
-                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv', event); return false;" style="margin-top: 10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv'); return false;" style="margin-top: 10px;">
                         Remove File and Try Again
                     </button>
                 </div>
