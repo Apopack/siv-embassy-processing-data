@@ -14,6 +14,15 @@ class AdminPortal {
 
     async init() {
         await this.loadCountryData();
+        
+        // Update existing data with country mapping
+        const updatedCount = await this.updateExistingDataWithCountryMapping();
+        if (updatedCount > 0) {
+            console.log(`Updated ${updatedCount} existing embassy records with country mapping`);
+            // Refresh the country data after updating existing records
+            await this.refreshCountryDataFromImports();
+        }
+        
         this.setupEventListeners();
         this.initializeFormValidation();
         this.setupFileImport();
@@ -45,13 +54,16 @@ class AdminPortal {
                 if (data.embassies && data.embassies.length > 0) {
                     console.log('Loading countries from imported SIV data:', data.embassies.length, 'embassies');
                     data.embassies.forEach(embassy => {
-                        // Use embassy name as country for search purposes
-                        const countryKey = embassy.embassy || embassy.country || 'Unknown';
-                        if (!this.countryData[countryKey]) {
-                            this.countryData[countryKey] = {
-                                country: countryKey,
-                                flag: this.getCountryFlag(countryKey),
-                                embassy: embassy.embassy,
+                        // Use embassy name as search key but map to proper country
+                        const embassyName = embassy.embassy || 'Unknown';
+                        const mappedCountry = embassy.country || this.getCountryFromEmbassy(embassyName);
+                        
+                        // Use embassy name as key for search, but store proper country info
+                        if (!this.countryData[embassyName]) {
+                            this.countryData[embassyName] = {
+                                country: mappedCountry, // Store mapped country name
+                                flag: this.getCountryFlag(mappedCountry), // Use country for flag
+                                embassy: embassyName,
                                 visaRequired: "unknown",
                                 visaType: "SQ Visas",
                                 visaCost: "",
@@ -133,6 +145,179 @@ class AdminPortal {
         }
     }
 
+    getCountryFromEmbassy(embassy) {
+        // Comprehensive embassy/city to country mapping
+        const embassyToCountry = {
+            // US Embassies and Consulates
+            'Abu Dhabi': 'United Arab Emirates',
+            'Almaty': 'Kazakhstan',
+            'Amman': 'Jordan',
+            'Amsterdam': 'Netherlands',
+            'Ankara': 'Turkey',
+            'Athens': 'Greece',
+            'Auckland': 'New Zealand',
+            'Baghdad': 'Iraq',
+            'Bangkok': 'Thailand',
+            'Barcelona': 'Spain',
+            'Beijing': 'China',
+            'Belgrade': 'Serbia',
+            'Berlin': 'Germany',
+            'Bern': 'Switzerland',
+            'Bogota': 'Colombia',
+            'Brasilia': 'Brazil',
+            'Brussels': 'Belgium',
+            'Bucharest': 'Romania',
+            'Budapest': 'Hungary',
+            'Buenos Aires': 'Argentina',
+            'Cairo': 'Egypt',
+            'Calgary': 'Canada',
+            'Canberra': 'Australia',
+            'Cape Town': 'South Africa',
+            'Caracas': 'Venezuela',
+            'Casablanca': 'Morocco',
+            'Chennai': 'India',
+            'Chengdu': 'China',
+            'Ciudad Juarez': 'Mexico',
+            'Copenhagen': 'Denmark',
+            'Dakar': 'Senegal',
+            'Damascus': 'Syria',
+            'Delhi': 'India',
+            'New Delhi': 'India',
+            'Dhaka': 'Bangladesh',
+            'Dubai': 'United Arab Emirates',
+            'Dublin': 'Ireland',
+            'Dusseldorf': 'Germany',
+            'Edinburgh': 'United Kingdom',
+            'Florence': 'Italy',
+            'Frankfurt': 'Germany',
+            'Geneva': 'Switzerland',
+            'Guatemala City': 'Guatemala',
+            'Guadalajara': 'Mexico',
+            'Guangzhou': 'China',
+            'Hamburg': 'Germany',
+            'Hanoi': 'Vietnam',
+            'Havana': 'Cuba',
+            'Helsinki': 'Finland',
+            'Ho Chi Minh City': 'Vietnam',
+            'Hong Kong': 'Hong Kong',
+            'Hyderabad': 'India',
+            'Istanbul': 'Turkey',
+            'Islamabad': 'Pakistan',
+            'Jakarta': 'Indonesia',
+            'Jeddah': 'Saudi Arabia',
+            'Jerusalem': 'Israel',
+            'Johannesburg': 'South Africa',
+            'Kabul': 'Afghanistan',
+            'Kampala': 'Uganda',
+            'Karachi': 'Pakistan',
+            'Kathmandu': 'Nepal',
+            'Kigali': 'Rwanda',
+            'Kingston': 'Jamaica',
+            'Kolkata': 'India',
+            'Kuala Lumpur': 'Malaysia',
+            'Kuwait': 'Kuwait',
+            'Kuwait City': 'Kuwait',
+            'Kyiv': 'Ukraine',
+            'Lagos': 'Nigeria',
+            'Lahore': 'Pakistan',
+            'La Paz': 'Bolivia',
+            'Lima': 'Peru',
+            'Lisbon': 'Portugal',
+            'London': 'United Kingdom',
+            'Lyon': 'France',
+            'Madrid': 'Spain',
+            'Manila': 'Philippines',
+            'Marseille': 'France',
+            'Melbourne': 'Australia',
+            'Mexico City': 'Mexico',
+            'Milan': 'Italy',
+            'Montreal': 'Canada',
+            'Moscow': 'Russia',
+            'Mumbai': 'India',
+            'Munich': 'Germany',
+            'Nairobi': 'Kenya',
+            'Naples': 'Italy',
+            'Nassau': 'Bahamas',
+            'Nicosia': 'Cyprus',
+            'Nogales': 'Mexico',
+            'Nuevo Laredo': 'Mexico',
+            'Oslo': 'Norway',
+            'Ottawa': 'Canada',
+            'Panama City': 'Panama',
+            'Paris': 'France',
+            'Perth': 'Australia',
+            'Peshawar': 'Pakistan',
+            'Prague': 'Czech Republic',
+            'Pretoria': 'South Africa',
+            'Quebec': 'Canada',
+            'Quito': 'Ecuador',
+            'Reykjavik': 'Iceland',
+            'Rio de Janeiro': 'Brazil',
+            'Riyadh': 'Saudi Arabia',
+            'Rome': 'Italy',
+            'Salvador': 'Brazil',
+            'San Jose': 'Costa Rica',
+            'Santiago': 'Chile',
+            'Sao Paulo': 'Brazil',
+            'Seoul': 'South Korea',
+            'Shanghai': 'China',
+            'Shenyang': 'China',
+            'Singapore': 'Singapore',
+            'Sofia': 'Bulgaria',
+            'Stockholm': 'Sweden',
+            'Strasbourg': 'France',
+            'Sydney': 'Australia',
+            'Taipei': 'Taiwan',
+            'Tashkent': 'Uzbekistan',
+            'Tbilisi': 'Georgia',
+            'Tel Aviv': 'Israel',
+            'Thessaloniki': 'Greece',
+            'Tijuana': 'Mexico',
+            'Tokyo': 'Japan',
+            'Toronto': 'Canada',
+            'Tunis': 'Tunisia',
+            'Vancouver': 'Canada',
+            'Vienna': 'Austria',
+            'Vladivostok': 'Russia',
+            'Warsaw': 'Poland',
+            'Wuhan': 'China',
+            'Yekaterinburg': 'Russia',
+            'Yerevan': 'Armenia',
+            'Zagreb': 'Croatia',
+            'Zurich': 'Switzerland',
+            
+            // Additional mappings for common variations
+            'Ho Chi Minh': 'Vietnam',
+            'New York': 'United States',
+            'Los Angeles': 'United States',
+            'Chicago': 'United States',
+            'Houston': 'United States',
+            'Boston': 'United States',
+            'San Francisco': 'United States',
+            'Miami': 'United States',
+            'Atlanta': 'United States',
+            'Seattle': 'United States',
+            'Detroit': 'United States'
+        };
+        
+        // Clean the embassy name and try exact match first
+        const cleanEmbassy = embassy.trim();
+        if (embassyToCountry[cleanEmbassy]) {
+            return embassyToCountry[cleanEmbassy];
+        }
+        
+        // Try partial matching for variations
+        for (const [embassyName, country] of Object.entries(embassyToCountry)) {
+            if (cleanEmbassy.toLowerCase().includes(embassyName.toLowerCase()) ||
+                embassyName.toLowerCase().includes(cleanEmbassy.toLowerCase())) {
+                return country;
+            }
+        }
+        
+        // If no match found, return the embassy name as country (fallback)
+        return cleanEmbassy;
+    }
+
     getCountryFlag(country) {
         const flagMap = {
             // Original countries
@@ -156,13 +341,26 @@ class AdminPortal {
             'Rome': '🇮🇹', 'Seoul': '🇰🇷', 'Singapore': '🇸🇬', 'Sydney': '🇦🇺',
             'Tel Aviv': '🇮🇱', 'Tokyo': '🇯🇵', 'Vienna': '🇦🇹', 'Warsaw': '🇵🇱',
             
-            // Common country names
+            // Common country names and additional countries
             'Thailand': '🇹🇭', 'Vietnam': '🇻🇳', 'Indonesia': '🇮🇩', 'Malaysia': '🇲🇾',
             'South Korea': '🇰🇷', 'Japan': '🇯🇵', 'Kenya': '🇰🇪', 'Syria': '🇸🇾',
             'Kuwait': '🇰🇼', 'Saudi Arabia': '🇸🇦', 'Israel': '🇮🇱', 'Italy': '🇮🇹', 
             'Spain': '🇪🇸', 'Poland': '🇵🇱', 'Russia': '🇷🇺', 'Peru': '🇵🇪', 
             'Mexico': '🇲🇽', 'Colombia': '🇨🇴', 'Ireland': '🇮🇪', 'Switzerland': '🇨🇭', 
-            'United Kingdom': '🇬🇧', 'New Zealand': '🇳🇿', 'Jordan': '🇯🇴'
+            'United Kingdom': '🇬🇧', 'New Zealand': '🇳🇿', 'Jordan': '🇯🇴',
+            
+            // Additional countries for embassy mapping
+            'Kazakhstan': '🇰🇿', 'Netherlands': '🇳🇱', 'Greece': '🇬🇷', 'Serbia': '🇷🇸',
+            'Romania': '🇷🇴', 'Hungary': '🇭🇺', 'Argentina': '🇦🇷', 'Venezuela': '🇻🇪',
+            'Morocco': '🇲🇦', 'Bangladesh': '🇧🇩', 'Finland': '🇫🇮', 'Hong Kong': '🇭🇰',
+            'Uganda': '🇺🇬', 'Nepal': '🇳🇵', 'Jamaica': '🇯🇲', 'Cyprus': '🇨🇾',
+            'Nigeria': '🇳🇬', 'Bolivia': '🇧🇴', 'Portugal': '🇵🇹', 'Iceland': '🇮🇸',
+            'Chile': '🇨🇱', 'Bulgaria': '🇧🇬', 'Sweden': '🇸🇪', 'Taiwan': '🇹🇼',
+            'Uzbekistan': '🇺🇿', 'Georgia': '🇬🇪', 'Croatia': '🇭🇷', 'South Africa': '🇿🇦',
+            'Senegal': '🇸🇳', 'Guatemala': '🇬🇹', 'Cuba': '🇨🇺', 'Bahamas': '🇧🇸',
+            'Panama': '🇵🇦', 'Czech Republic': '🇨🇿', 'Ecuador': '🇪🇨', 'Costa Rica': '🇨🇷',
+            'Tunisia': '🇹🇳', 'Armenia': '🇦🇲', 'Ukraine': '🇺🇦', 'Singapore': '🇸🇬',
+            'Norway': '🇳🇴'
         };
         return flagMap[country] || '🏳️';
     }
@@ -1096,9 +1294,12 @@ class AdminPortal {
             // Only process SQ visa classes
             if (post && visaClass.startsWith('SQ') && issuances > 0) {
                 if (!sqByPost[post]) {
+                    // Map embassy/city to country
+                    const mappedCountry = this.getCountryFromEmbassy(post);
+                    
                     sqByPost[post] = {
                         embassy: post,
-                        country: post, // Use post as country for now
+                        country: mappedCountry, // Use mapped country
                         sqCount: 0,
                         sqBreakdown: {},
                         lastUpdated: new Date().toISOString().split('T')[0],
@@ -1432,6 +1633,45 @@ class AdminPortal {
         }
     }
 
+    async updateExistingDataWithCountryMapping() {
+        try {
+            // Update existing SIV import data with proper country mapping
+            const importedSIVData = localStorage.getItem('sivImportData');
+            if (importedSIVData) {
+                const data = JSON.parse(importedSIVData);
+                if (data.embassies && data.embassies.length > 0) {
+                    console.log('Updating existing SIV data with country mapping...');
+                    
+                    // Update each embassy record with proper country mapping
+                    data.embassies.forEach(embassy => {
+                        const embassyName = embassy.embassy || 'Unknown';
+                        const mappedCountry = this.getCountryFromEmbassy(embassyName);
+                        
+                        // Update the country field
+                        embassy.country = mappedCountry;
+                        
+                        console.log(`Mapped ${embassyName} → ${mappedCountry}`);
+                    });
+                    
+                    // Save the updated data back to localStorage
+                    localStorage.setItem('sivImportData', JSON.stringify(data));
+                    
+                    // Also update the database SIV data
+                    localStorage.setItem('databaseSIVData', JSON.stringify(data.embassies));
+                    
+                    console.log('Updated', data.embassies.length, 'embassy records with country mapping');
+                    
+                    return data.embassies.length;
+                }
+            }
+            
+            return 0;
+        } catch (error) {
+            console.error('Error updating existing data with country mapping:', error);
+            return 0;
+        }
+    }
+
     async refreshCountryDataFromImports() {
         try {
             // Load newly imported SIV data
@@ -1442,14 +1682,15 @@ class AdminPortal {
                     console.log('Refreshing country data with newly imported embassies:', data.embassies.length);
                     
                     data.embassies.forEach(embassy => {
-                        const countryKey = embassy.embassy || embassy.country || 'Unknown';
+                        const embassyName = embassy.embassy || 'Unknown';
+                        const mappedCountry = embassy.country || this.getCountryFromEmbassy(embassyName);
                         
                         // Only add if not already exists or update if it's from SIV import
-                        if (!this.countryData[countryKey] || this.countryData[countryKey].sourceType === 'siv_data') {
-                            this.countryData[countryKey] = {
-                                country: countryKey,
-                                flag: this.getCountryFlag(countryKey),
-                                embassy: embassy.embassy,
+                        if (!this.countryData[embassyName] || this.countryData[embassyName].sourceType === 'siv_data') {
+                            this.countryData[embassyName] = {
+                                country: mappedCountry, // Store mapped country name
+                                flag: this.getCountryFlag(mappedCountry), // Use country for flag
+                                embassy: embassyName,
                                 visaRequired: "unknown",
                                 visaType: "SQ Visas",
                                 visaCost: "",
