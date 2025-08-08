@@ -30,12 +30,26 @@ class AdminPortal {
     }
 
     async loadCountryData() {
-        // Load country data from localStorage if it exists
+        // First, clear any old hardcoded visa data from localStorage
+        // This ensures we start fresh without legacy data
         const savedData = localStorage.getItem('adminCountryData');
         if (savedData) {
             try {
-                this.countryData = JSON.parse(savedData);
-                console.log('Loaded admin country data:', Object.keys(this.countryData).length, 'countries');
+                const parsedData = JSON.parse(savedData);
+                // Filter out any entries that look like hardcoded visa data
+                // Keep only entries that come from SIV imports
+                const filteredData = {};
+                Object.entries(parsedData).forEach(([key, value]) => {
+                    // Only keep data that has sourceType = 'siv_data' or has SIV-related fields
+                    if (value.sourceType === 'siv_data' || value.sivData) {
+                        filteredData[key] = value;
+                    }
+                });
+                this.countryData = filteredData;
+                
+                // Save the filtered data back
+                localStorage.setItem('adminCountryData', JSON.stringify(filteredData));
+                console.log('Filtered admin data - kept', Object.keys(filteredData).length, 'SIV-sourced countries');
             } catch (error) {
                 console.error('Error loading saved country data:', error);
                 this.countryData = {};
@@ -2143,6 +2157,7 @@ class AdminPortal {
         document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAllChanges());
         document.getElementById('discardBtn')?.addEventListener('click', () => this.discardChanges());
         document.getElementById('exportBtn')?.addEventListener('click', () => this.exportData());
+        document.getElementById('clearDataBtn')?.addEventListener('click', () => this.clearAllData());
         document.getElementById('addStepBtn')?.addEventListener('click', () => this.addProcessingStep());
         
         // Import center toggle
@@ -2181,10 +2196,14 @@ class AdminPortal {
         if (filtered.length === 0) {
             searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--admin-gray-500);">No countries found</div>';
         } else {
-            searchResults.innerHTML = filtered.map(country => {
+            searchResults.innerHTML = filtered.map((country, index) => {
                 const countryCode = this.getCountryCode(country.country);
+                // Find the correct key - could be country name or location name
+                const dataKey = Object.keys(this.countryData).find(key => 
+                    this.countryData[key] === country
+                );
                 return `
-                    <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
+                    <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${dataKey}')">
                         <span class="search-result-flag">${countryCode}</span>
                         <div class="search-result-info">
                             <h4>${country.country}</h4>
@@ -2206,10 +2225,14 @@ class AdminPortal {
             a.country.localeCompare(b.country)
         );
 
-        searchResults.innerHTML = countries.map(country => {
+        searchResults.innerHTML = countries.map((country, index) => {
             const countryCode = this.getCountryCode(country.country);
+            // Find the correct key - could be country name or location name
+            const dataKey = Object.keys(this.countryData).find(key => 
+                this.countryData[key] === country
+            );
             return `
-                <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
+                <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${dataKey}')">
                     <span class="search-result-flag">${countryCode}</span>
                     <div class="search-result-info">
                         <h4>${country.country}</h4>
@@ -2229,25 +2252,34 @@ class AdminPortal {
         }
     }
 
-    selectCountry(countryName) {
+    selectCountryByKey(dataKey) {
         if (this.unsavedChanges) {
             if (!confirm('You have unsaved changes. Do you want to discard them?')) {
                 return;
             }
         }
 
-        this.currentCountry = countryName;
-        const data = this.countryData[countryName];
+        this.currentCountryKey = dataKey;
+        const data = this.countryData[dataKey];
+        
+        if (!data) {
+            console.error('Country data not found for key:', dataKey);
+            return;
+        }
 
-        // Update header
-        document.getElementById('countryFlag').textContent = data.flag;
+        // Update header - use country code instead of flag
+        const countryCode = this.getCountryCode(data.country);
+        document.getElementById('countryFlag').textContent = countryCode;
         document.getElementById('countryName').textContent = data.country;
-        document.getElementById('embassyInfo').textContent = `${data.location || data.embassy}`;
+        document.getElementById('embassyInfo').textContent = `${data.location || data.embassy || 'Unknown location'}`;
 
+        // Initialize all form fields with default values if data is missing
+        this.initializeFormDefaults();
+        
         // Load visa information
         this.loadVisaData(data);
         this.loadTravelData(data);
-        this.loadChangeHistory(countryName);
+        this.loadChangeHistory(data.country);
 
         // Show editor and switch to visa tab
         document.getElementById('editorSection').style.display = 'block';
@@ -2258,6 +2290,50 @@ class AdminPortal {
         this.hideSearchResults();
 
         this.unsavedChanges = false;
+    }
+
+    selectCountry(countryName) {
+        // Legacy function - redirect to selectCountryByKey
+        const dataKey = Object.keys(this.countryData).find(key => 
+            this.countryData[key].country === countryName
+        );
+        if (dataKey) {
+            this.selectCountryByKey(dataKey);
+        }
+    }
+
+    initializeFormDefaults() {
+        // Reset all form fields to default values
+        // Visa Information
+        document.getElementById('visaRequired').value = 'unknown';
+        document.getElementById('visaType').value = '';
+        document.getElementById('visaCost').value = '';
+        document.getElementById('validity').value = '';
+        document.getElementById('processingTime').value = '';
+        document.getElementById('applicationMethod').value = 'embassy';
+        document.getElementById('officialLink').value = '';
+        document.getElementById('extensionPossible').value = 'unknown';
+        document.getElementById('extensionDuration').value = '';
+        document.getElementById('extensionCost').value = '';
+        document.getElementById('sourceName').value = '';
+        document.getElementById('sourceType').value = 'embassy';
+        document.getElementById('lastUpdated').value = new Date().toISOString().split('T')[0];
+        
+        // Travel Information
+        document.getElementById('directFlights').value = 'unknown';
+        document.getElementById('airlines').value = '';
+        document.getElementById('flightDuration').value = '';
+        document.getElementById('mainAirport').value = '';
+        document.getElementById('airportCode').value = '';
+        document.getElementById('cityDistance').value = '';
+        document.getElementById('safetyLevel').value = 'unknown';
+        document.getElementById('travelNotes').value = '';
+        
+        // Clear processing steps
+        const container = document.getElementById('processingStepsList');
+        if (container) {
+            container.innerHTML = '';
+        }
     }
 
     loadVisaData(data) {
@@ -2422,7 +2498,7 @@ class AdminPortal {
     }
 
     async saveChanges() {
-        if (!this.currentCountry) return;
+        if (!this.currentCountryKey) return;
 
         const data = this.collectFormData();
         
@@ -2431,14 +2507,17 @@ class AdminPortal {
             return;
         }
 
-        // Update country data
-        this.countryData[this.currentCountry] = {
-            ...this.countryData[this.currentCountry],
+        // Get the current country name for history tracking
+        const currentCountryName = this.countryData[this.currentCountryKey].country;
+
+        // Update country data using the key
+        this.countryData[this.currentCountryKey] = {
+            ...this.countryData[this.currentCountryKey],
             ...data
         };
 
-        // Record change in history
-        this.recordChange('update', 'Updated country information', this.getChangeSummary(data));
+        // Record change in history with country name
+        this.recordChange('update', `Updated ${currentCountryName} information`, this.getChangeSummary(data));
 
         // Save to localStorage (in production, this would be an API call)
         localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
@@ -2539,7 +2618,7 @@ class AdminPortal {
         if (!this.unsavedChanges) return;
 
         if (confirm('Are you sure you want to discard all changes?')) {
-            this.selectCountry(this.currentCountry);
+            this.selectCountryByKey(this.currentCountryKey);
         }
     }
 
@@ -2651,6 +2730,58 @@ class AdminPortal {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 3000);
+    }
+
+    clearAllData() {
+        const confirmMsg = `⚠️ WARNING: This will clear visa and travel information.
+
+This will remove:
+• All country visa requirements data
+• All travel information data
+• Admin change history
+
+This will KEEP:
+• Your uploaded SIV issuance data
+• File upload history
+
+Continue?`;
+
+        if (confirm(confirmMsg)) {
+            // Only clear visa/travel related data, preserve SIV data
+            localStorage.removeItem('adminCountryData');
+            localStorage.removeItem('adminVisaData');
+            localStorage.removeItem('adminTravelData');
+            localStorage.removeItem('adminChangeHistory');
+            localStorage.removeItem('databaseVisaData');
+            localStorage.removeItem('databaseTravelData');
+            
+            // Keep these:
+            // - sivImportData (your uploaded SIV data)
+            // - fileUploads (upload history)
+            // - importHistory (import records)
+            
+            // Reset only visa/travel data in memory
+            this.countryData = {};
+            this.changeHistory = [];
+            
+            // Reload countries from SIV data only
+            this.loadCountryData();
+            
+            // Hide editor section
+            document.getElementById('editorSection').style.display = 'none';
+            
+            // Clear search
+            document.getElementById('countrySearch').value = '';
+            this.hideSearchResults();
+            
+            // Show success notification
+            this.showNotification('✅ Visa and travel data cleared! SIV data preserved.');
+            
+            // Soft reload to refresh the view
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
     }
 
     initializeFormValidation() {
