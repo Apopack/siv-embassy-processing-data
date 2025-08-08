@@ -70,6 +70,24 @@
     gap: 12px;
 }
 
+/* Enhanced Data Upload Button */
+#dataImportBtn {
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: var(--admin-shadow-md);
+    border-left: 3px solid var(--admin-primary-light);
+}
+
+#dataImportBtn:hover {
+    box-shadow: var(--admin-shadow-lg);
+    border-left: 3px solid white;
+}
+
+#dataImportBtn .btn-icon {
+    font-size: 16px;
+}
+
 /* Buttons */
 .btn {
     display: inline-flex;
@@ -538,64 +556,6 @@ textarea.form-control {
     display: inline-block;
 }
 
-/* Import Button Section */
-.import-button-section {
-    padding: 0 32px 32px;
-}
-
-.import-btn-large {
-    width: 100%;
-    background: white;
-    border: 2px solid var(--admin-gray-200);
-    border-radius: 12px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.import-btn-large:hover {
-    border-color: var(--admin-primary);
-    box-shadow: 0 4px 12px rgba(0, 82, 204, 0.1);
-    transform: translateY(-2px);
-}
-
-.import-btn-content {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.import-btn-icon {
-    font-size: 48px;
-    line-height: 1;
-}
-
-.import-btn-text h3 {
-    margin: 0 0 4px 0;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--admin-gray-900);
-}
-
-.import-btn-text p {
-    margin: 0;
-    font-size: 14px;
-    color: var(--admin-gray-600);
-}
-
-.import-btn-arrow {
-    font-size: 24px;
-    color: var(--admin-gray-400);
-    transition: transform 0.2s ease;
-}
-
-.import-btn-large:hover .import-btn-arrow {
-    transform: translateX(4px);
-    color: var(--admin-primary);
-}
 
 /* Remove old editor actions */
 .editor-actions {

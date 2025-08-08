@@ -4005,7 +4005,7 @@ Continue?`;
         
         // Update button text
         const btn = document.getElementById('dataImportBtn');
-        btn.innerHTML = '<span class="btn-icon">📊</span>Hide Import Center';
+        btn.innerHTML = '<span class="btn-icon">📤</span>Hide Data Upload';
     }
 
     closeImportCenter() {
@@ -4014,7 +4014,7 @@ Continue?`;
         
         // Reset button text
         const btn = document.getElementById('dataImportBtn');
-        btn.innerHTML = '<span class="btn-icon">📊</span>Data Import Center';
+        btn.innerHTML = '<span class="btn-icon">📤</span>SIV Data Upload';
         
         // Clear any current import
         if (this.currentImport) {
