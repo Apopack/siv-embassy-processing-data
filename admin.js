@@ -2152,14 +2152,12 @@ class AdminPortal {
             input.addEventListener('input', () => this.markAsChanged());
         });
 
-        // Action buttons - remove old save button handlers, use sticky ones
-        document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAllChanges());
-        document.getElementById('exportBtn')?.addEventListener('click', () => this.exportData());
+        // Action buttons
         document.getElementById('addStepBtn')?.addEventListener('click', () => this.addProcessingStep());
         
-        // Sticky action bar buttons
-        document.getElementById('stickySaveBtn')?.addEventListener('click', () => this.saveChanges());
-        document.getElementById('stickyDiscardBtn')?.addEventListener('click', () => this.discardChanges());
+        // Floating action buttons
+        document.getElementById('floatingSaveBtn')?.addEventListener('click', () => this.saveChanges());
+        document.getElementById('floatingDiscardBtn')?.addEventListener('click', () => this.discardChanges());
         
         // Import center toggle
         document.getElementById('dataImportBtn')?.addEventListener('click', () => this.toggleImportCenter());
@@ -2286,9 +2284,8 @@ class AdminPortal {
         document.getElementById('editorSection').style.display = 'block';
         this.switchTab('visa');
         
-        // Show sticky action bar
-        document.getElementById('stickyActionBar').style.display = 'block';
-        document.getElementById('editingCountryName').textContent = data.country;
+        // Show floating action buttons
+        document.getElementById('floatingActions').style.display = 'flex';
 
         // Clear search
         document.getElementById('countrySearch').value = '';
@@ -2499,9 +2496,9 @@ class AdminPortal {
 
     markAsChanged() {
         this.unsavedChanges = true;
-        const saveBtn = document.getElementById('stickySaveBtn');
+        const saveBtn = document.getElementById('floatingSaveBtn');
         if (saveBtn) {
-            saveBtn.innerHTML = '<span class="btn-icon">💾</span> Save Changes*';
+            saveBtn.innerHTML = '<span class="floating-icon">💾</span><span class="floating-text">Save*</span>';
         }
     }
 
@@ -2536,9 +2533,9 @@ class AdminPortal {
 
         // Reset unsaved changes
         this.unsavedChanges = false;
-        const saveBtn = document.getElementById('stickySaveBtn');
+        const saveBtn = document.getElementById('floatingSaveBtn');
         if (saveBtn) {
-            saveBtn.innerHTML = '<span class="btn-icon">💾</span> Save Changes';
+            saveBtn.innerHTML = '<span class="floating-icon">💾</span><span class="floating-text">Save</span>';
         }
 
         // Show success notification
@@ -2633,12 +2630,6 @@ class AdminPortal {
         }
     }
 
-    saveAllChanges() {
-        // In production, this would sync with backend
-        localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
-        this.updateDatabaseStorage();
-        this.showNotification('All changes saved to database!');
-    }
 
     updateDatabaseStorage() {
         // Update database-specific storage entries for the database view
@@ -2793,9 +2784,9 @@ Continue?`;
             // Reload countries from SIV data only
             this.loadCountryData();
             
-            // Hide editor section and sticky bar
+            // Hide editor section and floating actions
             document.getElementById('editorSection').style.display = 'none';
-            document.getElementById('stickyActionBar').style.display = 'none';
+            document.getElementById('floatingActions').style.display = 'none';
             
             // Clear search
             document.getElementById('countrySearch').value = '';

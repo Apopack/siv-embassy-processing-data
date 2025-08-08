@@ -68,40 +68,19 @@
                         <h1>Country Information Management</h1>
                         <p class="header-subtitle">Update visa requirements and travel information for SIV applicants</p>
                     </div>
-                    <div class="header-actions">
-                        <button class="btn btn-secondary" id="dataImportBtn">
-                            <span class="btn-icon">📊</span>
-                            Data Import Center
-                        </button>
-                        <button class="btn btn-secondary" id="exportBtn">
-                            <span class="btn-icon">📥</span>
-                            Export Data
-                        </button>
-                        <button class="btn btn-primary" id="saveAllBtn">
-                            <span class="btn-icon">💾</span>
-                            Save All Changes
-                        </button>
-                    </div>
                 </div>
             </header>
 
-            <!-- Sticky Action Bar -->
-            <div class="sticky-action-bar" id="stickyActionBar" style="display: none;">
-                <div class="sticky-actions-container">
-                    <div class="sticky-actions-left">
-                        <span class="editing-country" id="editingCountryName"></span>
-                    </div>
-                    <div class="sticky-actions-right">
-                        <button class="btn btn-secondary" id="stickyDiscardBtn">
-                            <span class="btn-icon">↩️</span>
-                            Discard Changes
-                        </button>
-                        <button class="btn btn-primary" id="stickySaveBtn">
-                            <span class="btn-icon">💾</span>
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
+            <!-- Floating Action Buttons -->
+            <div class="floating-actions" id="floatingActions" style="display: none;">
+                <button class="floating-btn discard" id="floatingDiscardBtn" title="Discard Changes">
+                    <span class="floating-icon">↩️</span>
+                    <span class="floating-text">Discard</span>
+                </button>
+                <button class="floating-btn save" id="floatingSaveBtn" title="Save Changes">
+                    <span class="floating-icon">💾</span>
+                    <span class="floating-text">Save</span>
+                </button>
             </div>
 
             <!-- Search Section -->
@@ -115,6 +94,20 @@
                         <!-- Search results will appear here -->
                     </div>
                 </div>
+            </section>
+
+            <!-- Data Import Button -->
+            <section class="import-button-section">
+                <button class="import-btn-large" id="dataImportBtn">
+                    <div class="import-btn-content">
+                        <span class="import-btn-icon">📊</span>
+                        <div class="import-btn-text">
+                            <h3>Data Import Center</h3>
+                            <p>Upload Excel files to update SIV issuance data</p>
+                        </div>
+                    </div>
+                    <span class="import-btn-arrow">→</span>
+                </button>
             </section>
 
             <!-- Excel Import Section -->

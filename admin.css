@@ -482,49 +482,119 @@ textarea.form-control {
     margin: 0;
 }
 
-/* Sticky Action Bar */
-.sticky-action-bar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: white;
-    border-bottom: 1px solid var(--admin-gray-200);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 16px 32px;
-    margin: 0 -32px;
-    transition: transform 0.3s ease;
-}
-
-.sticky-actions-container {
-    max-width: 1400px;
-    margin: 0 auto;
+/* Floating Action Buttons */
+.floating-actions {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.sticky-actions-left {
-    display: flex;
-    align-items: center;
     gap: 12px;
 }
 
-.editing-country {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--admin-gray-800);
+.floating-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.editing-country::before {
-    content: "Editing: ";
-    font-weight: 400;
+.floating-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.floating-btn.save {
+    background: var(--admin-primary);
+    color: white;
+}
+
+.floating-btn.save:hover {
+    background: var(--admin-primary-dark);
+}
+
+.floating-btn.discard {
+    background: white;
+    color: var(--admin-gray-700);
+    border: 1px solid var(--admin-gray-300);
+}
+
+.floating-btn.discard:hover {
+    background: var(--admin-gray-50);
+}
+
+.floating-icon {
+    font-size: 16px;
+}
+
+.floating-text {
+    display: inline-block;
+}
+
+/* Import Button Section */
+.import-button-section {
+    padding: 0 32px 32px;
+}
+
+.import-btn-large {
+    width: 100%;
+    background: white;
+    border: 2px solid var(--admin-gray-200);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.import-btn-large:hover {
+    border-color: var(--admin-primary);
+    box-shadow: 0 4px 12px rgba(0, 82, 204, 0.1);
+    transform: translateY(-2px);
+}
+
+.import-btn-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.import-btn-icon {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.import-btn-text h3 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--admin-gray-900);
+}
+
+.import-btn-text p {
+    margin: 0;
+    font-size: 14px;
     color: var(--admin-gray-600);
 }
 
-.sticky-actions-right {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+.import-btn-arrow {
+    font-size: 24px;
+    color: var(--admin-gray-400);
+    transition: transform 0.2s ease;
+}
+
+.import-btn-large:hover .import-btn-arrow {
+    transform: translateX(4px);
+    color: var(--admin-primary);
 }
 
 /* Remove old editor actions */
@@ -567,27 +637,34 @@ textarea.form-control {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .sticky-action-bar {
-        padding: 12px 16px;
-    }
-    
-    .sticky-actions-container {
+    .floating-actions {
+        top: 16px;
+        right: 16px;
         flex-direction: column;
-        gap: 12px;
     }
     
-    .sticky-actions-left {
-        width: 100%;
-        justify-content: center;
+    .floating-btn {
+        padding: 10px 16px;
     }
     
-    .sticky-actions-right {
-        width: 100%;
-        justify-content: center;
+    .floating-text {
+        display: none;
     }
     
-    .editing-country {
-        font-size: 14px;
+    .import-btn-large {
+        padding: 16px;
+    }
+    
+    .import-btn-icon {
+        font-size: 36px;
+    }
+    
+    .import-btn-text h3 {
+        font-size: 18px;
+    }
+    
+    .import-btn-text p {
+        font-size: 13px;
     }
 }
 
