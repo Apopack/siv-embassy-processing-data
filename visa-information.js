@@ -31,6 +31,7 @@ class VisaInformationApp {
                 this.visaData = this.visaData.map(visa => ({
                     ...visa,
                     country: visa.country || 'Unknown',
+                    flag: this.getCountryFlag(visa.country || 'Unknown'),
                     embassy: visa.embassy || visa.location || 'Unknown',
                     visaRequired: visa.visaRequired || 'unknown',
                     visaType: visa.visaType || '',
@@ -309,7 +310,7 @@ class VisaInformationApp {
         this.visaData.forEach(visa => {
             allCountries.set(visa.country, {
                 name: visa.country,
-                flag: visa.flag,
+                flag: visa.flag || this.getCountryFlag(visa.country),
                 embassy: visa.embassy,
                 hasVisaInfo: true
             });
@@ -433,7 +434,7 @@ class VisaInformationApp {
             if (sivCountry) {
                 countryData = {
                     country: countryName,
-                    flag: sivCountry.flag,
+                    flag: sivCountry.flag || this.getCountryFlag(countryName),
                     embassy: sivCountry.embassy,
                     visaType: 'Information not available',
                     visaCost: 'Contact embassy for details',
@@ -447,6 +448,10 @@ class VisaInformationApp {
             }
         } else {
             countryData.hasDetailedInfo = true;
+            // Ensure flag is set even if not in original data
+            if (!countryData.flag) {
+                countryData.flag = this.getCountryFlag(countryData.country);
+            }
         }
         
         return countryData;
