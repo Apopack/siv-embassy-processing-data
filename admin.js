@@ -2503,43 +2503,51 @@ class AdminPortal {
     }
 
     async saveChanges() {
-        if (!this.currentCountryKey) return;
-
-        const data = this.collectFormData();
-        
-        // Validate required fields
-        if (!this.validateData(data)) {
+        if (!this.currentCountryKey) {
+            this.showNotification('No country selected for editing', 'error');
             return;
         }
 
-        // Get the current country name for history tracking
-        const currentCountryName = this.countryData[this.currentCountryKey].country;
+        try {
+            const data = this.collectFormData();
+            
+            // Validate required fields
+            if (!this.validateData(data)) {
+                return;
+            }
 
-        // Update country data using the key
-        this.countryData[this.currentCountryKey] = {
-            ...this.countryData[this.currentCountryKey],
-            ...data
-        };
+            // Get the current country name for history tracking
+            const currentCountryName = this.countryData[this.currentCountryKey].country;
 
-        // Record change in history with country name
-        this.recordChange('update', `Updated ${currentCountryName} information`, this.getChangeSummary(data));
+            // Update country data using the key
+            this.countryData[this.currentCountryKey] = {
+                ...this.countryData[this.currentCountryKey],
+                ...data
+            };
 
-        // Save to localStorage (in production, this would be an API call)
-        localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
-        localStorage.setItem('adminChangeHistory', JSON.stringify(this.changeHistory));
-        
-        // Update database-specific storage for database view
-        this.updateDatabaseStorage();
+            // Record change in history with country name
+            this.recordChange('update', `Updated ${currentCountryName} information`, this.getChangeSummary(data));
 
-        // Reset unsaved changes
-        this.unsavedChanges = false;
-        const saveBtn = document.getElementById('floatingSaveBtn');
-        if (saveBtn) {
-            saveBtn.innerHTML = '<span class="floating-icon">💾</span><span class="floating-text">Save</span>';
+            // Save to localStorage (in production, this would be an API call)
+            localStorage.setItem('adminCountryData', JSON.stringify(this.countryData));
+            localStorage.setItem('adminChangeHistory', JSON.stringify(this.changeHistory));
+            
+            // Update database-specific storage for database view
+            this.updateDatabaseStorage();
+
+            // Reset unsaved changes
+            this.unsavedChanges = false;
+            const saveBtn = document.getElementById('floatingSaveBtn');
+            if (saveBtn) {
+                saveBtn.innerHTML = '<span class="floating-icon">💾</span><span class="floating-text">Save</span>';
+            }
+
+            // Show success notification
+            this.showNotification('Changes saved successfully!');
+        } catch (error) {
+            console.error('Error saving changes:', error);
+            this.showNotification('Failed to save changes: ' + error.message, 'error');
         }
-
-        // Show success notification
-        this.showNotification('Changes saved successfully!');
     }
 
     collectFormData() {
@@ -2601,7 +2609,7 @@ class AdminPortal {
 
     getChangeSummary(data) {
         const changes = [];
-        const current = this.countryData[this.currentCountry];
+        const current = this.countryData[this.currentCountryKey];
 
         if (data.visaType !== current.visaType) changes.push('visa type');
         if (data.visaCost !== current.visaCost) changes.push('visa cost');
@@ -2613,7 +2621,7 @@ class AdminPortal {
 
     recordChange(type, action, details) {
         this.changeHistory.push({
-            country: this.currentCountry,
+            country: this.countryData[this.currentCountryKey].country,
             type: type,
             action: action,
             details: details,
