@@ -255,7 +255,7 @@ function updateTableHeaders() {
     
     let headerHTML = `
         <th>Rank</th>
-        <th>Embassy/City</th>
+        <th>Location/City</th>
         <th>Country</th>
     `;
     
@@ -392,7 +392,7 @@ function clearSearch() {
 }
 
 function downloadCSV() {
-    const headers = ['Rank', 'Embassy/City', 'Country'];
+    const headers = ['Rank', 'Location/City', 'Country'];
     
     // Add visible month headers
     visibleMonths.forEach(monthKey => {
@@ -426,7 +426,7 @@ function downloadCSV() {
     link.setAttribute('href', url);
     const startMonthName = getMonthName(currentDateRange.startMonth);
     const endMonthName = getMonthName(currentDateRange.endMonth);
-    const filename = `siv_embassy_data_${startMonthName}${currentDateRange.startYear}_to_${endMonthName}${currentDateRange.endYear}_${new Date().toISOString().split('T')[0]}.csv`;
+    const filename = `siv_location_data_${startMonthName}${currentDateRange.startYear}_to_${endMonthName}${currentDateRange.endYear}_${new Date().toISOString().split('T')[0]}.csv`;
     link.setAttribute('download', filename);
     link.style.display = 'none';
     
