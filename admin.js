@@ -15,10 +15,10 @@ class AdminPortal {
     async init() {
         await this.loadCountryData();
         
-        // Update existing data with country mapping
-        const updatedCount = await this.updateExistingDataWithCountryMapping();
+        // Update existing data with country mapping (force update to catch new mappings)
+        const updatedCount = await this.updateExistingDataWithCountryMapping(true);
         if (updatedCount > 0) {
-            console.log(`Updated ${updatedCount} existing embassy records with country mapping`);
+            console.log(`Updated ${updatedCount} existing location records with country mapping`);
             // Refresh the country data after updating existing records
             await this.refreshCountryDataFromImports();
         }
@@ -52,18 +52,18 @@ class AdminPortal {
             if (importedSIVData) {
                 const data = JSON.parse(importedSIVData);
                 if (data.embassies && data.embassies.length > 0) {
-                    console.log('Loading countries from imported SIV data:', data.embassies.length, 'embassies');
+                    console.log('Loading countries from imported SIV data:', data.embassies.length, 'locations');
                     data.embassies.forEach(embassy => {
-                        // Use embassy name as search key but map to proper country
-                        const embassyName = embassy.embassy || 'Unknown';
-                        const mappedCountry = embassy.country || this.getCountryFromEmbassy(embassyName);
+                        // Use location name as search key but map to proper country
+                        const locationName = embassy.embassy || 'Unknown';
+                        const mappedCountry = embassy.country || this.getCountryFromLocation(locationName);
                         
-                        // Use embassy name as key for search, but store proper country info
-                        if (!this.countryData[embassyName]) {
-                            this.countryData[embassyName] = {
+                        // Use location name as key for search, but store proper country info
+                        if (!this.countryData[locationName]) {
+                            this.countryData[locationName] = {
                                 country: mappedCountry, // Store mapped country name
                                 flag: this.getCountryFlag(mappedCountry), // Use country for flag
-                                embassy: embassyName,
+                                location: locationName,
                                 visaRequired: "unknown",
                                 visaType: "SQ Visas",
                                 visaCost: "",
@@ -105,7 +105,7 @@ class AdminPortal {
                             this.countryData[embassy.country] = {
                                 country: embassy.country,
                                 flag: this.getCountryFlag(embassy.country),
-                                embassy: embassy.embassy,
+                                location: embassy.embassy,
                                 visaRequired: "unknown",
                                 visaType: "",
                                 visaCost: "",
@@ -145,10 +145,10 @@ class AdminPortal {
         }
     }
 
-    getCountryFromEmbassy(embassy) {
-        // Comprehensive embassy/city to country mapping
-        const embassyToCountry = {
-            // US Embassies and Consulates
+    getCountryFromLocation(location) {
+        // Comprehensive location/city to country mapping
+        const locationToCountry = {
+            // US Posts (Embassies and Consulates)
             'Abu Dhabi': 'United Arab Emirates',
             'Almaty': 'Kazakhstan',
             'Amman': 'Jordan',
@@ -184,6 +184,7 @@ class AdminPortal {
             'Delhi': 'India',
             'New Delhi': 'India',
             'Dhaka': 'Bangladesh',
+            'Doha': 'Qatar',
             'Dubai': 'United Arab Emirates',
             'Dublin': 'Ireland',
             'Dusseldorf': 'Germany',
@@ -273,6 +274,7 @@ class AdminPortal {
             'Tel Aviv': 'Israel',
             'Thessaloniki': 'Greece',
             'Tijuana': 'Mexico',
+            'Tirana': 'Albania',
             'Tokyo': 'Japan',
             'Toronto': 'Canada',
             'Tunis': 'Tunisia',
@@ -286,7 +288,7 @@ class AdminPortal {
             'Zagreb': 'Croatia',
             'Zurich': 'Switzerland',
             
-            // Additional mappings for common variations
+            // Additional mappings for common variations and missing cities
             'Ho Chi Minh': 'Vietnam',
             'New York': 'United States',
             'Los Angeles': 'United States',
@@ -297,25 +299,82 @@ class AdminPortal {
             'Miami': 'United States',
             'Atlanta': 'United States',
             'Seattle': 'United States',
-            'Detroit': 'United States'
+            'Detroit': 'United States',
+            
+            // Additional cities that might be missing
+            'Abidjan': 'Ivory Coast',
+            'Accra': 'Ghana',
+            'Addis Ababa': 'Ethiopia',
+            'Algiers': 'Algeria',
+            'Ashgabat': 'Turkmenistan',
+            'Astana': 'Kazakhstan',
+            'Baku': 'Azerbaijan',
+            'Bamako': 'Mali',
+            'Bandar Seri Begawan': 'Brunei',
+            'Banjul': 'Gambia',
+            'Beirut': 'Lebanon',
+            'Belize City': 'Belize',
+            'Bishkek': 'Kyrgyzstan',
+            'Bridgetown': 'Barbados',
+            'Colombo': 'Sri Lanka',
+            'Conakry': 'Guinea',
+            'Djibouti': 'Djibouti',
+            'Freetown': 'Sierra Leone',
+            'Gaborone': 'Botswana',
+            'Georgetown': 'Guyana',
+            'Harare': 'Zimbabwe',
+            'Khartoum': 'Sudan',
+            'Kinshasa': 'Democratic Republic of Congo',
+            'Libreville': 'Gabon',
+            'Lilongwe': 'Malawi',
+            'Ljubljana': 'Slovenia',
+            'Lome': 'Togo',
+            'Luanda': 'Angola',
+            'Lusaka': 'Zambia',
+            'Manama': 'Bahrain',
+            'Maputo': 'Mozambique',
+            'Minsk': 'Belarus',
+            'Monrovia': 'Liberia',
+            'Montevideo': 'Uruguay',
+            'Muscat': 'Oman',
+            'Ndjamena': 'Chad',
+            'Ouagadougou': 'Burkina Faso',
+            'Phnom Penh': 'Cambodia',
+            'Port Louis': 'Mauritius',
+            'Port of Spain': 'Trinidad and Tobago',
+            'Rabat': 'Morocco',
+            'Riga': 'Latvia',
+            'San Salvador': 'El Salvador',
+            'Sanaa': 'Yemen',
+            'Skopje': 'North Macedonia',
+            'Suva': 'Fiji',
+            'Tallinn': 'Estonia',
+            'Tegucigalpa': 'Honduras',
+            'Thimphu': 'Bhutan',
+            'Ulaanbaatar': 'Mongolia',
+            'Valletta': 'Malta',
+            'Vientiane': 'Laos',
+            'Vilnius': 'Lithuania',
+            'Windhoek': 'Namibia',
+            'Yaounde': 'Cameroon'
         };
         
-        // Clean the embassy name and try exact match first
-        const cleanEmbassy = embassy.trim();
-        if (embassyToCountry[cleanEmbassy]) {
-            return embassyToCountry[cleanEmbassy];
+        // Clean the location name and try exact match first
+        const cleanLocation = location.trim();
+        if (locationToCountry[cleanLocation]) {
+            return locationToCountry[cleanLocation];
         }
         
         // Try partial matching for variations
-        for (const [embassyName, country] of Object.entries(embassyToCountry)) {
-            if (cleanEmbassy.toLowerCase().includes(embassyName.toLowerCase()) ||
-                embassyName.toLowerCase().includes(cleanEmbassy.toLowerCase())) {
+        for (const [locationName, country] of Object.entries(locationToCountry)) {
+            if (cleanLocation.toLowerCase().includes(locationName.toLowerCase()) ||
+                locationName.toLowerCase().includes(cleanLocation.toLowerCase())) {
                 return country;
             }
         }
         
-        // If no match found, return the embassy name as country (fallback)
-        return cleanEmbassy;
+        // If no match found, return the location name as country (fallback)
+        return cleanLocation;
     }
 
     getCountryFlag(country) {
@@ -360,7 +419,23 @@ class AdminPortal {
             'Senegal': '🇸🇳', 'Guatemala': '🇬🇹', 'Cuba': '🇨🇺', 'Bahamas': '🇧🇸',
             'Panama': '🇵🇦', 'Czech Republic': '🇨🇿', 'Ecuador': '🇪🇨', 'Costa Rica': '🇨🇷',
             'Tunisia': '🇹🇳', 'Armenia': '🇦🇲', 'Ukraine': '🇺🇦', 'Singapore': '🇸🇬',
-            'Norway': '🇳🇴'
+            'Norway': '🇳🇴',
+            
+            // Additional country flags for new embassy mappings
+            'Ivory Coast': '🇨🇮', 'Ghana': '🇬🇭', 'Ethiopia': '🇪🇹', 'Algeria': '🇩🇿',
+            'Turkmenistan': '🇹🇲', 'Azerbaijan': '🇦🇿', 'Mali': '🇲🇱', 'Brunei': '🇧🇳',
+            'Gambia': '🇬🇲', 'Lebanon': '🇱🇧', 'Belize': '🇧🇿', 'Kyrgyzstan': '🇰🇬',
+            'Barbados': '🇧🇧', 'Sri Lanka': '🇱🇰', 'Guinea': '🇬🇳', 'Djibouti': '🇩🇯',
+            'Sierra Leone': '🇸🇱', 'Botswana': '🇧🇼', 'Guyana': '🇬🇾', 'Zimbabwe': '🇿🇼',
+            'Sudan': '🇸🇩', 'Democratic Republic of Congo': '🇨🇩', 'Gabon': '🇬🇦', 'Malawi': '🇲🇼',
+            'Slovenia': '🇸🇮', 'Togo': '🇹🇬', 'Angola': '🇦🇴', 'Zambia': '🇿🇲',
+            'Bahrain': '🇧🇭', 'Mozambique': '🇲🇿', 'Belarus': '🇧🇾', 'Liberia': '🇱🇷',
+            'Uruguay': '🇺🇾', 'Oman': '🇴🇲', 'Chad': '🇹🇩', 'Burkina Faso': '🇧🇫',
+            'Cambodia': '🇰🇭', 'Mauritius': '🇲🇺', 'Trinidad and Tobago': '🇹🇹', 'Latvia': '🇱🇻',
+            'El Salvador': '🇸🇻', 'Yemen': '🇾🇪', 'North Macedonia': '🇲🇰', 'Fiji': '🇫🇯',
+            'Estonia': '🇪🇪', 'Honduras': '🇭🇳', 'Bhutan': '🇧🇹', 'Mongolia': '🇲🇳',
+            'Malta': '🇲🇹', 'Laos': '🇱🇦', 'Lithuania': '🇱🇹', 'Namibia': '🇳🇦',
+            'Cameroon': '🇨🇲'
         };
         return flagMap[country] || '🏳️';
     }
@@ -443,7 +518,7 @@ class AdminPortal {
                     <span class="search-result-flag">${country.flag}</span>
                     <div class="search-result-info">
                         <h4>${country.country}</h4>
-                        <p>${country.embassy} Embassy</p>
+                        <p>${country.location || country.embassy}</p>
                     </div>
                 </div>
             `).join('');
@@ -465,7 +540,7 @@ class AdminPortal {
                 <span class="search-result-flag">${country.flag}</span>
                 <div class="search-result-info">
                     <h4>${country.country}</h4>
-                    <p>${country.embassy} Embassy</p>
+                    <p>${country.location || country.embassy}</p>
                 </div>
             </div>
         `).join('');
@@ -493,7 +568,7 @@ class AdminPortal {
         // Update header
         document.getElementById('countryFlag').textContent = data.flag;
         document.getElementById('countryName').textContent = data.country;
-        document.getElementById('embassyInfo').textContent = `${data.embassy} Embassy`;
+        document.getElementById('embassyInfo').textContent = `${data.location || data.embassy}`;
 
         // Load visa information
         this.loadVisaData(data);
@@ -1226,9 +1301,9 @@ class AdminPortal {
                     <p style="margin-top: 10px; font-size: 14px;">
                         This file format may not be compatible. Please ensure:
                         <ul>
-                            <li>The file contains embassy/post data with SQ visa columns</li>
+                            <li>The file contains location/post data with SQ visa columns</li>
                             <li>The file follows the "MONTH YEAR - IV Issuances by Post and Visa Class" format</li>
-                            <li>The data includes columns for Post/Embassy and SQ visa counts</li>
+                            <li>The data includes columns for Post/Location and SQ visa counts</li>
                         </ul>
                     </p>
                     <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearFile('siv'); return false;" style="margin-top: 10px;">
@@ -1294,11 +1369,11 @@ class AdminPortal {
             // Only process SQ visa classes
             if (post && visaClass.startsWith('SQ') && issuances > 0) {
                 if (!sqByPost[post]) {
-                    // Map embassy/city to country
-                    const mappedCountry = this.getCountryFromEmbassy(post);
+                    // Map location/city to country
+                    const mappedCountry = this.getCountryFromLocation(post);
                     
                     sqByPost[post] = {
-                        embassy: post,
+                        location: post,
                         country: mappedCountry, // Use mapped country
                         sqCount: 0,
                         sqBreakdown: {},
@@ -1434,7 +1509,7 @@ class AdminPortal {
                     <table class="preview-data-table">
                         <thead>
                             <tr>
-                                <th>Embassy/Post</th>
+                                <th>Location/Post</th>
                                 <th>SQ Visas</th>
                                 <th>SQ Breakdown</th>
                                 <th>Month</th>
@@ -1443,7 +1518,7 @@ class AdminPortal {
                         <tbody>
                             ${fileData.data.map(record => `
                                 <tr>
-                                    <td>${record.embassy}</td>
+                                    <td>${record.location || record.embassy}</td>
                                     <td>${record.sqCount}</td>
                                     <td>${Object.entries(record.sqBreakdown || {}).map(([type, count]) => `${type}: ${count}`).join(', ')}</td>
                                     <td>${record.monthYear || 'N/A'}</td>
@@ -1633,7 +1708,7 @@ class AdminPortal {
         }
     }
 
-    async updateExistingDataWithCountryMapping() {
+    async updateExistingDataWithCountryMapping(forceUpdate = false) {
         try {
             // Update existing SIV import data with proper country mapping
             const importedSIVData = localStorage.getItem('sivImportData');
@@ -1641,27 +1716,32 @@ class AdminPortal {
                 const data = JSON.parse(importedSIVData);
                 if (data.embassies && data.embassies.length > 0) {
                     console.log('Updating existing SIV data with country mapping...');
+                    let updateCount = 0;
                     
-                    // Update each embassy record with proper country mapping
+                    // Update each location record with proper country mapping
                     data.embassies.forEach(embassy => {
-                        const embassyName = embassy.embassy || 'Unknown';
-                        const mappedCountry = this.getCountryFromEmbassy(embassyName);
+                        const locationName = embassy.embassy || 'Unknown';
+                        const mappedCountry = this.getCountryFromLocation(locationName);
                         
-                        // Update the country field
-                        embassy.country = mappedCountry;
-                        
-                        console.log(`Mapped ${embassyName} → ${mappedCountry}`);
+                        // Update if forced, or if country is missing/same as location name
+                        if (forceUpdate || !embassy.country || embassy.country === locationName) {
+                            embassy.country = mappedCountry;
+                            console.log(`Mapped ${locationName} → ${mappedCountry}`);
+                            updateCount++;
+                        }
                     });
                     
-                    // Save the updated data back to localStorage
-                    localStorage.setItem('sivImportData', JSON.stringify(data));
+                    // Save the updated data back to localStorage if any updates were made
+                    if (updateCount > 0) {
+                        localStorage.setItem('sivImportData', JSON.stringify(data));
+                        
+                        // Also update the database SIV data
+                        localStorage.setItem('databaseSIVData', JSON.stringify(data.embassies));
+                        
+                        console.log('Updated', updateCount, 'location records with country mapping');
+                    }
                     
-                    // Also update the database SIV data
-                    localStorage.setItem('databaseSIVData', JSON.stringify(data.embassies));
-                    
-                    console.log('Updated', data.embassies.length, 'embassy records with country mapping');
-                    
-                    return data.embassies.length;
+                    return updateCount;
                 }
             }
             
@@ -1679,18 +1759,18 @@ class AdminPortal {
             if (importedSIVData) {
                 const data = JSON.parse(importedSIVData);
                 if (data.embassies && data.embassies.length > 0) {
-                    console.log('Refreshing country data with newly imported embassies:', data.embassies.length);
+                    console.log('Refreshing country data with newly imported locations:', data.embassies.length);
                     
                     data.embassies.forEach(embassy => {
-                        const embassyName = embassy.embassy || 'Unknown';
-                        const mappedCountry = embassy.country || this.getCountryFromEmbassy(embassyName);
+                        const locationName = embassy.embassy || 'Unknown';
+                        const mappedCountry = embassy.country || this.getCountryFromLocation(locationName);
                         
                         // Only add if not already exists or update if it's from SIV import
-                        if (!this.countryData[embassyName] || this.countryData[embassyName].sourceType === 'siv_data') {
-                            this.countryData[embassyName] = {
+                        if (!this.countryData[locationName] || this.countryData[locationName].sourceType === 'siv_data') {
+                            this.countryData[locationName] = {
                                 country: mappedCountry, // Store mapped country name
                                 flag: this.getCountryFlag(mappedCountry), // Use country for flag
-                                embassy: embassyName,
+                                location: locationName,
                                 visaRequired: "unknown",
                                 visaType: "SQ Visas",
                                 visaCost: "",
@@ -1756,21 +1836,22 @@ class AdminPortal {
         
         // Check for required fields
         data.forEach((record, index) => {
-            if (!record.embassy && !record.country) {
-                errors.push(`Row ${record.sourceRow || index + 1}: Missing embassy and country`);
+            if (!record.location && !record.embassy && !record.country) {
+                errors.push(`Row ${record.sourceRow || index + 1}: Missing location and country`);
             }
             if (record.total === 0) {
-                warnings.push(`Row ${record.sourceRow || index + 1}: Total is 0 for ${record.embassy || record.country}`);
+                warnings.push(`Row ${record.sourceRow || index + 1}: Total is 0 for ${record.location || record.embassy || record.country}`);
             }
         });
         
         // Check for duplicates
-        const embassySet = new Set();
+        const locationSet = new Set();
         data.forEach((record, index) => {
-            if (embassySet.has(record.embassy)) {
-                warnings.push(`Duplicate embassy found: ${record.embassy}`);
+            const locationKey = record.location || record.embassy;
+            if (locationSet.has(locationKey)) {
+                warnings.push(`Duplicate location found: ${locationKey}`);
             }
-            embassySet.add(record.embassy);
+            locationSet.add(locationKey);
         });
         
         let validationHTML = '';
