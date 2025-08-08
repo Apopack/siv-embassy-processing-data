@@ -667,6 +667,9 @@ class AdminPortal {
         const sivPreviewBtn = document.getElementById('sivPreviewBtn');
         const sivImportBtn = document.getElementById('sivImportBtn');
 
+        // Initialize selected files array
+        this.selectedFiles = [];
+        
         // File upload area click handler
         sivUploadArea.addEventListener('click', () => {
             sivFileInput.click();
@@ -685,27 +688,132 @@ class AdminPortal {
         sivUploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             sivUploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                this.handleFileSelect(files[0], 'siv');
-            }
+            const files = Array.from(e.dataTransfer.files);
+            this.handleMultipleFileSelect(files, 'siv');
         });
 
         // File input change handler
         sivFileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleFileSelect(e.target.files[0], 'siv');
-            }
+            const files = Array.from(e.target.files);
+            this.handleMultipleFileSelect(files, 'siv');
         });
 
         // Button handlers
         sivPreviewBtn.addEventListener('click', () => this.previewImport());
-        sivImportBtn.addEventListener('click', () => this.startImport());
+        sivImportBtn.addEventListener('click', () => this.startMultipleImport());
         
         // Cancel import
         document.getElementById('cancelImportBtn')?.addEventListener('click', () => {
             this.cancelImport();
         });
+    }
+
+    handleMultipleFileSelect(files, type) {
+        // Filter for Excel files only
+        const excelFiles = files.filter(file => {
+            const extension = file.name.toLowerCase().split('.').pop();
+            return extension === 'xlsx' || extension === 'xls';
+        });
+
+        if (excelFiles.length === 0) {
+            this.showNotification('Please select valid Excel files (.xlsx or .xls)', 'error');
+            return;
+        }
+
+        // Add files to selection, avoiding duplicates
+        excelFiles.forEach(file => {
+            const exists = this.selectedFiles.find(f => f.name === file.name && f.size === file.size);
+            if (!exists) {
+                this.selectedFiles.push({
+                    file: file,
+                    id: Date.now() + Math.random(),
+                    status: 'pending',
+                    data: null,
+                    error: null
+                });
+            }
+        });
+
+        this.updateMultipleFileUI();
+        
+        // Show notification for added files
+        const addedCount = excelFiles.length;
+        this.showNotification(`Added ${addedCount} file${addedCount > 1 ? 's' : ''} to selection`, 'success');
+    }
+
+    updateMultipleFileUI() {
+        const uploadArea = document.getElementById('sivUploadArea');
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const previewBtn = document.getElementById('sivPreviewBtn');
+        const importBtn = document.getElementById('sivImportBtn');
+
+        if (this.selectedFiles.length === 0) {
+            // Reset to default state
+            uploadArea.innerHTML = `
+                <div class="upload-content">
+                    <span class="upload-icon">📁</span>
+                    <p class="upload-text">Drop Excel files here or <span class="upload-link">browse files</span></p>
+                    <p class="upload-hint">Supports .xlsx and .xls formats • Select multiple files</p>
+                </div>
+            `;
+            uploadArea.style.pointerEvents = '';
+            uploadArea.style.opacity = '';
+            selectedFilesDiv.style.display = 'none';
+            previewBtn.disabled = true;
+            importBtn.disabled = true;
+            return;
+        }
+
+        // Update upload area to show file count
+        uploadArea.innerHTML = `
+            <div class="upload-content">
+                <span class="upload-icon">📄</span>
+                <p class="upload-text"><strong>${this.selectedFiles.length} files selected</strong></p>
+                <p class="upload-hint">Click to add more files or drag and drop additional files</p>
+            </div>
+        `;
+
+        // Show selected files
+        selectedFilesDiv.style.display = 'block';
+        selectedFilesDiv.innerHTML = `
+            <div class="selected-files-header">
+                <span>Selected Files (${this.selectedFiles.length})</span>
+                <button class="btn btn-secondary btn-sm" onclick="adminPortal.clearAllFiles()">Clear All</button>
+            </div>
+            ${this.selectedFiles.map(fileObj => `
+                <div class="file-item" data-file-id="${fileObj.id}">
+                    <div class="file-info">
+                        <span class="file-icon">📄</span>
+                        <div>
+                            <div class="file-name">${fileObj.file.name}</div>
+                            <div class="file-size">${this.formatFileSize(fileObj.file.size)}</div>
+                        </div>
+                    </div>
+                    <div class="file-status">
+                        <span class="status-badge status-${fileObj.status}">${fileObj.status}</span>
+                        <button class="file-remove" onclick="adminPortal.removeFile('${fileObj.id}')" title="Remove file">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+
+        // Enable buttons
+        previewBtn.disabled = false;
+        importBtn.disabled = false;
+    }
+
+    removeFile(fileId) {
+        this.selectedFiles = this.selectedFiles.filter(f => f.id !== fileId);
+        this.updateMultipleFileUI();
+        this.showNotification('File removed from selection', 'warning');
+    }
+
+    clearAllFiles() {
+        this.selectedFiles = [];
+        this.updateMultipleFileUI();
+        this.showNotification('All files cleared', 'warning');
     }
 
     handleFileSelect(file, type) {
@@ -978,55 +1086,275 @@ class AdminPortal {
         };
     }
 
-    previewImport() {
-        if (!this.currentImport || !this.currentImport.data) {
-            this.showNotification('No data to preview', 'error');
+    async previewImport() {
+        if (this.selectedFiles.length === 0) {
+            this.showNotification('No files selected for preview', 'error');
             return;
         }
         
-        // Show import progress panel
+        // Show progress panel
         document.getElementById('importProgress').style.display = 'block';
-        document.getElementById('progressStatus').textContent = 'Data Preview';
-        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressStatus').textContent = 'Parsing files for preview...';
+        document.getElementById('progressFill').style.width = '0%';
         
-        // Generate preview
-        const data = this.currentImport.data;
+        // Parse all selected files first
+        await this.parseAllSelectedFiles();
+        
+        const allPreviewData = [];
+        let totalRecords = 0;
+        let successfulFiles = 0;
+        let errorFiles = 0;
+        
+        for (const fileObj of this.selectedFiles) {
+            if (fileObj.status === 'success' && fileObj.data) {
+                totalRecords += fileObj.data.length;
+                successfulFiles++;
+                allPreviewData.push({
+                    filename: fileObj.file.name,
+                    data: fileObj.data.slice(0, 3), // Show first 3 records per file
+                    totalRecords: fileObj.data.length,
+                    monthYear: fileObj.data[0]?.monthYear || 'Unknown'
+                });
+            } else if (fileObj.status === 'error') {
+                errorFiles++;
+            }
+        }
+        
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressStatus').textContent = 'Preview ready';
+        
+        if (allPreviewData.length === 0) {
+            const errorHTML = `
+                <div class="preview-error">
+                    <h4>⚠️ No Valid Data Found</h4>
+                    <p>None of the selected files could be processed successfully.</p>
+                    ${this.selectedFiles.filter(f => f.status === 'error').map(f => 
+                        `<p><strong>${f.file.name}:</strong> ${f.error}</p>`
+                    ).join('')}
+                </div>
+            `;
+            document.getElementById('progressLog').innerHTML = errorHTML;
+            return;
+        }
+        
         const previewHTML = `
             <div class="preview-summary">
-                <h4>Import Preview - ${this.currentImport.file.name}</h4>
-                <p><strong>Records found:</strong> ${data.length}</p>
-                <p><strong>File type:</strong> SIV Issuances Data</p>
-                <p><strong>Date range:</strong> ${this.getDataDateRange(data)}</p>
+                <h4>📊 Multi-File Import Preview</h4>
+                <div class="preview-stats">
+                    <div class="stat-item">
+                        <strong>✅ Successful Files:</strong> ${successfulFiles}
+                    </div>
+                    <div class="stat-item">
+                        <strong>❌ Error Files:</strong> ${errorFiles}
+                    </div>
+                    <div class="stat-item">
+                        <strong>📄 Total Records:</strong> ${totalRecords}
+                    </div>
+                </div>
             </div>
-            <div class="preview-table">
-                <h5>Sample Records (first 5):</h5>
-                <table class="preview-data-table">
-                    <thead>
-                        <tr>
-                            <th>Embassy/Post</th>
-                            <th>Country</th>
-                            <th>SQ Visas</th>
-                            <th>Month</th>
-                            <th>Source File</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.slice(0, 5).map(record => `
+            
+            ${allPreviewData.map((fileData, index) => `
+                <div class="file-preview-section">
+                    <h5>📄 ${fileData.filename} (${fileData.monthYear})</h5>
+                    <p><strong>Records:</strong> ${fileData.totalRecords} SQ visa entries</p>
+                    
+                    <table class="preview-data-table">
+                        <thead>
                             <tr>
-                                <td>${record.embassy}</td>
-                                <td>${record.country}</td>
-                                <td>${record.sqCount}</td>
-                                <td>${record.monthData ? Object.keys(record.monthData)[0] : 'N/A'}</td>
-                                <td>${record.sourceFile}</td>
+                                <th>Embassy/Post</th>
+                                <th>SQ Visas</th>
+                                <th>SQ Breakdown</th>
+                                <th>Month</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-            ${this.validateImportData(data)}
+                        </thead>
+                        <tbody>
+                            ${fileData.data.map(record => `
+                                <tr>
+                                    <td>${record.embassy}</td>
+                                    <td>${record.sqCount}</td>
+                                    <td>${Object.entries(record.sqBreakdown || {}).map(([type, count]) => `${type}: ${count}`).join(', ')}</td>
+                                    <td>${record.monthYear || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                            ${fileData.totalRecords > 3 ? `
+                                <tr>
+                                    <td colspan="4" style="text-align: center; font-style: italic; color: #666;">
+                                        ... and ${fileData.totalRecords - 3} more records
+                                    </td>
+                                </tr>
+                            ` : ''}
+                        </tbody>
+                    </table>
+                </div>
+            `).join('')}
         `;
         
         document.getElementById('progressLog').innerHTML = previewHTML;
+    }
+
+    async parseAllSelectedFiles() {
+        for (let i = 0; i < this.selectedFiles.length; i++) {
+            const fileObj = this.selectedFiles[i];
+            
+            if (fileObj.status === 'pending') {
+                try {
+                    fileObj.status = 'processing';
+                    this.updateFileStatus(fileObj.id, 'processing');
+                    
+                    // Update progress
+                    const progress = ((i + 1) / this.selectedFiles.length) * 100;
+                    document.getElementById('progressFill').style.width = `${progress}%`;
+                    
+                    // Parse the file
+                    const arrayBuffer = await fileObj.file.arrayBuffer();
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    
+                    // Create temporary currentImport for parsing
+                    const tempImport = {
+                        file: fileObj.file,
+                        data: null
+                    };
+                    const originalImport = this.currentImport;
+                    this.currentImport = tempImport;
+                    
+                    const parsedData = this.parseSIVData(workbook);
+                    
+                    // Restore original import
+                    this.currentImport = originalImport;
+                    
+                    fileObj.data = parsedData;
+                    fileObj.status = 'success';
+                    fileObj.error = null;
+                    
+                } catch (error) {
+                    console.error(`Error parsing ${fileObj.file.name}:`, error);
+                    fileObj.status = 'error';
+                    fileObj.error = error.message;
+                    fileObj.data = null;
+                }
+                
+                this.updateFileStatus(fileObj.id, fileObj.status);
+            }
+        }
+    }
+
+    updateFileStatus(fileId, status) {
+        const fileElement = document.querySelector(`[data-file-id="${fileId}"] .status-badge`);
+        if (fileElement) {
+            fileElement.className = `status-badge status-${status}`;
+            fileElement.textContent = status;
+        }
+    }
+
+    async startMultipleImport() {
+        if (this.selectedFiles.length === 0) {
+            this.showNotification('No files selected for import', 'error');
+            return;
+        }
+        
+        // Parse all files first if not already parsed
+        await this.parseAllSelectedFiles();
+        
+        // Check if we have any successful files
+        const validFiles = this.selectedFiles.filter(f => f.status === 'success' && f.data);
+        if (validFiles.length === 0) {
+            this.showNotification('No valid files to import', 'error');
+            return;
+        }
+        
+        const replaceData = document.getElementById('sivReplaceData').checked;
+        
+        // Show progress
+        document.getElementById('importProgress').style.display = 'block';
+        document.getElementById('progressStatus').textContent = 'Starting multi-file import...';
+        document.getElementById('progressFill').style.width = '0%';
+        
+        let totalRecordsProcessed = 0;
+        let totalRecordsUpdated = 0;
+        let totalErrors = 0;
+        const importResults = [];
+        
+        try {
+            for (let i = 0; i < validFiles.length; i++) {
+                const fileObj = validFiles[i];
+                
+                // Update progress
+                const progress = (i / validFiles.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressStatus').textContent = `Processing ${fileObj.file.name}...`;
+                
+                try {
+                    const result = await this.processSIVImport(fileObj.data, replaceData, false);
+                    
+                    totalRecordsProcessed += fileObj.data.length;
+                    totalRecordsUpdated += result.updated;
+                    totalErrors += result.errors;
+                    
+                    importResults.push({
+                        filename: fileObj.file.name,
+                        recordsProcessed: fileObj.data.length,
+                        recordsUpdated: result.updated,
+                        errors: result.errors,
+                        status: 'success'
+                    });
+                    
+                } catch (error) {
+                    console.error(`Error importing ${fileObj.file.name}:`, error);
+                    importResults.push({
+                        filename: fileObj.file.name,
+                        recordsProcessed: 0,
+                        recordsUpdated: 0,
+                        errors: 1,
+                        status: 'error',
+                        errorMessage: error.message
+                    });
+                    totalErrors++;
+                }
+            }
+            
+            // Update progress
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressStatus').textContent = 'Multi-file import completed!';
+            
+            // Create combined import record
+            const combinedImportRecord = {
+                id: Date.now(),
+                filename: `Multi-file import (${validFiles.length} files)`,
+                fileType: 'SIV Issuances (Batch)',
+                fileSize: this.formatFileSize(validFiles.reduce((sum, f) => sum + f.file.size, 0)),
+                status: totalErrors > 0 ? 'partial' : 'success',
+                recordsProcessed: totalRecordsProcessed,
+                recordsUpdated: totalRecordsUpdated,
+                errors: totalErrors,
+                uploadedBy: 'admin@example.com',
+                uploadDate: new Date().toISOString(),
+                processingTime: 'N/A',
+                details: importResults
+            };
+            
+            this.fileUploads.unshift(combinedImportRecord);
+            this.saveImportHistory();
+            this.updateImportHistoryTable();
+            
+            // Show summary notification
+            const message = totalErrors > 0 
+                ? `Multi-file import completed with errors. Updated ${totalRecordsUpdated} records, ${totalErrors} errors.`
+                : `Multi-file import completed successfully! Updated ${totalRecordsUpdated} records.`;
+            const type = totalErrors > 0 ? 'warning' : 'success';
+            
+            this.showNotification(message, type);
+            
+            // Clear files and reset UI after successful import
+            setTimeout(() => {
+                this.clearAllFiles();
+                document.getElementById('importProgress').style.display = 'none';
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Multi-file import error:', error);
+            document.getElementById('progressStatus').textContent = 'Multi-file import failed: ' + error.message;
+            this.showNotification('Multi-file import failed: ' + error.message, 'error');
+        }
     }
 
     getDataDateRange(data) {

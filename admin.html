@@ -120,13 +120,14 @@
                         </div>
                         <div class="import-card-body">
                             <div class="file-upload-area" id="sivUploadArea">
-                                <input type="file" id="sivFileInput" accept=".xlsx,.xls" hidden>
+                                <input type="file" id="sivFileInput" accept=".xlsx,.xls" multiple hidden>
                                 <div class="upload-content">
                                     <span class="upload-icon">📁</span>
-                                    <p class="upload-text">Drop Excel file here or <span class="upload-link">browse files</span></p>
-                                    <p class="upload-hint">Supports .xlsx and .xls formats</p>
+                                    <p class="upload-text">Drop Excel files here or <span class="upload-link">browse files</span></p>
+                                    <p class="upload-hint">Supports .xlsx and .xls formats • Select multiple files</p>
                                 </div>
                             </div>
+                            <div id="selectedFiles" class="selected-files" style="display: none;"></div>
                             <div class="import-options">
                                 <label class="checkbox-label">
                                     <input type="checkbox" id="sivReplaceData" checked>
