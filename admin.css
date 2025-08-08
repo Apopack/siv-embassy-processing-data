@@ -503,8 +503,8 @@ textarea.form-control {
 /* Floating Action Buttons */
 .floating-actions {
     position: fixed;
-    top: 24px;
-    right: 24px;
+    top: 120px;
+    right: 32px;
     z-index: 100;
     display: flex;
     gap: 12px;
@@ -598,7 +598,7 @@ textarea.form-control {
 /* Responsive Design */
 @media (max-width: 768px) {
     .floating-actions {
-        top: 16px;
+        top: 100px;
         right: 16px;
         flex-direction: column;
     }
