@@ -85,6 +85,25 @@
                 </div>
             </header>
 
+            <!-- Sticky Action Bar -->
+            <div class="sticky-action-bar" id="stickyActionBar" style="display: none;">
+                <div class="sticky-actions-container">
+                    <div class="sticky-actions-left">
+                        <span class="editing-country" id="editingCountryName"></span>
+                    </div>
+                    <div class="sticky-actions-right">
+                        <button class="btn btn-secondary" id="stickyDiscardBtn">
+                            <span class="btn-icon">↩️</span>
+                            Discard Changes
+                        </button>
+                        <button class="btn btn-primary" id="stickySaveBtn">
+                            <span class="btn-icon">💾</span>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search Section -->
             <section class="search-section">
                 <div class="search-container">
@@ -385,15 +404,6 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="editor-actions">
-                    <button class="btn btn-secondary" id="discardBtn">
-                        Discard Changes
-                    </button>
-                    <button class="btn btn-primary" id="saveBtn">
-                        Save Changes
-                    </button>
-                </div>
             </section>
         </div>
     </main>
