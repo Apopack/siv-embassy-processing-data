@@ -304,6 +304,7 @@ class AdminPortal {
             'Saitama': 'Japan',
             'Hiroshima': 'Japan',
             'Sendai': 'Japan',
+            'Naha': 'Japan',
             'Pyongyang': 'North Korea',
             'Seoul': 'South Korea',
             'Busan': 'South Korea',
@@ -1016,6 +1017,12 @@ class AdminPortal {
             'Soroca': 'Moldova',
             'Orhei': 'Moldova',
             'Dubasari': 'Moldova',
+            'Tallinn': 'Estonia',
+            'Tartu': 'Estonia',
+            'Riga': 'Latvia',
+            'Daugavpils': 'Latvia',
+            'Vilnius': 'Lithuania',
+            'Kaunas': 'Lithuania',
             'Moscow': 'Russia',
             'Saint Petersburg': 'Russia',
             'Novosibirsk': 'Russia',
@@ -1970,6 +1977,70 @@ class AdminPortal {
         return cleanLocation;
     }
 
+    getCountryCode(country) {
+        const countryCodeMap = {
+            // Country to ISO 2-letter code mapping
+            'Pakistan': 'PK', 'Qatar': 'QA', 'Albania': 'AL', 'Turkey': 'TR',
+            'Germany': 'DE', 'Canada': 'CA', 'Philippines': 'PH', 'UAE': 'AE',
+            'United Arab Emirates': 'AE', 'Iraq': 'IQ', 'Rwanda': 'RW',
+            'United States': 'US', 'India': 'IN', 'Iran': 'IR', 'Afghanistan': 'AF',
+            'Australia': 'AU', 'Austria': 'AT', 'Belgium': 'BE', 'Brazil': 'BR',
+            'China': 'CN', 'Denmark': 'DK', 'Egypt': 'EG', 'France': 'FR',
+            'Thailand': 'TH', 'Vietnam': 'VN', 'Indonesia': 'ID', 'Malaysia': 'MY',
+            'South Korea': 'KR', 'Japan': 'JP', 'Kenya': 'KE', 'Syria': 'SY',
+            'Kuwait': 'KW', 'Saudi Arabia': 'SA', 'Israel': 'IL', 'Italy': 'IT',
+            'Spain': 'ES', 'Poland': 'PL', 'Russia': 'RU', 'Peru': 'PE',
+            'Mexico': 'MX', 'Colombia': 'CO', 'Ireland': 'IE', 'Switzerland': 'CH',
+            'United Kingdom': 'GB', 'New Zealand': 'NZ', 'Jordan': 'JO',
+            'Kazakhstan': 'KZ', 'Netherlands': 'NL', 'Greece': 'GR', 'Serbia': 'RS',
+            'Romania': 'RO', 'Hungary': 'HU', 'Argentina': 'AR', 'Venezuela': 'VE',
+            'Morocco': 'MA', 'Bangladesh': 'BD', 'Finland': 'FI', 'Hong Kong': 'HK',
+            'Uganda': 'UG', 'Nepal': 'NP', 'Jamaica': 'JM', 'Cyprus': 'CY',
+            'Nigeria': 'NG', 'Bolivia': 'BO', 'Portugal': 'PT', 'Iceland': 'IS',
+            'Chile': 'CL', 'Bulgaria': 'BG', 'Sweden': 'SE', 'Taiwan': 'TW',
+            'Uzbekistan': 'UZ', 'Georgia': 'GE', 'Croatia': 'HR', 'South Africa': 'ZA',
+            'Senegal': 'SN', 'Guatemala': 'GT', 'Cuba': 'CU', 'Bahamas': 'BS',
+            'Panama': 'PA', 'Czech Republic': 'CZ', 'Ecuador': 'EC', 'Costa Rica': 'CR',
+            'Estonia': 'EE', 'Latvia': 'LV', 'Lithuania': 'LT', 'Tunisia': 'TN',
+            'Lebanon': 'LB', 'Mali': 'ML', 'Norway': 'NO', 'Azerbaijan': 'AZ',
+            'Tajikistan': 'TJ', 'Ethiopia': 'ET', 'Ghana': 'GH', 'Tanzania': 'TZ',
+            'Slovakia': 'SK', 'Ukraine': 'UA', 'Armenia': 'AM', 'Myanmar': 'MM',
+            'Somalia': 'SO', 'Kyrgyzstan': 'KG', 'Albania': 'AL', 'Mauritania': 'MR',
+            'Niger': 'NE', 'Republic of Congo': 'CG', 'Democratic Republic of Congo': 'CD',
+            'Eritrea': 'ER', 'Haiti': 'HT', 'Kosovo': 'XK', 'Tonga': 'TO',
+            'Botswana': 'BW', 'Zimbabwe': 'ZW', 'Sudan': 'SD', 'Gabon': 'GA',
+            'Malawi': 'MW', 'Slovenia': 'SI', 'Togo': 'TG', 'Angola': 'AO',
+            'Zambia': 'ZM', 'Bahrain': 'BH', 'Mozambique': 'MZ', 'Belarus': 'BY',
+            'Liberia': 'LR', 'Uruguay': 'UY', 'Oman': 'OM', 'Chad': 'TD',
+            'Burkina Faso': 'BF', 'Cambodia': 'KH', 'Mauritius': 'MU',
+            'Trinidad and Tobago': 'TT', 'El Salvador': 'SV', 'Yemen': 'YE',
+            'North Macedonia': 'MK', 'Fiji': 'FJ', 'Honduras': 'HN', 'Bhutan': 'BT',
+            'Mongolia': 'MN', 'Malta': 'MT', 'Laos': 'LA', 'Namibia': 'NA',
+            'Cameroon': 'CM', 'Sierra Leone': 'SL', 'Guyana': 'GY',
+            'Ivory Coast': 'CI', 'Côte d\'Ivoire': 'CI', 'Djibouti': 'DJ',
+            'Equatorial Guinea': 'GQ', 'Gambia': 'GM', 'Guinea': 'GN',
+            'Guinea-Bissau': 'GW', 'Lesotho': 'LS', 'Madagascar': 'MG',
+            'Sao Tome and Principe': 'ST', 'São Tomé and Príncipe': 'ST',
+            'Seychelles': 'SC', 'Burundi': 'BI', 'Cape Verde': 'CV',
+            'Central African Republic': 'CF', 'Comoros': 'KM', 'Eswatini': 'SZ',
+            'Swaziland': 'SZ', 'Libya': 'LY', 'South Sudan': 'SS',
+            'Belize': 'BZ', 'Nicaragua': 'NI', 'Barbados': 'BB',
+            'Dominica': 'DM', 'Dominican Republic': 'DO', 'Grenada': 'GD',
+            'Saint Lucia': 'LC', 'Saint Vincent and the Grenadines': 'VC',
+            'Antigua and Barbuda': 'AG', 'Saint Kitts and Nevis': 'KN',
+            'Suriname': 'SR', 'Paraguay': 'PY', 'French Guiana': 'GF',
+            'Papua New Guinea': 'PG', 'Solomon Islands': 'SB', 'Vanuatu': 'VU',
+            'Samoa': 'WS', 'Kiribati': 'KI', 'Tuvalu': 'TV', 'Nauru': 'NR',
+            'Palau': 'PW', 'Marshall Islands': 'MH', 'Federated States of Micronesia': 'FM',
+            'Brunei': 'BN', 'East Timor': 'TL', 'Timor-Leste': 'TL',
+            'North Korea': 'KP', 'Turkmenistan': 'TM', 'Moldova': 'MD',
+            'Andorra': 'AD', 'Liechtenstein': 'LI', 'Monaco': 'MC',
+            'San Marino': 'SM', 'Vatican City': 'VA', 'Luxembourg': 'LU'
+        };
+        
+        return countryCodeMap[country] || '??';
+    }
+
     getCountryFlag(country) {
         const flagMap = {
             // Original countries
@@ -2110,15 +2181,18 @@ class AdminPortal {
         if (filtered.length === 0) {
             searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--admin-gray-500);">No countries found</div>';
         } else {
-            searchResults.innerHTML = filtered.map(country => `
-                <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
-                    <span class="search-result-flag">${country.flag}</span>
-                    <div class="search-result-info">
-                        <h4>${country.country}</h4>
-                        <p>${country.location || country.embassy}</p>
+            searchResults.innerHTML = filtered.map(country => {
+                const countryCode = this.getCountryCode(country.country);
+                return `
+                    <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
+                        <span class="search-result-flag">${countryCode}</span>
+                        <div class="search-result-info">
+                            <h4>${country.country}</h4>
+                            <p>${country.location || country.embassy}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         searchResults.style.display = 'block';
@@ -2132,15 +2206,18 @@ class AdminPortal {
             a.country.localeCompare(b.country)
         );
 
-        searchResults.innerHTML = countries.map(country => `
-            <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
-                <span class="search-result-flag">${country.flag}</span>
-                <div class="search-result-info">
-                    <h4>${country.country}</h4>
-                    <p>${country.location || country.embassy}</p>
+        searchResults.innerHTML = countries.map(country => {
+            const countryCode = this.getCountryCode(country.country);
+            return `
+                <div class="search-result-item" onclick="adminPortal.selectCountry('${country.country}')">
+                    <span class="search-result-flag">${countryCode}</span>
+                    <div class="search-result-info">
+                        <h4>${country.country}</h4>
+                        <p>${country.location || country.embassy}</p>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         searchResults.style.display = 'block';
     }

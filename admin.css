@@ -192,7 +192,17 @@
 }
 
 .search-result-flag {
-    font-size: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--admin-gray-200);
+    color: var(--admin-gray-700);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    text-transform: uppercase;
 }
 
 .search-result-info h4 {
