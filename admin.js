@@ -2157,7 +2157,6 @@ class AdminPortal {
         document.getElementById('saveAllBtn')?.addEventListener('click', () => this.saveAllChanges());
         document.getElementById('discardBtn')?.addEventListener('click', () => this.discardChanges());
         document.getElementById('exportBtn')?.addEventListener('click', () => this.exportData());
-        document.getElementById('clearDataBtn')?.addEventListener('click', () => this.clearAllData());
         document.getElementById('addStepBtn')?.addEventListener('click', () => this.addProcessingStep());
         
         // Import center toggle
