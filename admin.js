@@ -36,42 +36,92 @@ class AdminPortal {
             this.countryData = {};
         }
 
-        // Load SIV countries for search
+        // Load SIV countries for search - prioritize imported data from localStorage
         try {
-            const response = await fetch('data/embassy-siv-data.json');
-            const data = await response.json();
-            data.embassies.forEach(embassy => {
-                if (!this.countryData[embassy.country]) {
-                    this.countryData[embassy.country] = {
-                        country: embassy.country,
-                        flag: this.getCountryFlag(embassy.country),
-                        embassy: embassy.embassy,
-                        visaRequired: "unknown",
-                        visaType: "",
-                        visaCost: "",
-                        validity: "",
-                        processingTime: "",
-                        applicationMethod: "embassy",
-                        officialLink: "",
-                        processingSteps: [],
-                        extensionPossible: "unknown",
-                        extensionDuration: "",
-                        extensionCost: "",
-                        sourceName: "",
-                        sourceType: "embassy",
-                        lastUpdated: new Date().toISOString().split('T')[0],
-                        // Travel information
-                        directFlights: "unknown",
-                        airlines: "",
-                        flightDuration: "",
-                        mainAirport: "",
-                        airportCode: "",
-                        cityDistance: "",
-                        safetyLevel: "unknown",
-                        travelNotes: ""
-                    };
+            // First, try to load from imported SIV data (dynamically uploaded)
+            const importedSIVData = localStorage.getItem('sivImportData');
+            if (importedSIVData) {
+                const data = JSON.parse(importedSIVData);
+                if (data.embassies && data.embassies.length > 0) {
+                    console.log('Loading countries from imported SIV data:', data.embassies.length, 'embassies');
+                    data.embassies.forEach(embassy => {
+                        // Use embassy name as country for search purposes
+                        const countryKey = embassy.embassy || embassy.country || 'Unknown';
+                        if (!this.countryData[countryKey]) {
+                            this.countryData[countryKey] = {
+                                country: countryKey,
+                                flag: this.getCountryFlag(countryKey),
+                                embassy: embassy.embassy,
+                                visaRequired: "unknown",
+                                visaType: "SQ Visas",
+                                visaCost: "",
+                                validity: "",
+                                processingTime: "",
+                                applicationMethod: "embassy",
+                                officialLink: "",
+                                processingSteps: [],
+                                extensionPossible: "unknown",
+                                extensionDuration: "",
+                                extensionCost: "",
+                                sourceName: "SIV Import",
+                                sourceType: "siv_data",
+                                lastUpdated: embassy.lastUpdated || new Date().toISOString().split('T')[0],
+                                sivData: embassy, // Store the full SIV data
+                                // Travel information
+                                directFlights: "unknown",
+                                airlines: "",
+                                flightDuration: "",
+                                mainAirport: "",
+                                airportCode: "",
+                                cityDistance: "",
+                                safetyLevel: "unknown",
+                                travelNotes: ""
+                            };
+                        }
+                    });
                 }
-            });
+            }
+            
+            // Fallback: Load from static file if no imported data
+            if (Object.keys(this.countryData).length === 0) {
+                const response = await fetch('data/embassy-siv-data.json');
+                const data = await response.json();
+                if (data.embassies && data.embassies.length > 0) {
+                    console.log('Loading countries from static SIV data file');
+                    data.embassies.forEach(embassy => {
+                        if (!this.countryData[embassy.country]) {
+                            this.countryData[embassy.country] = {
+                                country: embassy.country,
+                                flag: this.getCountryFlag(embassy.country),
+                                embassy: embassy.embassy,
+                                visaRequired: "unknown",
+                                visaType: "",
+                                visaCost: "",
+                                validity: "",
+                                processingTime: "",
+                                applicationMethod: "embassy",
+                                officialLink: "",
+                                processingSteps: [],
+                                extensionPossible: "unknown",
+                                extensionDuration: "",
+                                extensionCost: "",
+                                sourceName: "",
+                                sourceType: "embassy",
+                                lastUpdated: new Date().toISOString().split('T')[0],
+                                // Travel information
+                                directFlights: "unknown",
+                                airlines: "",
+                                flightDuration: "",
+                                mainAirport: "",
+                                airportCode: "",
+                                cityDistance: "",
+                                safetyLevel: "unknown",
+                                travelNotes: ""
+                            };
+                        }
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error loading SIV data:', error);
         }
@@ -85,12 +135,34 @@ class AdminPortal {
 
     getCountryFlag(country) {
         const flagMap = {
+            // Original countries
             'Pakistan': '🇵🇰', 'Qatar': '🇶🇦', 'Albania': '🇦🇱', 'Turkey': '🇹🇷',
             'Germany': '🇩🇪', 'Canada': '🇨🇦', 'Philippines': '🇵🇭', 'UAE': '🇦🇪',
             'Iraq': '🇮🇶', 'Rwanda': '🇷🇼', 'United Arab Emirates': '🇦🇪',
             'United States': '🇺🇸', 'India': '🇮🇳', 'Iran': '🇮🇷', 'Afghanistan': '🇦🇫',
             'Australia': '🇦🇺', 'Austria': '🇦🇹', 'Belgium': '🇧🇪', 'Brazil': '🇧🇷',
-            'China': '🇨🇳', 'Denmark': '🇩🇰', 'Egypt': '🇪🇬', 'France': '🇫🇷'
+            'China': '🇨🇳', 'Denmark': '🇩🇰', 'Egypt': '🇪🇬', 'France': '🇫🇷',
+            
+            // Embassy locations that commonly appear in SIV data
+            'Abu Dhabi': '🇦🇪', 'Ankara': '🇹🇷', 'Auckland': '🇳🇿', 'Baghdad': '🇮🇶',
+            'Bangkok': '🇹🇭', 'Beijing': '🇨🇳', 'Berlin': '🇩🇪', 'Bogota': '🇨🇴',
+            'Brussels': '🇧🇪', 'Cairo': '🇪🇬', 'Canberra': '🇦🇺', 'Copenhagen': '🇩🇰',
+            'Damascus': '🇸🇾', 'Delhi': '🇮🇳', 'Dublin': '🇮🇪', 'Frankfurt': '🇩🇪',
+            'Geneva': '🇨🇭', 'Ho Chi Minh City': '🇻🇳', 'Islamabad': '🇵🇰', 'Istanbul': '🇹🇷',
+            'Jakarta': '🇮🇩', 'Kabul': '🇦🇫', 'Karachi': '🇵🇰', 'Kigali': '🇷🇼',
+            'Kuwait': '🇰🇼', 'Lima': '🇵🇪', 'London': '🇬🇧', 'Madrid': '🇪🇸',
+            'Manila': '🇵🇭', 'Mexico City': '🇲🇽', 'Moscow': '🇷🇺', 'Mumbai': '🇮🇳',
+            'Nairobi': '🇰🇪', 'New Delhi': '🇮🇳', 'Paris': '🇫🇷', 'Riyadh': '🇸🇦',
+            'Rome': '🇮🇹', 'Seoul': '🇰🇷', 'Singapore': '🇸🇬', 'Sydney': '🇦🇺',
+            'Tel Aviv': '🇮🇱', 'Tokyo': '🇯🇵', 'Vienna': '🇦🇹', 'Warsaw': '🇵🇱',
+            
+            // Common country names
+            'Thailand': '🇹🇭', 'Vietnam': '🇻🇳', 'Indonesia': '🇮🇩', 'Malaysia': '🇲🇾',
+            'South Korea': '🇰🇷', 'Japan': '🇯🇵', 'Kenya': '🇰🇪', 'Syria': '🇸🇾',
+            'Kuwait': '🇰🇼', 'Saudi Arabia': '🇸🇦', 'Israel': '🇮🇱', 'Italy': '🇮🇹', 
+            'Spain': '🇪🇸', 'Poland': '🇵🇱', 'Russia': '🇷🇺', 'Peru': '🇵🇪', 
+            'Mexico': '🇲🇽', 'Colombia': '🇨🇴', 'Ireland': '🇮🇪', 'Switzerland': '🇨🇭', 
+            'United Kingdom': '🇬🇧', 'New Zealand': '🇳🇿', 'Jordan': '🇯🇴'
         };
         return flagMap[country] || '🏳️';
     }
@@ -1344,6 +1416,9 @@ class AdminPortal {
             
             this.showNotification(message, type);
             
+            // Refresh country data to include newly imported embassies
+            await this.refreshCountryDataFromImports();
+            
             // Clear files and reset UI after successful import
             setTimeout(() => {
                 this.clearAllFiles();
@@ -1354,6 +1429,60 @@ class AdminPortal {
             console.error('Multi-file import error:', error);
             document.getElementById('progressStatus').textContent = 'Multi-file import failed: ' + error.message;
             this.showNotification('Multi-file import failed: ' + error.message, 'error');
+        }
+    }
+
+    async refreshCountryDataFromImports() {
+        try {
+            // Load newly imported SIV data
+            const importedSIVData = localStorage.getItem('sivImportData');
+            if (importedSIVData) {
+                const data = JSON.parse(importedSIVData);
+                if (data.embassies && data.embassies.length > 0) {
+                    console.log('Refreshing country data with newly imported embassies:', data.embassies.length);
+                    
+                    data.embassies.forEach(embassy => {
+                        const countryKey = embassy.embassy || embassy.country || 'Unknown';
+                        
+                        // Only add if not already exists or update if it's from SIV import
+                        if (!this.countryData[countryKey] || this.countryData[countryKey].sourceType === 'siv_data') {
+                            this.countryData[countryKey] = {
+                                country: countryKey,
+                                flag: this.getCountryFlag(countryKey),
+                                embassy: embassy.embassy,
+                                visaRequired: "unknown",
+                                visaType: "SQ Visas",
+                                visaCost: "",
+                                validity: "",
+                                processingTime: "",
+                                applicationMethod: "embassy",
+                                officialLink: "",
+                                processingSteps: [],
+                                extensionPossible: "unknown",
+                                extensionDuration: "",
+                                extensionCost: "",
+                                sourceName: "SIV Import",
+                                sourceType: "siv_data",
+                                lastUpdated: embassy.lastUpdated || new Date().toISOString().split('T')[0],
+                                sivData: embassy,
+                                // Travel information
+                                directFlights: "unknown",
+                                airlines: "",
+                                flightDuration: "",
+                                mainAirport: "",
+                                airportCode: "",
+                                cityDistance: "",
+                                safetyLevel: "unknown",
+                                travelNotes: ""
+                            };
+                        }
+                    });
+                    
+                    console.log('Country data refreshed. Total countries available for search:', Object.keys(this.countryData).length);
+                }
+            }
+        } catch (error) {
+            console.error('Error refreshing country data from imports:', error);
         }
     }
 
@@ -1470,6 +1599,9 @@ class AdminPortal {
             this.updateImportHistoryTable();
             
             this.showNotification(`Import completed! Updated ${result.updated} records.`, 'success');
+            
+            // Refresh country data to include newly imported embassies
+            await this.refreshCountryDataFromImports();
             
             // Clear current import
             setTimeout(() => {
