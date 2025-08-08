@@ -362,7 +362,7 @@ class VisaInformationApp {
                         <span class="popout-result-flag">${country.flag}</span>
                         <div class="popout-result-info">
                             <h5>${country.name}${country.hasVisaInfo ? '' : ' (Limited info)'}</h5>
-                            <p>${country.embassy}</p>
+                            <p>${country.embassy || 'Embassy information available'}</p>
                         </div>
                         ${isAlreadySelected ? 
                             '<span class="popout-result-status already-selected">Already selected</span>' : 
@@ -505,7 +505,7 @@ class VisaInformationApp {
                         <span class="country-flag">${country.flag}</span>
                         <div class="country-info">
                             <h4>${country.country}</h4>
-                            <p>${country.embassy}</p>
+                            <p>${country.embassy || 'Embassy information available'}</p>
                         </div>
                     </div>
                 </td>
@@ -828,7 +828,7 @@ class VisaInformationApp {
                             <th style="text-align: center;">
                                 <div>${visa.flag}</div>
                                 <div style="font-weight: 700; margin-top: 8px;">${visa.country}</div>
-                                <div style="font-size: 12px; color: var(--gray-600);">${visa.embassy}</div>
+                                <div style="font-size: 12px; color: var(--gray-600);">${visa.embassy || 'Embassy information available'}</div>
                             </th>
                         `).join('')}
                     </tr>
