@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embassy Information - SIV Resources</title>
+    <title>Location Information - SIV Resources</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="embassy-details.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -31,7 +31,7 @@
             <li class="nav-item active">
                 <a href="embassy-details.html" class="nav-link">
                     <span class="nav-icon">🏛️</span>
-                    Embassy Details
+                    Location Details
                 </a>
             </li>
         </ul>
@@ -70,8 +70,8 @@
         <div class="container">
             <!-- Simple Professional Header -->
             <header class="page-header">
-                <h1>Embassy Information & Resources</h1>
-                <p class="page-subtitle">Find detailed information for SIV applicants by embassy location</p>
+                <h1>Location Information & Resources</h1>
+                <p class="page-subtitle">Find detailed information for SIV applicants by location</p>
             </header>
 
             <!-- Prominent Embassy Search -->
@@ -82,7 +82,7 @@
                         <input 
                             type="text" 
                             class="search-input" 
-                            placeholder="Search embassy by name or country..."
+                            placeholder="Search location by name or country..."
                             id="embassySearch"
                         >
                         <div class="search-results" id="searchResults">
@@ -98,13 +98,13 @@
                 <!-- Embassy Header -->
                 <div class="embassy-header" id="embassyHeader">
                     <div class="embassy-title">
-                        <h1 id="embassyName">Embassy Name</h1>
+                        <h1 id="embassyName">Location Name</h1>
                         <p class="embassy-location" id="embassyLocation">City, Country</p>
                     </div>
                     <div class="embassy-stats">
                         <div class="loading" id="embassyLoading">
                             <div class="spinner"></div>
-                            Loading embassy information...
+                            Loading location information...
                         </div>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                             <div class="card-icon">📊</div>
                         </div>
                         <div class="info-card-content">
-                            <p>View current year processing volumes and historical trends for this embassy location.</p>
+                            <p>View current year processing volumes and historical trends for this location.</p>
                         </div>
                     </div>
 
@@ -130,7 +130,7 @@
                             <div class="card-icon">🔗</div>
                         </div>
                         <div class="info-card-content">
-                            <p>Direct links to embassy websites, visa services, and official contact information.</p>
+                            <p>Direct links to official websites, visa services, and contact information.</p>
                         </div>
                     </div>
 
@@ -174,7 +174,7 @@
                             <div class="card-icon">🏠</div>
                         </div>
                         <div class="info-card-content">
-                            <p>Accommodation costs, daily expenses, and budgeting information for embassy city.</p>
+                            <p>Accommodation costs, daily expenses, and budgeting information for this city.</p>
                         </div>
                     </div>
 
@@ -222,8 +222,8 @@
     <div class="comparison-panel" id="comparisonPanel">
         <div class="comparison-modal">
             <div class="comparison-header">
-                <h2>Compare Embassies</h2>
-                <p class="comparison-subtitle">Select up to 5 embassies to compare side by side</p>
+                <h2>Compare Locations</h2>
+                <p class="comparison-subtitle">Select up to 5 locations to compare side by side</p>
                 <button class="close-comparison-btn" onclick="embassyApp.closeComparisonPanel()">&times;</button>
             </div>
             <div class="comparison-controls">
@@ -231,7 +231,7 @@
                     <!-- Selected embassy chips will appear here -->
                 </div>
                 <button class="add-embassy-btn" id="addEmbassyBtn">
-                    <span>+</span> Add Embassy
+                    <span>+</span> Add Location
                 </button>
             </div>
             <div class="comparison-content" id="comparisonContent">
@@ -244,13 +244,13 @@
     <div class="modal" id="embassySelectionModal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h2>Select Embassy to Compare</h2>
+                <h2>Select Location to Compare</h2>
                 <button class="close-btn" onclick="embassyApp.closeEmbassySelection()">&times;</button>
             </div>
             <div class="modal-body">
-                <input type="text" id="comparisonSearch" class="comparison-search" placeholder="Search embassies...">
+                <input type="text" id="comparisonSearch" class="comparison-search" placeholder="Search locations...">
                 <div class="embassy-selection-list" id="embassySelectionList">
-                    <!-- Embassy list will populate here -->
+                    <!-- Location list will populate here -->
                 </div>
             </div>
         </div>

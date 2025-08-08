@@ -65,7 +65,7 @@
                 <div class="header-content">
                     <div class="header-title">
                         <h1>Database Management System</h1>
-                        <p class="header-subtitle">Normalized database tables with embassy as unique identifier</p>
+                        <p class="header-subtitle">Normalized database tables with location as unique identifier</p>
                     </div>
                     <div class="header-actions">
                         <button class="btn btn-secondary" id="refreshBtn">
@@ -144,7 +144,7 @@
             <div class="table-container active" id="visaTable">
                 <div class="table-header">
                     <h3>Visa Information Table</h3>
-                    <p class="table-description">Visa requirements and processing information by embassy</p>
+                    <p class="table-description">Visa requirements and processing information by location</p>
                 </div>
                 <div class="table-wrapper">
                     <table class="data-table">
@@ -153,7 +153,7 @@
                                 <th class="select-col">
                                     <input type="checkbox" id="visaSelectAll" class="select-checkbox">
                                 </th>
-                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="embassy-col sortable" data-field="embassy">Location (Key)</th>
                                 <th class="country-col sortable" data-field="country">Country</th>
                                 <th class="visa-required-col sortable" data-field="visaRequired">Visa Required</th>
                                 <th class="visa-type-col">Visa Type</th>
@@ -179,7 +179,7 @@
             <div class="table-container" id="travelTable">
                 <div class="table-header">
                     <h3>Travel Information Table</h3>
-                    <p class="table-description">Flight costs, accommodation, and travel details by embassy</p>
+                    <p class="table-description">Flight costs, accommodation, and travel details by location</p>
                 </div>
                 <div class="table-wrapper">
                     <table class="data-table">
@@ -188,7 +188,7 @@
                                 <th class="select-col">
                                     <input type="checkbox" id="travelSelectAll" class="select-checkbox">
                                 </th>
-                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="embassy-col sortable" data-field="embassy">Location (Key)</th>
                                 <th class="country-col sortable" data-field="country">Country</th>
                                 <th class="direct-flights-col">Direct Flights</th>
                                 <th class="airlines-col">Airlines</th>
@@ -215,7 +215,7 @@
             <div class="table-container" id="sivTable">
                 <div class="table-header">
                     <h3>SIV Issuances Table</h3>
-                    <p class="table-description">Monthly SIV processing data by embassy</p>
+                    <p class="table-description">Monthly SIV processing data by location</p>
                 </div>
                 <div class="table-wrapper">
                     <table class="data-table">
@@ -224,7 +224,7 @@
                                 <th class="select-col">
                                     <input type="checkbox" id="sivSelectAll" class="select-checkbox">
                                 </th>
-                                <th class="embassy-col sortable" data-field="embassy">Embassy (Key)</th>
+                                <th class="embassy-col sortable" data-field="embassy">Location (Key)</th>
                                 <th class="country-col sortable" data-field="country">Country</th>
                                 <th class="rank-col sortable" data-field="rank">Rank</th>
                                 <th class="month-col">Oct 2024</th>
@@ -262,7 +262,7 @@
                                     <input type="checkbox" id="historySelectAll" class="select-checkbox">
                                 </th>
                                 <th class="id-col sortable" data-field="id">ID</th>
-                                <th class="embassy-col sortable" data-field="embassy">Embassy</th>
+                                <th class="embassy-col sortable" data-field="embassy">Location</th>
                                 <th class="table-col sortable" data-field="table">Table</th>
                                 <th class="action-col sortable" data-field="action">Action</th>
                                 <th class="field-col">Field Changed</th>

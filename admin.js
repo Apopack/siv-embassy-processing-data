@@ -356,7 +356,92 @@ class AdminPortal {
             'Vientiane': 'Laos',
             'Vilnius': 'Lithuania',
             'Windhoek': 'Namibia',
-            'Yaounde': 'Cameroon'
+            'Yaounde': 'Cameroon',
+            
+            // Additional cities that might be missing from data
+            'Adana': 'Turkey',
+            'Almaty': 'Kazakhstan',
+            'Antwerp': 'Belgium',
+            'Asmara': 'Eritrea',
+            'Astana': 'Kazakhstan',
+            'Baku': 'Azerbaijan',
+            'Basra': 'Iraq',
+            'Belfast': 'United Kingdom',
+            'Belmopan': 'Belize',
+            'Bern': 'Switzerland',
+            'Bishkek': 'Kyrgyzstan',
+            'Blantyre': 'Malawi',
+            'Brazzaville': 'Republic of Congo',
+            'Bridgetown': 'Barbados',
+            'Bursa': 'Turkey',
+            'Busan': 'South Korea',
+            'Cardiff': 'United Kingdom',
+            'Cebu': 'Philippines',
+            'Chennai': 'India',
+            'Chiang Mai': 'Thailand',
+            'Cochabamba': 'Bolivia',
+            'Cologne': 'Germany',
+            'Cork': 'Ireland',
+            'Cracow': 'Poland',
+            'Cuernavaca': 'Mexico',
+            'Curacao': 'Netherlands',
+            'Davao': 'Philippines',
+            'Douala': 'Cameroon',
+            'Dresden': 'Germany',
+            'Durban': 'South Africa',
+            'Erbil': 'Iraq',
+            'Fez': 'Morocco',
+            'Fukuoka': 'Japan',
+            'Gdansk': 'Poland',
+            'Gothenburg': 'Sweden',
+            'Guangzhou': 'China',
+            'Hague': 'Netherlands',
+            'Halifax': 'Canada',
+            'Hannover': 'Germany',
+            'Irkutsk': 'Russia',
+            'Izmir': 'Turkey',
+            'Jeddah': 'Saudi Arabia',
+            'Kaduna': 'Nigeria',
+            'Kano': 'Nigeria',
+            'Kaohsiung': 'Taiwan',
+            'Khartoum': 'Sudan',
+            'Krakow': 'Poland',
+            'Lahore': 'Pakistan',
+            'Leipzig': 'Germany',
+            'Lyon': 'France',
+            'Marseille': 'France',
+            'Matamoros': 'Mexico',
+            'Mazar-i-Sharif': 'Afghanistan',
+            'Medan': 'Indonesia',
+            'Merida': 'Mexico',
+            'Monterrey': 'Mexico',
+            'Nice': 'France',
+            'Niamey': 'Niger',
+            'Nicosia': 'Cyprus',
+            'Nouakchott': 'Mauritania',
+            'Nuku\'alofa': 'Tonga',
+            'Peshawar': 'Pakistan',
+            'Port au Prince': 'Haiti',
+            'Porto': 'Portugal',
+            'Porto Alegre': 'Brazil',
+            'Poznan': 'Poland',
+            'Pristina': 'Kosovo',
+            'Recife': 'Brazil',
+            'Rotterdam': 'Netherlands',
+            'Salzburg': 'Austria',
+            'Santa Cruz': 'Bolivia',
+            'Split': 'Croatia',
+            'St. Johns': 'Canada',
+            'Strasbourg': 'France',
+            'Surabaya': 'Indonesia',
+            'Tijuana': 'Mexico',
+            'Thessaloniki': 'Greece',
+            'Toulouse': 'France',
+            'Vladivostok': 'Russia',
+            'Wuhan': 'China',
+            'Yekaterinburg': 'Russia',
+            'Yokohama': 'Japan',
+            'Zagreb': 'Croatia'
         };
         
         // Clean the location name and try exact match first
@@ -373,7 +458,8 @@ class AdminPortal {
             }
         }
         
-        // If no match found, return the location name as country (fallback)
+        // If no match found, log for debugging and return the location name as country (fallback)
+        console.warn(`⚠️ Unknown location not mapped to country: "${cleanLocation}"`);
         return cleanLocation;
     }
 
@@ -435,7 +521,11 @@ class AdminPortal {
             'El Salvador': '🇸🇻', 'Yemen': '🇾🇪', 'North Macedonia': '🇲🇰', 'Fiji': '🇫🇯',
             'Estonia': '🇪🇪', 'Honduras': '🇭🇳', 'Bhutan': '🇧🇹', 'Mongolia': '🇲🇳',
             'Malta': '🇲🇹', 'Laos': '🇱🇦', 'Lithuania': '🇱🇹', 'Namibia': '🇳🇦',
-            'Cameroon': '🇨🇲'
+            'Cameroon': '🇨🇲',
+            
+            // Additional flags for new country mappings
+            'Eritrea': '🇪🇷', 'Republic of Congo': '🇨🇬', 'Niger': '🇳🇪', 
+            'Mauritania': '🇲🇷', 'Tonga': '🇹🇴', 'Haiti': '🇭🇹', 'Kosovo': '🇽🇰'
         };
         return flagMap[country] || '🏳️';
     }
