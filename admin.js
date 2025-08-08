@@ -2635,10 +2635,12 @@ class AdminPortal {
         const travelData = [];
         
         Object.values(this.countryData).forEach(country => {
-            if (country.embassy) {
+            // Use location or embassy field (handles both SIV imports and manual entries)
+            const locationName = country.location || country.embassy;
+            if (locationName) {
                 // Add to visa data
                 visaData.push({
-                    embassy: country.embassy,
+                    embassy: locationName,
                     country: country.country,
                     visaRequired: country.visaRequired || "",
                     visaType: country.visaType || "",
@@ -2654,7 +2656,7 @@ class AdminPortal {
                 
                 // Add to travel data
                 travelData.push({
-                    embassy: country.embassy,
+                    embassy: locationName,
                     country: country.country,
                     directFlights: country.directFlights || "",
                     airlines: country.airlines || "",
@@ -2675,6 +2677,19 @@ class AdminPortal {
         localStorage.setItem('databaseHistoryData', JSON.stringify(this.changeHistory));
         
         console.log('Updated database storage: ', visaData.length, 'visa records,', travelData.length, 'travel records');
+        console.log('Sample visa data:', visaData[0]);
+        console.log('Sample travel data:', travelData[0]);
+        
+        // Also update the display pages directly
+        // This ensures the visa and travel pages get the updated data
+        if (visaData.length > 0) {
+            // Store as adminVisaData for direct access by visa page
+            localStorage.setItem('adminVisaData', JSON.stringify(visaData));
+        }
+        if (travelData.length > 0) {
+            // Store as adminTravelData for direct access by travel page
+            localStorage.setItem('adminTravelData', JSON.stringify(travelData));
+        }
     }
 
     exportData() {
@@ -2701,7 +2716,7 @@ class AdminPortal {
 
         const rows = data.map(country => [
             country.country,
-            country.embassy,
+            country.location || country.embassy,
             country.visaRequired,
             country.visaType,
             country.visaCost,

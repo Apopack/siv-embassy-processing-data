@@ -20,12 +20,27 @@ class VisaInformationApp {
 
     async loadVisaData() {
         // Check for visa data from admin panel first
-        const adminData = localStorage.getItem('databaseVisaData');
+        const adminData = localStorage.getItem('adminVisaData') || localStorage.getItem('databaseVisaData');
         if (adminData) {
             try {
                 const data = JSON.parse(adminData);
                 this.visaData = Array.from(data.values ? data.values() : data);
                 console.log('Loading visa data from admin portal:', this.visaData.length, 'countries');
+                
+                // Ensure each record has the required fields
+                this.visaData = this.visaData.map(visa => ({
+                    ...visa,
+                    country: visa.country || 'Unknown',
+                    embassy: visa.embassy || visa.location || 'Unknown',
+                    visaRequired: visa.visaRequired || 'unknown',
+                    visaType: visa.visaType || '',
+                    cost: visa.visaCost || visa.cost || '',
+                    validity: visa.validity || '',
+                    processingTime: visa.processingTime || '',
+                    applicationMethod: visa.applicationMethod || '',
+                    officialLink: visa.officialLink || ''
+                }));
+                
                 this.filteredData = [...this.visaData];
                 
                 if (this.visaData.length === 0) {

@@ -19,12 +19,27 @@ class TravelInformationApp {
 
     async loadTravelData() {
         // Check for travel data from admin panel first
-        const adminData = localStorage.getItem('databaseTravelData');
+        const adminData = localStorage.getItem('adminTravelData') || localStorage.getItem('databaseTravelData');
         if (adminData) {
             try {
                 const data = JSON.parse(adminData);
                 this.travelData = Array.from(data.values ? data.values() : data);
                 console.log('Loading travel data from admin portal:', this.travelData.length, 'destinations');
+                
+                // Ensure each record has the required fields
+                this.travelData = this.travelData.map(travel => ({
+                    ...travel,
+                    country: travel.country || 'Unknown',
+                    embassy: travel.embassy || travel.location || 'Unknown',
+                    directFlights: travel.directFlights || 'unknown',
+                    airlines: travel.airlines || '',
+                    flightDuration: travel.flightDuration || '',
+                    flightCost: travel.flightCost || '',
+                    mainAirport: travel.mainAirport || '',
+                    airportCode: travel.airportCode || '',
+                    safetyLevel: travel.safetyLevel || 'unknown'
+                }));
+                
                 this.filteredData = [...this.travelData];
                 
                 if (this.travelData.length === 0) {
