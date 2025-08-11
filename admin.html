@@ -318,168 +318,268 @@
                     </div>
                 </div>
 
-                <!-- Visa Information Tab -->
+                <!-- Visa Policy Tab -->
                 <div class="tab-content active" id="visaTab">
                     <div class="form-grid">
                         <div class="form-section">
-                            <h3 class="section-title">Basic Requirements</h3>
+                            <h3 class="section-title">Visa Policy</h3>
                             <div class="form-group">
-                                <label for="visaRequired">Visa Required</label>
-                                <select id="visaRequired" class="form-control">
+                                <label for="visaCategory">Visa Category</label>
+                                <select id="visaCategory" class="form-control">
+                                    <option value="">-- Select --</option>
+                                    <option value="visa-free">Visa-free</option>
+                                    <option value="visa-on-arrival">Visa on Arrival</option>
+                                    <option value="e-visa">E-visa</option>
+                                    <option value="embassy-visa">Embassy Visa</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="entryMode">Entry Mode</label>
+                                <input type="text" id="entryMode" class="form-control" placeholder="e.g., land, air, sea">
+                            </div>
+                            <div class="form-group">
+                                <label for="visaFeeSingleUsd">Single Entry Visa Fee (USD)</label>
+                                <input type="number" id="visaFeeSingleUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="visaFeeMultipleUsd">Multiple Entry Visa Fee (USD)</label>
+                                <input type="number" id="visaFeeMultipleUsd" class="form-control" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3 class="section-title">Visa Extension</h3>
+                            <div class="form-group">
+                                <label for="visaExtensionAllowed">Extension Allowed</label>
+                                <select id="visaExtensionAllowed" class="form-control">
                                     <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
-                                    <option value="on-arrival">Visa on Arrival</option>
-                                    <option value="unknown">Unknown</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="visaType">Visa Type</label>
-                                <input type="text" id="visaType" class="form-control" placeholder="e.g., Tourist Visa, Business Visa">
+                                <label for="visaExtensionMaxDays">Maximum Extension Days</label>
+                                <input type="number" id="visaExtensionMaxDays" class="form-control" placeholder="0">
                             </div>
                             <div class="form-group">
-                                <label for="visaCost">Cost</label>
-                                <input type="text" id="visaCost" class="form-control" placeholder="e.g., US$50-100">
-                            </div>
-                            <div class="form-group">
-                                <label for="validity">Validity Period</label>
-                                <input type="text" id="validity" class="form-control" placeholder="e.g., 30 days, 3 months">
+                                <label for="visaExtensionFeeUsd">Extension Fee (USD)</label>
+                                <input type="number" id="visaExtensionFeeUsd" class="form-control" placeholder="0">
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <h3 class="section-title">Processing Information</h3>
+                            <h3 class="section-title">Work & Application</h3>
                             <div class="form-group">
-                                <label for="processingTime">Processing Time</label>
-                                <input type="text" id="processingTime" class="form-control" placeholder="e.g., 3-5 business days">
-                            </div>
-                            <div class="form-group">
-                                <label for="applicationMethod">Application Method</label>
-                                <select id="applicationMethod" class="form-control">
-                                    <option value="">-- Select --</option>
-                                    <option value="online">Online (e-Visa)</option>
-                                    <option value="embassy">Embassy/Consulate</option>
-                                    <option value="both">Both Online and Embassy</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="officialLink">Official Application Link</label>
-                                <input type="url" id="officialLink" class="form-control" placeholder="https://visa.example.gov">
-                            </div>
-                        </div>
-
-                        <div class="form-section full-width">
-                            <h3 class="section-title">Application Process</h3>
-                            <div class="form-group">
-                                <label for="processingSteps">Processing Steps</label>
-                                <div class="dynamic-list" id="processingStepsList">
-                                    <!-- Dynamic steps will appear here -->
-                                </div>
-                                <button class="btn btn-secondary btn-sm" id="addStepBtn">
-                                    <span class="btn-icon">+</span>
-                                    Add Step
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h3 class="section-title">Extension Policy</h3>
-                            <div class="form-group">
-                                <label for="extensionPossible">Extension Available</label>
-                                <select id="extensionPossible" class="form-control">
+                                <label for="workAllowedOnVisa">Work Allowed on Visa</label>
+                                <select id="workAllowedOnVisa" class="form-control">
                                     <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
-                                    <option value="unknown">Unknown</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="extensionDetails" style="display: none;">
-                                <label for="extensionDuration">Extension Duration</label>
-                                <input type="text" id="extensionDuration" class="form-control" placeholder="e.g., Up to 30 days">
-                            </div>
-                            <div class="form-group" id="extensionCostGroup" style="display: none;">
-                                <label for="extensionCost">Extension Cost</label>
-                                <input type="text" id="extensionCost" class="form-control" placeholder="e.g., US$50">
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h3 class="section-title">Source Information</h3>
-                            <div class="form-group">
-                                <label for="sourceName">Source Name</label>
-                                <input type="text" id="sourceName" class="form-control" placeholder="e.g., Official Government Portal">
-                            </div>
-                            <div class="form-group">
-                                <label for="sourceType">Source Type</label>
-                                <select id="sourceType" class="form-control">
-                                    <option value="">-- Select --</option>
-                                    <option value="government">Government Portal</option>
-                                    <option value="post">Post Website</option>
-                                    <option value="aggregator">Aggregator Service</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="lastUpdated">Last Updated</label>
-                                <input type="date" id="lastUpdated" class="form-control">
+                                <label for="visaApplicationMethod">Application Method</label>
+                                <input type="text" id="visaApplicationMethod" class="form-control" placeholder="online, embassy, on-arrival">
+                            </div>
+                            <div class="form-group">
+                                <label for="visaApplicationUrl">Application URL</label>
+                                <input type="url" id="visaApplicationUrl" class="form-control" placeholder="https://visa.example.gov">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Travel Information Tab -->
-                <div class="tab-content" id="travelTab">
+                <!-- Work Rights Tab -->
+                <div class="tab-content" id="workTab">
                     <div class="form-grid">
                         <div class="form-section">
-                            <h3 class="section-title">Flight Information</h3>
+                            <h3 class="section-title">Work Rights & Short-Term Work</h3>
                             <div class="form-group">
-                                <label for="directFlights">Direct Flights Available</label>
-                                <select id="directFlights" class="form-control">
+                                <label for="canWorkLegallyOnArrival">Can Work Legally on Arrival</label>
+                                <select id="canWorkLegallyOnArrival" class="form-control">
                                     <option value="">-- Select --</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="airlines">Airlines</label>
-                                <input type="text" id="airlines" class="form-control" placeholder="e.g., Turkish Airlines, Emirates">
+                                <label for="conditionsToWork">Conditions to Work</label>
+                                <textarea id="conditionsToWork" class="form-control" rows="3" placeholder="Describe requirements and conditions for legal work"></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="flightDuration">Average Flight Duration</label>
-                                <input type="text" id="flightDuration" class="form-control" placeholder="e.g., 8-12 hours">
+                                <label for="shortTermWorkInfo">Short-Term Work Info</label>
+                                <textarea id="shortTermWorkInfo" class="form-control" rows="3" placeholder="Information about short-term work opportunities"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- U.S. Embassy Tab -->
+                <div class="tab-content" id="embassyTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">U.S. Embassy & Consulate</h3>
+                            <div class="form-group">
+                                <label for="usEmbassyName">U.S. Embassy Name</label>
+                                <input type="text" id="usEmbassyName" class="form-control" placeholder="Full name of U.S. Embassy or Consulate">
+                            </div>
+                            <div class="form-group">
+                                <label for="usEmbassyAddress">Embassy Address</label>
+                                <textarea id="usEmbassyAddress" class="form-control" rows="2" placeholder="Complete address of U.S. Embassy"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="usEmbassyWebsiteUrl">Embassy Website URL</label>
+                                <input type="url" id="usEmbassyWebsiteUrl" class="form-control" placeholder="https://embassy.example.gov">
+                            </div>
+                            <div class="form-group">
+                                <label for="usEmbassyIvUrl">Immigrant Visa URL</label>
+                                <input type="url" id="usEmbassyIvUrl" class="form-control" placeholder="https://embassy.example.gov/iv">
+                            </div>
+                            <div class="form-group">
+                                <label for="usEmbassyIvEmail">Immigrant Visa Email</label>
+                                <input type="email" id="usEmbassyIvEmail" class="form-control" placeholder="iv@embassy.example.gov">
                             </div>
                         </div>
 
                         <div class="form-section">
-                            <h3 class="section-title">Airport & Transportation</h3>
+                            <h3 class="section-title">Medical Exam Facility</h3>
                             <div class="form-group">
-                                <label for="mainAirport">Main International Airport</label>
-                                <input type="text" id="mainAirport" class="form-control" placeholder="e.g., John F. Kennedy International">
+                                <label for="medicalExamFacilityName">Medical Facility Name</label>
+                                <input type="text" id="medicalExamFacilityName" class="form-control" placeholder="Name of approved medical exam facility">
                             </div>
                             <div class="form-group">
-                                <label for="airportCode">Airport Code</label>
-                                <input type="text" id="airportCode" class="form-control" placeholder="e.g., JFK">
+                                <label for="medicalExamFacilityAddress">Facility Address</label>
+                                <textarea id="medicalExamFacilityAddress" class="form-control" rows="2" placeholder="Address of medical exam facility"></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="cityDistance">Distance to City Center</label>
-                                <input type="text" id="cityDistance" class="form-control" placeholder="e.g., 25km">
+                                <label for="medicalExamFacilityPhone">Facility Phone</label>
+                                <input type="tel" id="medicalExamFacilityPhone" class="form-control" placeholder="+1-234-567-8900">
+                            </div>
+                            <div class="form-group">
+                                <label for="medicalExamFacilityWebsite">Facility Website</label>
+                                <input type="url" id="medicalExamFacilityWebsite" class="form-control" placeholder="https://medical.example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="medicalExamNotes">Medical Exam Notes</label>
+                                <textarea id="medicalExamNotes" class="form-control" rows="3" placeholder="Important notes about medical exams"></textarea>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="form-section full-width">
-                            <h3 class="section-title">Travel Advisories</h3>
+                <!-- Safety Tab -->
+                <div class="tab-content" id="safetyTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Safety & Neighborhoods</h3>
                             <div class="form-group">
-                                <label for="safetyLevel">Safety Level</label>
-                                <select id="safetyLevel" class="form-control">
+                                <label for="travelAdvisoryLevel">Travel Advisory Level</label>
+                                <select id="travelAdvisoryLevel" class="form-control">
                                     <option value="">-- Select --</option>
-                                    <option value="safe">Safe</option>
-                                    <option value="caution">Exercise Caution</option>
-                                    <option value="warning">Travel Warning</option>
-                                    <option value="donottravel">Do Not Travel</option>
+                                    <option value="1">Level 1 - Exercise Normal Precautions</option>
+                                    <option value="2">Level 2 - Exercise Increased Caution</option>
+                                    <option value="3">Level 3 - Reconsider Travel</option>
+                                    <option value="4">Level 4 - Do Not Travel</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="travelNotes">Travel Notes & Recommendations</label>
-                                <textarea id="travelNotes" class="form-control" rows="4" placeholder="Important information for travelers..."></textarea>
+                                <label for="travelAdvisoryUrl">Travel Advisory URL</label>
+                                <input type="url" id="travelAdvisoryUrl" class="form-control" placeholder="https://travel.state.gov/content/travel/en/traveladvisories">
+                            </div>
+                            <div class="form-group">
+                                <label for="hotspotNotes">Areas to Avoid</label>
+                                <textarea id="hotspotNotes" class="form-control" rows="3" placeholder="Notes about areas to avoid or be cautious"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="saferNeighborhoods">Safer Neighborhoods</label>
+                                <textarea id="saferNeighborhoods" class="form-control" rows="3" placeholder="List of safer neighborhoods for visitors"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="afghanNeighborhoods">Afghan Communities</label>
+                                <textarea id="afghanNeighborhoods" class="form-control" rows="3" placeholder="Areas with Afghan communities"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accommodation Tab -->
+                <div class="tab-content" id="accommodationTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Accommodation Pricing (USD)</h3>
+                            <div class="form-group">
+                                <label for="hostelPriceMinUsd">Hostel Price Min (per night)</label>
+                                <input type="number" id="hostelPriceMinUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="hostelPriceMaxUsd">Hostel Price Max (per night)</label>
+                                <input type="number" id="hostelPriceMaxUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetHotelPriceMinUsd">Budget Hotel Price Min (per night)</label>
+                                <input type="number" id="budgetHotelPriceMinUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="budgetHotelPriceMaxUsd">Budget Hotel Price Max (per night)</label>
+                                <input type="number" id="budgetHotelPriceMaxUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="furnishedRentalPriceMinUsd">Furnished Rental Min (per month)</label>
+                                <input type="number" id="furnishedRentalPriceMinUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="furnishedRentalPriceMaxUsd">Furnished Rental Max (per month)</label>
+                                <input type="number" id="furnishedRentalPriceMaxUsd" class="form-control" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost of Living Tab -->
+                <div class="tab-content" id="costTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Cost of Living (USD per month)</h3>
+                            <div class="form-group">
+                                <label for="costSinglePersonUsd">Single Person Cost</label>
+                                <input type="number" id="costSinglePersonUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="costFamily4Usd">Family of 4 Cost</label>
+                                <input type="number" id="costFamily4Usd" class="form-control" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Travel Routes Tab -->
+                <div class="tab-content" id="travelTab">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">Travel Routes & Flights</h3>
+                            <div class="form-group">
+                                <label for="originAirportCode">Origin Airport Code</label>
+                                <input type="text" id="originAirportCode" class="form-control" placeholder="e.g., KBL, ISB">
+                            </div>
+                            <div class="form-group">
+                                <label for="destinationAirportCode">Destination Airport Code</label>
+                                <input type="text" id="destinationAirportCode" class="form-control" placeholder="e.g., JFK, LHR">
+                            </div>
+                            <div class="form-group">
+                                <label for="transitPoints">Transit Points</label>
+                                <input type="text" id="transitPoints" class="form-control" placeholder="e.g., Dubai, Istanbul">
+                            </div>
+                            <div class="form-group">
+                                <label for="transitVisaNotes">Transit Visa Notes</label>
+                                <textarea id="transitVisaNotes" class="form-control" rows="2" placeholder="Notes about transit visa requirements"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="flightPriceOnewayUsd">One-way Flight Price (USD)</label>
+                                <input type="number" id="flightPriceOnewayUsd" class="form-control" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="flightSearchUrl">Flight Search URL</label>
+                                <input type="url" id="flightSearchUrl" class="form-control" placeholder="https://kayak.com or recommended booking site">
                             </div>
                         </div>
                     </div>
