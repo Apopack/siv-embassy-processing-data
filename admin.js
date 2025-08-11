@@ -2188,25 +2188,26 @@ class AdminPortal {
             return;
         }
 
-        const filtered = Object.values(this.countryData).filter(country =>
-            country.country.toLowerCase().includes(query.toLowerCase())
-        );
+        const filtered = [];
+        // Search through countryData using keys and values
+        Object.keys(this.countryData).forEach(key => {
+            const country = this.countryData[key];
+            if (country.country && country.country.toLowerCase().includes(query.toLowerCase())) {
+                filtered.push({ key: key, data: country });
+            }
+        });
 
         if (filtered.length === 0) {
             searchResults.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--admin-gray-500);">No countries found</div>';
         } else {
-            searchResults.innerHTML = filtered.map((country, index) => {
-                const countryCode = this.getCountryCode(country.country);
-                // Find the correct key - could be country name or location name
-                const dataKey = Object.keys(this.countryData).find(key => 
-                    this.countryData[key] === country
-                );
+            searchResults.innerHTML = filtered.map((item) => {
+                const countryCode = this.getCountryCode(item.data.country);
                 return `
-                    <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${dataKey}')">
+                    <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${item.key}')">
                         <span class="search-result-flag">${countryCode}</span>
                         <div class="search-result-info">
-                            <h4>${country.country}</h4>
-                            <p>${country.location || country.embassy}</p>
+                            <h4>${item.data.country}</h4>
+                            <p>${item.data.location || item.data.embassy}</p>
                         </div>
                     </div>
                 `;
@@ -2220,22 +2221,20 @@ class AdminPortal {
         const searchResults = document.getElementById('searchResults');
         if (!searchResults) return;
 
-        const countries = Object.values(this.countryData).sort((a, b) => 
-            a.country.localeCompare(b.country)
-        );
+        // Create array of key-value pairs and sort by country name
+        const countries = Object.keys(this.countryData)
+            .map(key => ({ key: key, data: this.countryData[key] }))
+            .filter(item => item.data.country) // Only show items with country names
+            .sort((a, b) => a.data.country.localeCompare(b.data.country));
 
-        searchResults.innerHTML = countries.map((country, index) => {
-            const countryCode = this.getCountryCode(country.country);
-            // Find the correct key - could be country name or location name
-            const dataKey = Object.keys(this.countryData).find(key => 
-                this.countryData[key] === country
-            );
+        searchResults.innerHTML = countries.map((item) => {
+            const countryCode = this.getCountryCode(item.data.country);
             return `
-                <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${dataKey}')">
+                <div class="search-result-item" onclick="adminPortal.selectCountryByKey('${item.key}')">
                     <span class="search-result-flag">${countryCode}</span>
                     <div class="search-result-info">
-                        <h4>${country.country}</h4>
-                        <p>${country.location || country.embassy}</p>
+                        <h4>${item.data.country}</h4>
+                        <p>${item.data.location || item.data.embassy}</p>
                     </div>
                 </div>
             `;
@@ -2252,6 +2251,8 @@ class AdminPortal {
     }
 
     selectCountryByKey(dataKey) {
+        console.log('Selecting country with key:', dataKey);
+        
         if (this.unsavedChanges) {
             if (!confirm('You have unsaved changes. Do you want to discard them?')) {
                 return;
@@ -2259,12 +2260,20 @@ class AdminPortal {
         }
 
         this.currentCountryKey = dataKey;
-        const data = this.countryData[dataKey];
+        let data = this.countryData[dataKey];
         
         if (!data) {
             console.error('Country data not found for key:', dataKey);
-            return;
+            // Create minimal data structure for new country
+            data = {
+                country: dataKey, // Use the key as country name if no data exists
+                embassy: dataKey,
+                location: dataKey
+            };
+            this.countryData[dataKey] = data;
         }
+        
+        console.log('Country data:', data);
 
         // Update header - use country code instead of flag
         const countryCode = this.getCountryCode(data.country);
