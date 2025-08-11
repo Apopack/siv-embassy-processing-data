@@ -69,6 +69,11 @@
                         <p class="header-subtitle">Update visa requirements and travel information for SIV applicants</p>
                     </div>
                     <div class="header-actions">
+                        <button class="btn btn-ai-primary" id="aiDataBtn" title="Use AI to automatically fetch country information">
+                            <span class="btn-icon">🤖</span>
+                            <span class="btn-text">AI Auto-Fill Data</span>
+                            <span class="btn-badge">NEW</span>
+                        </button>
                         <button class="btn btn-primary" id="dataImportBtn">
                             <span class="btn-icon">📤</span>
                             SIV Data Upload
@@ -99,6 +104,14 @@
                     <div class="search-results" id="searchResults" style="display: none;">
                         <!-- Search results will appear here -->
                     </div>
+                </div>
+                
+                <!-- Quick AI Actions -->
+                <div class="quick-ai-actions">
+                    <button class="btn-ai-quick" id="quickAIBtn">
+                        <span class="ai-sparkle">✨</span>
+                        <span>Quick AI Fill: Select a country above, then click here to auto-populate all fields with AI</span>
+                    </button>
                 </div>
             </section>
 
@@ -192,6 +205,93 @@
                 </div>
             </section>
 
+            <!-- AI Data Fetching Section -->
+            <section class="ai-fetch-section" id="aiFetchSection" style="display: none;">
+                <div class="ai-fetch-container">
+                    <div class="ai-fetch-header">
+                        <h2>🤖 AI-Powered Data Collection</h2>
+                        <p class="ai-fetch-subtitle">Use AI to automatically fetch comprehensive country information</p>
+                        <button class="btn btn-secondary btn-sm close-ai-btn" id="closeAIBtn">
+                            <span class="btn-icon">×</span>
+                            Close AI Assistant
+                        </button>
+                    </div>
+                    
+                    <div class="ai-config-card">
+                        <h3>Configuration</h3>
+                        <div class="form-group">
+                            <label for="openaiApiKey">OpenAI API Key</label>
+                            <input type="password" id="openaiApiKey" class="form-control" placeholder="sk-...">
+                            <small>Your API key is stored locally and never sent to our servers</small>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-fetch-card">
+                        <h3>Select Countries to Research</h3>
+                        <div class="country-selection-grid" id="aiCountrySelection">
+                            <!-- Countries will be populated here -->
+                        </div>
+                        
+                        <h3>Select Information Categories</h3>
+                        <div class="category-checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="visaPolicy" checked>
+                                Visa Policy
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="workRights" checked>
+                                Work Rights
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="usEmbassy" checked>
+                                U.S. Embassy & Medical
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="safety" checked>
+                                Safety & Neighborhoods
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="accommodation" checked>
+                                Accommodation
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="costOfLiving" checked>
+                                Cost of Living
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ai-category" value="travelRoutes" checked>
+                                Travel Routes
+                            </label>
+                        </div>
+                        
+                        <div class="ai-fetch-actions">
+                            <button class="btn btn-primary" id="startAIFetch">
+                                <span class="btn-icon">🔍</span>
+                                Fetch Data with AI
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Results Preview -->
+                    <div class="ai-results" id="aiResults" style="display: none;">
+                        <h3>AI-Generated Data Preview</h3>
+                        <div class="ai-results-content" id="aiResultsContent">
+                            <!-- Results will appear here -->
+                        </div>
+                        <div class="ai-results-actions">
+                            <button class="btn btn-secondary" id="rejectAIData">
+                                <span class="btn-icon">❌</span>
+                                Discard All
+                            </button>
+                            <button class="btn btn-primary" id="acceptAIData">
+                                <span class="btn-icon">✅</span>
+                                Accept & Import to Database
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Country Editor Section -->
             <section class="editor-section" id="editorSection" style="display: none;">
                 <div class="editor-header">
@@ -202,10 +302,19 @@
                             <p class="embassy-info" id="embassyInfo">Location information will appear here</p>
                         </div>
                     </div>
+                    <button class="btn-ai-fill" id="aiAutoFillBtn" title="Use AI to fill all fields for this country">
+                        <span class="ai-icon">🤖</span>
+                        <span>AI Auto-Fill This Country</span>
+                    </button>
                     <div class="editor-tabs">
-                        <button class="tab-btn active" data-tab="visa">Visa Information</button>
-                        <button class="tab-btn" data-tab="travel">Travel Information</button>
-                        <button class="tab-btn" data-tab="history">Change History</button>
+                        <button class="tab-btn active" data-tab="visa">Visa Policy</button>
+                        <button class="tab-btn" data-tab="work">Work Rights</button>
+                        <button class="tab-btn" data-tab="embassy">U.S. Embassy</button>
+                        <button class="tab-btn" data-tab="safety">Safety</button>
+                        <button class="tab-btn" data-tab="accommodation">Accommodation</button>
+                        <button class="tab-btn" data-tab="cost">Cost of Living</button>
+                        <button class="tab-btn" data-tab="travel">Travel Routes</button>
+                        <button class="tab-btn" data-tab="history">History</button>
                     </div>
                 </div>
 
@@ -399,6 +508,7 @@
         <span class="notification-message">Changes saved successfully!</span>
     </div>
 
+    <script src="ai-data-fetcher.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>
