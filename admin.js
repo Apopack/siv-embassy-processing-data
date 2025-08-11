@@ -2284,8 +2284,13 @@ class AdminPortal {
         // Initialize all form fields with default values if data is missing
         this.initializeFormDefaults();
         
-        // Load visa information
+        // Load all form data for all tabs
         this.loadVisaData(data);
+        this.loadWorkData(data);
+        this.loadEmbassyData(data);
+        this.loadSafetyData(data);
+        this.loadAccommodationData(data);
+        this.loadCostData(data);
         this.loadTravelData(data);
         this.loadChangeHistory(data.country);
 
@@ -2314,82 +2319,133 @@ class AdminPortal {
     }
 
     initializeFormDefaults() {
-        // Reset all form fields to default values
-        // Visa Information
-        document.getElementById('visaRequired').value = 'unknown';
-        document.getElementById('visaType').value = '';
-        document.getElementById('visaCost').value = '';
-        document.getElementById('validity').value = '';
-        document.getElementById('processingTime').value = '';
-        document.getElementById('applicationMethod').value = 'embassy';
-        document.getElementById('officialLink').value = '';
-        document.getElementById('extensionPossible').value = 'unknown';
-        document.getElementById('extensionDuration').value = '';
-        document.getElementById('extensionCost').value = '';
-        document.getElementById('sourceName').value = '';
-        document.getElementById('sourceType').value = 'embassy';
-        document.getElementById('lastUpdated').value = new Date().toISOString().split('T')[0];
+        // Reset all form fields to default values using new 42-field structure
         
-        // Travel Information
-        document.getElementById('directFlights').value = 'unknown';
-        document.getElementById('airlines').value = '';
-        document.getElementById('flightDuration').value = '';
-        document.getElementById('mainAirport').value = '';
-        document.getElementById('airportCode').value = '';
-        document.getElementById('cityDistance').value = '';
-        document.getElementById('safetyLevel').value = 'unknown';
-        document.getElementById('travelNotes').value = '';
-        
-        // Clear processing steps
-        const container = document.getElementById('processingStepsList');
-        if (container) {
-            container.innerHTML = '';
-        }
+        // Visa Policy Fields
+        document.getElementById('visaCategory').value = '';
+        document.getElementById('entryMode').value = '';
+        document.getElementById('visaFeeSingleUsd').value = '';
+        document.getElementById('visaFeeMultipleUsd').value = '';
+        document.getElementById('visaExtensionAllowed').value = '';
+        document.getElementById('visaExtensionMaxDays').value = '';
+        document.getElementById('visaExtensionFeeUsd').value = '';
+        document.getElementById('workAllowedOnVisa').value = '';
+        document.getElementById('visaApplicationMethod').value = '';
+        document.getElementById('visaApplicationUrl').value = '';
+
+        // Work Rights Fields
+        document.getElementById('canWorkLegallyOnArrival').value = '';
+        document.getElementById('conditionsToWork').value = '';
+        document.getElementById('shortTermWorkInfo').value = '';
+
+        // U.S. Embassy Fields
+        document.getElementById('usEmbassyName').value = '';
+        document.getElementById('usEmbassyAddress').value = '';
+        document.getElementById('usEmbassyWebsiteUrl').value = '';
+        document.getElementById('usEmbassyIvUrl').value = '';
+        document.getElementById('usEmbassyIvEmail').value = '';
+        document.getElementById('medicalExamFacilityName').value = '';
+        document.getElementById('medicalExamFacilityAddress').value = '';
+        document.getElementById('medicalExamFacilityPhone').value = '';
+        document.getElementById('medicalExamFacilityWebsite').value = '';
+        document.getElementById('medicalExamNotes').value = '';
+
+        // Safety Fields
+        document.getElementById('travelAdvisoryLevel').value = '';
+        document.getElementById('travelAdvisoryUrl').value = '';
+        document.getElementById('hotspotNotes').value = '';
+        document.getElementById('saferNeighborhoods').value = '';
+        document.getElementById('afghanNeighborhoods').value = '';
+
+        // Accommodation Fields
+        document.getElementById('hostelPriceMinUsd').value = '';
+        document.getElementById('hostelPriceMaxUsd').value = '';
+        document.getElementById('budgetHotelPriceMinUsd').value = '';
+        document.getElementById('budgetHotelPriceMaxUsd').value = '';
+        document.getElementById('furnishedRentalPriceMinUsd').value = '';
+        document.getElementById('furnishedRentalPriceMaxUsd').value = '';
+
+        // Cost of Living Fields
+        document.getElementById('costSinglePersonUsd').value = '';
+        document.getElementById('costFamily4Usd').value = '';
+
+        // Travel Routes Fields
+        document.getElementById('originAirportCode').value = '';
+        document.getElementById('destinationAirportCode').value = '';
+        document.getElementById('transitPoints').value = '';
+        document.getElementById('transitVisaNotes').value = '';
+        document.getElementById('flightPriceOnewayUsd').value = '';
+        document.getElementById('flightSearchUrl').value = '';
     }
 
     loadVisaData(data) {
-        // Basic Requirements
-        document.getElementById('visaRequired').value = data.visaRequired || 'unknown';
-        document.getElementById('visaType').value = data.visaType || '';
-        document.getElementById('visaCost').value = data.visaCost || '';
-        document.getElementById('validity').value = data.validity || '';
-
-        // Processing Information
-        document.getElementById('processingTime').value = data.processingTime || '';
-        document.getElementById('applicationMethod').value = data.applicationMethod || 'embassy';
-        document.getElementById('officialLink').value = data.officialLink || '';
-
-        // Processing Steps
-        this.loadProcessingSteps(data.processingSteps || []);
-
-        // Extension Policy
-        document.getElementById('extensionPossible').value = data.extensionPossible || 'unknown';
-        const showExtension = data.extensionPossible === 'yes';
-        document.getElementById('extensionDetails').style.display = showExtension ? 'block' : 'none';
-        document.getElementById('extensionCostGroup').style.display = showExtension ? 'block' : 'none';
-        document.getElementById('extensionDuration').value = data.extensionDuration || '';
-        document.getElementById('extensionCost').value = data.extensionCost || '';
-
-        // Source Information
-        document.getElementById('sourceName').value = data.sourceName || '';
-        document.getElementById('sourceType').value = data.sourceType || 'embassy';
-        document.getElementById('lastUpdated').value = data.lastUpdated || new Date().toISOString().split('T')[0];
+        // Visa Policy Tab Fields - using new 42-field structure
+        document.getElementById('visaCategory').value = data.visa_category || '';
+        document.getElementById('entryMode').value = data.entry_mode || '';
+        document.getElementById('visaFeeSingleUsd').value = data.visa_fee_single_usd || '';
+        document.getElementById('visaFeeMultipleUsd').value = data.visa_fee_multiple_usd || '';
+        document.getElementById('visaExtensionAllowed').value = data.visa_extension_allowed || '';
+        document.getElementById('visaExtensionMaxDays').value = data.visa_extension_max_days || '';
+        document.getElementById('visaExtensionFeeUsd').value = data.visa_extension_fee_usd || '';
+        document.getElementById('workAllowedOnVisa').value = data.work_allowed_on_visa || '';
+        document.getElementById('visaApplicationMethod').value = data.visa_application_method || '';
+        document.getElementById('visaApplicationUrl').value = data.visa_application_url || '';
     }
 
     loadTravelData(data) {
-        // Flight Information
-        document.getElementById('directFlights').value = data.directFlights || 'unknown';
-        document.getElementById('airlines').value = data.airlines || '';
-        document.getElementById('flightDuration').value = data.flightDuration || '';
+        // Travel Routes Tab Fields - using new 42-field structure
+        document.getElementById('originAirportCode').value = data.origin_airport_code || '';
+        document.getElementById('destinationAirportCode').value = data.destination_airport_code || '';
+        document.getElementById('transitPoints').value = data.transit_points || '';
+        document.getElementById('transitVisaNotes').value = data.transit_visa_notes || '';
+        document.getElementById('flightPriceOnewayUsd').value = data.flight_price_oneway_usd || '';
+        document.getElementById('flightSearchUrl').value = data.flight_search_url || '';
+    }
 
-        // Airport & Transportation
-        document.getElementById('mainAirport').value = data.mainAirport || '';
-        document.getElementById('airportCode').value = data.airportCode || '';
-        document.getElementById('cityDistance').value = data.cityDistance || '';
+    loadWorkData(data) {
+        // Work Rights Tab Fields
+        document.getElementById('canWorkLegallyOnArrival').value = data.can_work_legally_on_arrival || '';
+        document.getElementById('conditionsToWork').value = data.conditions_to_work || '';
+        document.getElementById('shortTermWorkInfo').value = data.short_term_work_info || '';
+    }
 
-        // Travel Advisories
-        document.getElementById('safetyLevel').value = data.safetyLevel || 'unknown';
-        document.getElementById('travelNotes').value = data.travelNotes || '';
+    loadEmbassyData(data) {
+        // U.S. Embassy Tab Fields
+        document.getElementById('usEmbassyName').value = data.us_embassy_name || '';
+        document.getElementById('usEmbassyAddress').value = data.us_embassy_address || '';
+        document.getElementById('usEmbassyWebsiteUrl').value = data.us_embassy_website_url || '';
+        document.getElementById('usEmbassyIvUrl').value = data.us_embassy_iv_url || '';
+        document.getElementById('usEmbassyIvEmail').value = data.us_embassy_iv_email || '';
+        document.getElementById('medicalExamFacilityName').value = data.medical_exam_facility_name || '';
+        document.getElementById('medicalExamFacilityAddress').value = data.medical_exam_facility_address || '';
+        document.getElementById('medicalExamFacilityPhone').value = data.medical_exam_facility_phone || '';
+        document.getElementById('medicalExamFacilityWebsite').value = data.medical_exam_facility_website || '';
+        document.getElementById('medicalExamNotes').value = data.medical_exam_notes || '';
+    }
+
+    loadSafetyData(data) {
+        // Safety Tab Fields
+        document.getElementById('travelAdvisoryLevel').value = data.travel_advisory_level || '';
+        document.getElementById('travelAdvisoryUrl').value = data.travel_advisory_url || '';
+        document.getElementById('hotspotNotes').value = data.hotspot_notes || '';
+        document.getElementById('saferNeighborhoods').value = data.safer_neighborhoods || '';
+        document.getElementById('afghanNeighborhoods').value = data.afghan_neighborhoods || '';
+    }
+
+    loadAccommodationData(data) {
+        // Accommodation Tab Fields
+        document.getElementById('hostelPriceMinUsd').value = data.hostel_price_min_usd || '';
+        document.getElementById('hostelPriceMaxUsd').value = data.hostel_price_max_usd || '';
+        document.getElementById('budgetHotelPriceMinUsd').value = data.budget_hotel_price_min_usd || '';
+        document.getElementById('budgetHotelPriceMaxUsd').value = data.budget_hotel_price_max_usd || '';
+        document.getElementById('furnishedRentalPriceMinUsd').value = data.furnished_rental_price_min_usd || '';
+        document.getElementById('furnishedRentalPriceMaxUsd').value = data.furnished_rental_price_max_usd || '';
+    }
+
+    loadCostData(data) {
+        // Cost of Living Tab Fields
+        document.getElementById('costSinglePersonUsd').value = data.cost_single_person_usd || '';
+        document.getElementById('costFamily4Usd').value = data.cost_family4_usd || '';
     }
 
     loadProcessingSteps(steps) {
@@ -2560,40 +2616,62 @@ class AdminPortal {
     }
 
     collectFormData() {
-        // Collect processing steps
-        const steps = [];
-        document.querySelectorAll('#processingStepsList .list-item-input').forEach(input => {
-            if (input.value.trim()) {
-                steps.push(input.value.trim());
-            }
-        });
-
         return {
-            // Visa Information
-            visaRequired: document.getElementById('visaRequired').value,
-            visaType: document.getElementById('visaType').value,
-            visaCost: document.getElementById('visaCost').value,
-            validity: document.getElementById('validity').value,
-            processingTime: document.getElementById('processingTime').value,
-            applicationMethod: document.getElementById('applicationMethod').value,
-            officialLink: document.getElementById('officialLink').value,
-            processingSteps: steps,
-            extensionPossible: document.getElementById('extensionPossible').value,
-            extensionDuration: document.getElementById('extensionDuration').value,
-            extensionCost: document.getElementById('extensionCost').value,
-            sourceName: document.getElementById('sourceName').value,
-            sourceType: document.getElementById('sourceType').value,
-            lastUpdated: document.getElementById('lastUpdated').value,
-            
-            // Travel Information
-            directFlights: document.getElementById('directFlights').value,
-            airlines: document.getElementById('airlines').value,
-            flightDuration: document.getElementById('flightDuration').value,
-            mainAirport: document.getElementById('mainAirport').value,
-            airportCode: document.getElementById('airportCode').value,
-            cityDistance: document.getElementById('cityDistance').value,
-            safetyLevel: document.getElementById('safetyLevel').value,
-            travelNotes: document.getElementById('travelNotes').value
+            // Visa Policy Fields
+            visa_category: document.getElementById('visaCategory').value,
+            entry_mode: document.getElementById('entryMode').value,
+            visa_fee_single_usd: document.getElementById('visaFeeSingleUsd').value,
+            visa_fee_multiple_usd: document.getElementById('visaFeeMultipleUsd').value,
+            visa_extension_allowed: document.getElementById('visaExtensionAllowed').value,
+            visa_extension_max_days: document.getElementById('visaExtensionMaxDays').value,
+            visa_extension_fee_usd: document.getElementById('visaExtensionFeeUsd').value,
+            work_allowed_on_visa: document.getElementById('workAllowedOnVisa').value,
+            visa_application_method: document.getElementById('visaApplicationMethod').value,
+            visa_application_url: document.getElementById('visaApplicationUrl').value,
+
+            // Work Rights Fields
+            can_work_legally_on_arrival: document.getElementById('canWorkLegallyOnArrival').value,
+            conditions_to_work: document.getElementById('conditionsToWork').value,
+            short_term_work_info: document.getElementById('shortTermWorkInfo').value,
+
+            // U.S. Embassy Fields
+            us_embassy_name: document.getElementById('usEmbassyName').value,
+            us_embassy_address: document.getElementById('usEmbassyAddress').value,
+            us_embassy_website_url: document.getElementById('usEmbassyWebsiteUrl').value,
+            us_embassy_iv_url: document.getElementById('usEmbassyIvUrl').value,
+            us_embassy_iv_email: document.getElementById('usEmbassyIvEmail').value,
+            medical_exam_facility_name: document.getElementById('medicalExamFacilityName').value,
+            medical_exam_facility_address: document.getElementById('medicalExamFacilityAddress').value,
+            medical_exam_facility_phone: document.getElementById('medicalExamFacilityPhone').value,
+            medical_exam_facility_website: document.getElementById('medicalExamFacilityWebsite').value,
+            medical_exam_notes: document.getElementById('medicalExamNotes').value,
+
+            // Safety Fields
+            travel_advisory_level: document.getElementById('travelAdvisoryLevel').value,
+            travel_advisory_url: document.getElementById('travelAdvisoryUrl').value,
+            hotspot_notes: document.getElementById('hotspotNotes').value,
+            safer_neighborhoods: document.getElementById('saferNeighborhoods').value,
+            afghan_neighborhoods: document.getElementById('afghanNeighborhoods').value,
+
+            // Accommodation Fields
+            hostel_price_min_usd: document.getElementById('hostelPriceMinUsd').value,
+            hostel_price_max_usd: document.getElementById('hostelPriceMaxUsd').value,
+            budget_hotel_price_min_usd: document.getElementById('budgetHotelPriceMinUsd').value,
+            budget_hotel_price_max_usd: document.getElementById('budgetHotelPriceMaxUsd').value,
+            furnished_rental_price_min_usd: document.getElementById('furnishedRentalPriceMinUsd').value,
+            furnished_rental_price_max_usd: document.getElementById('furnishedRentalPriceMaxUsd').value,
+
+            // Cost of Living Fields
+            cost_single_person_usd: document.getElementById('costSinglePersonUsd').value,
+            cost_family4_usd: document.getElementById('costFamily4Usd').value,
+
+            // Travel Routes Fields
+            origin_airport_code: document.getElementById('originAirportCode').value,
+            destination_airport_code: document.getElementById('destinationAirportCode').value,
+            transit_points: document.getElementById('transitPoints').value,
+            transit_visa_notes: document.getElementById('transitVisaNotes').value,
+            flight_price_oneway_usd: document.getElementById('flightPriceOnewayUsd').value,
+            flight_search_url: document.getElementById('flightSearchUrl').value
         };
     }
 
