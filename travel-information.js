@@ -18,26 +18,35 @@ class TravelInformationApp {
     }
 
     async loadTravelData() {
-        // Check for travel data from admin panel first
-        const adminData = localStorage.getItem('adminTravelData') || localStorage.getItem('databaseTravelData');
+        // Load data from admin panel storage - using new 42-field structure
+        const adminData = localStorage.getItem('adminCountryData');
         if (adminData) {
             try {
                 const data = JSON.parse(adminData);
-                this.travelData = Array.from(data.values ? data.values() : data);
+                this.travelData = Object.values(data).filter(country => country && country.country);
                 console.log('Loading travel data from admin portal:', this.travelData.length, 'destinations');
                 
-                // Ensure each record has the required fields
+                // Map to new field structure
                 this.travelData = this.travelData.map(travel => ({
                     ...travel,
                     country: travel.country || 'Unknown',
-                    embassy: travel.embassy || travel.location || 'Unknown',
-                    directFlights: travel.directFlights || 'unknown',
+                    
+                    // New travel route fields
+                    originAirport: travel.origin_airport_code || '',
+                    destinationAirport: travel.destination_airport_code || '',
+                    transitPoints: travel.transit_points || '',
+                    transitVisaNotes: travel.transit_visa_notes || '',
+                    flightPrice: travel.flight_price_oneway_usd || '',
+                    flightSearchUrl: travel.flight_search_url || '',
+                    
+                    // Legacy field mapping for backward compatibility
+                    directFlights: travel.direct_flights_available || 'unknown',
                     airlines: travel.airlines || '',
-                    flightDuration: travel.flightDuration || '',
-                    flightCost: travel.flightCost || '',
-                    mainAirport: travel.mainAirport || '',
-                    airportCode: travel.airportCode || '',
-                    safetyLevel: travel.safetyLevel || 'unknown'
+                    flightDuration: travel.flight_duration_hours || '',
+                    flightCost: travel.flight_price_oneway_usd ? `$${travel.flight_price_oneway_usd}` : '',
+                    mainAirport: travel.destination_airport_code || '',
+                    airportCode: travel.destination_airport_code || '',
+                    safetyLevel: travel.travel_advisory_level ? `Level ${travel.travel_advisory_level}` : 'unknown'
                 }));
                 
                 this.filteredData = [...this.travelData];
@@ -191,58 +200,85 @@ class TravelInformationApp {
         }
         
         grid.innerHTML = this.filteredData.map(travel => {
-            const totalCost = this.getTotalCost(travel);
+            const flightPrice = travel.flightPrice ? `$${travel.flightPrice}` : 'Contact airline';
+            const accommodationPrice = travel.budget_hotel_price_min_usd && travel.budget_hotel_price_max_usd ? 
+                `$${travel.budget_hotel_price_min_usd}-$${travel.budget_hotel_price_max_usd}` : 'Contact hotels';
             
             return `
                 <div class="travel-card">
                     <div class="travel-card-header">
-                        <h3 class="destination-name">${travel.city}</h3>
-                        <p class="destination-country">${travel.country}</p>
-                        <div class="destination-flag">${travel.flag}</div>
+                        <h3 class="destination-name">${travel.country}</h3>
+                        <div class="destination-flag">${this.getCountryFlag(travel.country)}</div>
                     </div>
                     
                     <div class="travel-card-body">
+                        <div class="flight-info">
+                            <div class="flight-route">
+                                <span class="airport-code">${travel.originAirport || 'KBL'}</span>
+                                <span class="route-arrow">→</span>
+                                <span class="airport-code">${travel.destinationAirport || '???'}</span>
+                            </div>
+                            ${travel.transitPoints ? `
+                                <div class="transit-info">
+                                    <span class="transit-label">Via:</span>
+                                    <span class="transit-points">${travel.transitPoints}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
                         <div class="cost-summary">
                             <div class="cost-item">
-                                <span class="cost-label">Flight (round trip)</span>
-                                <span class="cost-value">${travel.flightCost}</span>
+                                <span class="cost-label">Flight (one-way)</span>
+                                <span class="cost-value">${flightPrice}</span>
                             </div>
-                            <div class="cost-item">
-                                <span class="cost-label">Accommodation (per night)</span>
-                                <span class="cost-value">${travel.accommodation.mid}</span>
-                            </div>
-                            <div class="cost-item">
-                                <span class="cost-label">Daily expenses</span>
-                                <span class="cost-value">$${travel.dailyFoodValue + travel.transportValue}</span>
-                            </div>
-                            <div class="cost-item">
-                                <span class="cost-label">Medical exam</span>
-                                <span class="cost-value">$${travel.medicalExamValue}</span>
-                            </div>
-                            <div class="cost-item">
-                                <span class="cost-label">Total (7 days)</span>
-                                <span class="cost-value total-cost">$${totalCost.toLocaleString()}</span>
-                            </div>
+                            ${travel.budget_hotel_price_min_usd ? `
+                                <div class="cost-item">
+                                    <span class="cost-label">Hotels (per night)</span>
+                                    <span class="cost-value">${accommodationPrice}</span>
+                                </div>
+                            ` : ''}
+                            ${travel.cost_single_person_usd ? `
+                                <div class="cost-item">
+                                    <span class="cost-label">Living costs (monthly)</span>
+                                    <span class="cost-value">$${parseInt(travel.cost_single_person_usd).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
                         </div>
                         
                         <div class="travel-details">
-                            <div class="detail-item">
-                                <span class="detail-icon">📍</span>
-                                <span class="detail-text">${travel.distance} from Kabul</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-icon">💱</span>
-                                <span class="detail-text">${travel.currency} currency</span>
-                            </div>
+                            ${travel.flight_duration_hours ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">⏱️</span>
+                                    <span class="detail-text">${travel.flight_duration_hours}h flight</span>
+                                </div>
+                            ` : ''}
+                            ${travel.safetyLevel !== 'unknown' ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">🛡️</span>
+                                    <span class="detail-text">${travel.safetyLevel}</span>
+                                </div>
+                            ` : ''}
+                            ${travel.transitVisaNotes ? `
+                                <div class="detail-item">
+                                    <span class="detail-icon">📋</span>
+                                    <span class="detail-text">${travel.transitVisaNotes}</span>
+                                </div>
+                            ` : ''}
                         </div>
                         
                         <div class="travel-actions">
                             <button class="travel-action-btn" onclick="travelApp.addToComparison('${travel.country}')">
                                 Compare
                             </button>
-                            <button class="travel-action-btn primary" onclick="travelApp.openCalculatorFor('${travel.country}')">
-                                Calculate Cost
-                            </button>
+                            ${travel.flightSearchUrl ? `
+                                <a href="${travel.flightSearchUrl}" target="_blank" class="travel-action-btn primary">
+                                    Search Flights
+                                </a>
+                            ` : `
+                                <button class="travel-action-btn primary" onclick="travelApp.openCalculatorFor('${travel.country}')">
+                                    Calculate Cost
+                                </button>
+                            `}
                         </div>
                     </div>
                 </div>
@@ -509,6 +545,18 @@ class TravelInformationApp {
             </p>
         `;
         resultDiv.classList.add('active');
+    }
+
+    getCountryFlag(country) {
+        const flagMap = {
+            'United States': '🇺🇸', 'Canada': '🇨🇦', 'United Kingdom': '🇬🇧', 'Germany': '🇩🇪',
+            'France': '🇫🇷', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Australia': '🇦🇺',
+            'Pakistan': '🇵🇰', 'India': '🇮🇳', 'Turkey': '🇹🇷', 'UAE': '🇦🇪',
+            'Qatar': '🇶🇦', 'Saudi Arabia': '🇸🇦', 'Egypt': '🇪🇬', 'Jordan': '🇯🇴',
+            'Rwanda': '🇷🇼', 'Uganda': '🇺🇬', 'Kenya': '🇰🇪', 'Tanzania': '🇹🇿',
+            'Netherlands': '🇳🇱', 'Belgium': '🇧🇪', 'Sweden': '🇸🇪', 'Norway': '🇳🇴'
+        };
+        return flagMap[country] || '🏳️';
     }
 }
 

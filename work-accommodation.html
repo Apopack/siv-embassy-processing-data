@@ -82,197 +82,57 @@
                             <!-- Country list will be populated here -->
                         </div>
                     </div>
-                    <div class="selected-country-display" id="selectedCountryDisplay" style="display: none;">
-                        <span class="country-flag" id="selectedFlag"></span>
-                        <span class="country-name" id="selectedName"></span>
-                        <button class="change-country-btn" id="changeCountryBtn">Change</button>
-                    </div>
                 </div>
             </section>
 
-            <!-- Work Rights Section -->
-            <section class="info-section" id="workRightsSection" style="display: none;">
-                <div class="section-header">
-                    <h2>🏢 Work Rights & Employment</h2>
+            <!-- Content Section -->
+            <section class="content-section" style="display: none;">
+                <div class="country-header">
+                    <span class="country-flag" id="selectedCountryFlag">🏳️</span>
+                    <h2 id="selectedCountryName">Country</h2>
                 </div>
                 
-                <div class="info-grid">
-                    <div class="info-card">
-                        <h3>Legal Work Status</h3>
-                        <div class="info-item">
-                            <span class="info-label">Can work on arrival:</span>
-                            <span class="info-value" id="canWorkOnArrival">Loading...</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Work allowed on visa:</span>
-                            <span class="info-value" id="workAllowedOnVisa">Loading...</span>
-                        </div>
-                    </div>
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" data-tab="workRights">Work Rights</button>
+                    <button class="tab-btn" data-tab="accommodation">Accommodation</button>
+                    <button class="tab-btn" data-tab="costOfLiving">Cost of Living</button>
+                    <button class="tab-btn" data-tab="safety">Safety</button>
+                    <button class="tab-btn" data-tab="embassy">Embassy</button>
+                </div>
 
-                    <div class="info-card">
-                        <h3>Work Conditions</h3>
-                        <div class="info-item">
-                            <span class="info-label">Requirements:</span>
-                            <span class="info-value" id="conditionsToWork">Loading...</span>
-                        </div>
-                        <div class="info-source">
-                            <a href="#" id="workConditionsSource" target="_blank">Verify Information →</a>
-                        </div>
+                <!-- Tab Contents -->
+                <div class="tab-content active" id="workRightsTab">
+                    <div id="workRightsContent">
+                        <!-- Content populated by JavaScript -->
                     </div>
+                </div>
 
-                    <div class="info-card full-width">
-                        <h3>Short-Term Work Opportunities</h3>
-                        <div class="info-text" id="shortTermWorkInfo">Loading...</div>
-                        <div class="info-source">
-                            <a href="#" id="shortTermWorkSource" target="_blank">Learn More →</a>
-                        </div>
+                <div class="tab-content" id="accommodationTab">
+                    <div id="accommodationContent">
+                        <!-- Content populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="costOfLivingTab">
+                    <div id="costOfLivingContent">
+                        <!-- Content populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="safetyTab">
+                    <div id="safetyContent">
+                        <!-- Content populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="tab-content" id="embassyTab">
+                    <div id="embassyContent">
+                        <!-- Content populated by JavaScript -->
                     </div>
                 </div>
             </section>
 
-            <!-- Accommodation Section -->
-            <section class="info-section" id="accommodationSection" style="display: none;">
-                <div class="section-header">
-                    <h2>🏠 Accommodation Options</h2>
-                </div>
-                
-                <div class="accommodation-grid">
-                    <div class="accommodation-card">
-                        <div class="accommodation-type">
-                            <span class="type-icon">🏨</span>
-                            <h3>Hostels</h3>
-                        </div>
-                        <div class="price-range">
-                            <span class="price-label">Per Night:</span>
-                            <span class="price-value">
-                                $<span id="hostelMin">0</span> - $<span id="hostelMax">0</span>
-                            </span>
-                        </div>
-                        <div class="accommodation-notes">
-                            Budget-friendly option for short stays
-                        </div>
-                    </div>
-
-                    <div class="accommodation-card">
-                        <div class="accommodation-type">
-                            <span class="type-icon">🏢</span>
-                            <h3>Budget Hotels</h3>
-                        </div>
-                        <div class="price-range">
-                            <span class="price-label">Per Night:</span>
-                            <span class="price-value">
-                                $<span id="hotelMin">0</span> - $<span id="hotelMax">0</span>
-                            </span>
-                        </div>
-                        <div class="accommodation-notes">
-                            Private rooms with basic amenities
-                        </div>
-                    </div>
-
-                    <div class="accommodation-card">
-                        <div class="accommodation-type">
-                            <span class="type-icon">🏡</span>
-                            <h3>Furnished Rentals</h3>
-                        </div>
-                        <div class="price-range">
-                            <span class="price-label">Per Month:</span>
-                            <span class="price-value">
-                                $<span id="rentalMin">0</span> - $<span id="rentalMax">0</span>
-                            </span>
-                        </div>
-                        <div class="accommodation-notes">
-                            Long-term furnished apartments
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-source">
-                    <a href="#" id="accommodationSource" target="_blank">View Accommodation Listings →</a>
-                </div>
-            </section>
-
-            <!-- Cost of Living Section -->
-            <section class="info-section" id="costSection" style="display: none;">
-                <div class="section-header">
-                    <h2>💰 Cost of Living</h2>
-                </div>
-                
-                <div class="cost-cards">
-                    <div class="cost-card">
-                        <div class="cost-header">
-                            <span class="cost-icon">👤</span>
-                            <h3>Single Person</h3>
-                        </div>
-                        <div class="cost-amount">
-                            $<span id="costSingle">0</span>
-                            <span class="cost-period">per month</span>
-                        </div>
-                        <div class="cost-breakdown">
-                            <p>Includes: Housing, food, transportation, utilities</p>
-                        </div>
-                    </div>
-
-                    <div class="cost-card">
-                        <div class="cost-header">
-                            <span class="cost-icon">👨‍👩‍👧‍👦</span>
-                            <h3>Family of 4</h3>
-                        </div>
-                        <div class="cost-amount">
-                            $<span id="costFamily">0</span>
-                            <span class="cost-period">per month</span>
-                        </div>
-                        <div class="cost-breakdown">
-                            <p>Includes: Housing, food, transportation, utilities, schooling</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-source">
-                    <a href="#" id="costSource" target="_blank">View Detailed Breakdown →</a>
-                </div>
-            </section>
-
-            <!-- Neighborhoods Section -->
-            <section class="info-section" id="neighborhoodsSection" style="display: none;">
-                <div class="section-header">
-                    <h2>🏘️ Neighborhoods & Safety</h2>
-                </div>
-                
-                <div class="neighborhoods-grid">
-                    <div class="neighborhood-card">
-                        <h3>🏛️ Afghan Communities</h3>
-                        <div class="neighborhood-list" id="afghanNeighborhoods">
-                            Loading...
-                        </div>
-                    </div>
-
-                    <div class="neighborhood-card">
-                        <h3>✅ Safer Areas</h3>
-                        <div class="neighborhood-list" id="saferNeighborhoods">
-                            Loading...
-                        </div>
-                    </div>
-
-                    <div class="neighborhood-card">
-                        <h3>⚠️ Areas to Avoid</h3>
-                        <div class="neighborhood-list" id="hotspotNotes">
-                            Loading...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="info-source">
-                    <a href="#" id="safetySource" target="_blank">View Safety Advisory →</a>
-                </div>
-            </section>
-
-            <!-- No Data Message -->
-            <div class="no-data-message" id="noDataMessage" style="display: none;">
-                <div class="no-data-icon">📭</div>
-                <h3>No Information Available</h3>
-                <p>Work and accommodation data for this location hasn't been added yet.</p>
-                <p>Please check back later or contact the admin for updates.</p>
-            </div>
         </div>
     </main>
 
